@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linaro — Presupuestación Arquitectónica</title>
+<meta name="description" content="Linaro — Presupuestación profesional de cocinas, closets, obras civiles, despiece de carpintería, melamínicos y planos con muebles">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{--gold:#BA7517;--gold-l:#FAEEDA;--gold-m:#FAC775;--green:#27500A;--green-l:#EAF3DE;--green-m:#C0DD97;--green-b:#3B6D11;--blue:#0C447C;--blue-l:#E6F1FB;--blue-b:#185FA5;--teal-l:#E1F5EE;--teal-b:#5DCAA5;--teal-d:#0F6E56;--purple-l:#EEEDFE;--purple:#534AB7;--purple-d:#3C3489;--red-l:#FCEBEB;--red:#A32D2D;--bg:#F8F7F4;--bg2:#FFFFFF;--bg3:#F1EFE8;--text:#1a1a1a;--text2:#666;--text3:#999;--border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);--r:8px;--rl:12px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+.nav{background:var(--bg2);border-bottom:.5px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:16px;height:56px;position:sticky;top:0;z-index:100;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow-x:auto}
+.nav-logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo-box{width:34px;height:34px;background:var(--gold-l);border:.5px solid var(--gold);border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-brand{font-size:17px;font-weight:600;color:var(--text);letter-spacing:-.02em}
+.nav-sub{font-size:11px;color:var(--text2)}
+.nav-tabs{display:flex;gap:2px;height:100%;flex-shrink:0}
+.nt{padding:0 14px;border:none;background:none;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;font-family:inherit;height:100%;white-space:nowrap}
+.nt:hover{color:var(--text)}.nt.on{color:var(--text);border-bottom-color:var(--gold);font-weight:500}
+.page{max-width:1280px;margin:0 auto;padding:24px 24px 60px}
+.module{display:none}.module.on{display:block}
+.card{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--rl);padding:16px 18px}
+.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}
+.sl{font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.field{margin-bottom:10px}.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px}
+input,select,textarea{width:100%;padding:7px 10px;border:.5px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
+input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(186,117,23,.12)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:700px){.g4{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.flex{display:flex}.flexb{display:flex;justify-content:space-between;align-items:center}
+.gap8{gap:8px}.gap12{gap:12px}.wrap{flex-wrap:wrap}
+.btn{padding:8px 15px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg2);font-size:13px;cursor:pointer;color:var(--text);font-family:inherit;transition:background .12s;white-space:nowrap}
+.btn:hover{background:var(--bg3)}
+.btn-gold{background:var(--gold-l);border-color:var(--gold);color:var(--gold);font-weight:500}.btn-gold:hover{background:var(--gold-m)}
+.btn-green{background:var(--green-l);border-color:var(--green-b);color:var(--green);font-weight:500}.btn-green:hover{background:var(--green-m)}
+.btn-blue{background:var(--blue-l);border-color:var(--blue-b);color:var(--blue);font-weight:500}.btn-blue:hover{background:#B5D4F4}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-del{color:var(--red);border-color:#F7C1C1}.btn-del:hover{background:var(--red-l)}
+.cat-btn{padding:7px 13px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg2);font-size:13px;cursor:pointer;color:var(--text2);font-family:inherit}
+.cat-btn:hover{background:var(--bg3)}.cat-btn.on{background:var(--gold-l);border-color:var(--gold);color:var(--gold);font-weight:500}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:11px;font-weight:600;color:var(--text2);padding:9px 10px;border-bottom:.5px solid var(--border);background:var(--bg3)}
+td{padding:8px 10px;border-bottom:.5px solid var(--border);color:var(--text)}
+tr:hover td{background:#FDFCFA}
+td input,td select{border:none;background:transparent;font-size:13px;color:var(--text);font-family:inherit;outline:none;padding:0;width:100%;box-shadow:none}
+td input:focus{background:var(--bg3);padding:2px 5px;border-radius:4px}
+.mono{font-family:'SF Mono','Fira Code',monospace}.tr{text-align:right}
+.muted{color:var(--text2)}.tgold{color:var(--gold);font-weight:500}.tblue{color:var(--blue);font-weight:500}.tgreen{color:var(--green);font-weight:500}
+.tag{display:inline-block;background:var(--bg3);border:.5px solid var(--border);border-radius:var(--r);padding:1px 7px;font-size:11px;font-family:monospace}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:600}
+.bg{background:var(--gold-l);color:var(--gold)}.bgr{background:var(--green-l);color:var(--green)}.bbl{background:var(--blue-l);color:var(--blue)}.bpu{background:var(--purple-l);color:var(--purple)}
+.sr{display:flex;justify-content:space-between;padding:8px 0;font-size:13px;border-bottom:.5px solid var(--border)}
+.stot{display:flex;justify-content:space-between;padding:11px 0 0;font-size:15px;font-weight:600}
+.divider{height:.5px;background:var(--border);margin:12px 0}
+.metric{background:var(--bg3);border-radius:var(--r);padding:10px 13px}
+.mlabel{font-size:12px;color:var(--text2);margin-bottom:2px}
+.mval{font-size:18px;font-weight:600;font-family:monospace}
+.dis-card{background:var(--blue-l);border:.5px solid var(--blue-b);border-radius:var(--rl);padding:16px 18px}
+.dis-metric{background:var(--bg2);border:.5px solid var(--blue-b);border-radius:var(--r);padding:10px 13px;flex:1;min-width:130px}
+.hw{border:.5px solid var(--green-m);border-radius:var(--r);overflow:hidden;margin-top:10px}
+.hhead{background:var(--green-l);padding:8px 13px;font-size:11px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.hrow{display:flex;justify-content:space-between;align-items:center;padding:8px 13px;border-top:.5px solid var(--green-m);font-size:13px}
+.hqty{font-family:monospace;font-weight:600;color:var(--green-b);min-width:32px;text-align:right}
+.gola-box{border:.5px solid var(--teal-b);border-radius:var(--r);overflow:hidden;margin-top:10px}
+.gola-head{background:var(--teal-l);padding:8px 13px;font-size:11px;font-weight:600;color:var(--teal-d);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.gola-row{display:flex;justify-content:space-between;align-items:center;padding:8px 13px;border-top:.5px solid var(--teal-b);font-size:13px}
+.tc-box{border:.5px solid #CECBF6;border-radius:var(--r);overflow:hidden;margin-top:10px}
+.tc-head{background:var(--purple-l);padding:8px 13px;font-size:11px;font-weight:600;color:var(--purple);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tc-row{display:flex;justify-content:space-between;align-items:center;padding:8px 13px;border-top:.5px solid #CECBF6;font-size:13px}
+.gola-info{background:var(--teal-l);border:.5px solid var(--teal-b);border-radius:var(--r);padding:9px 11px;font-size:12px;color:var(--teal-d);display:none;margin-bottom:10px}
+.mel-card{border:.5px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:10px}
+.mel-head{background:var(--bg3);padding:11px 15px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.mel-body{padding:14px 15px;border-top:.5px solid var(--border)}
+.mel-price{font-size:18px;font-weight:600;font-family:monospace;color:var(--gold)}
+.stock-badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:600}
+.in-stock{background:var(--green-l);color:var(--green)}.no-stock{background:var(--red-l);color:var(--red)}
+.empty{text-align:center;padding:48px 20px;color:var(--text2)}
+.empty-icon{font-size:30px;margin-bottom:10px}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:var(--green-l);padding:11px 18px;border-radius:var(--r);font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:340px}
+.toast.show{opacity:1}
+footer{text-align:center;padding:32px;font-size:12px;color:var(--text3);border-top:.5px solid var(--border);background:var(--bg2)}
+footer span{color:var(--gold);font-weight:500}
+/* PLANS */
+.plan-app{display:flex;flex-direction:column;height:720px;border:.5px solid var(--border);border-radius:var(--rl);overflow:hidden;background:var(--bg2)}
+.plan-toolbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg2);border-bottom:.5px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+.plan-toolbar .ptitle{font-size:13px;font-weight:600;color:var(--gold);flex-shrink:0}
+.tsep{width:.5px;height:18px;background:var(--border);flex-shrink:0}
+.tbtn{padding:4px 11px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg2);font-size:12px;cursor:pointer;font-family:inherit;color:var(--text);white-space:nowrap}
+.tbtn:hover{background:var(--bg3)}
+.tbtn-gold{background:var(--gold-l);border-color:var(--gold);color:var(--gold);font-weight:500}.tbtn-gold:hover{background:var(--gold-m)}
+.tbtn-del{color:var(--red);border-color:#F7C1C1}.tbtn-del:hover{background:var(--red-l)}
+.scbadge{font-size:11px;font-family:monospace;padding:3px 8px;background:var(--bg3);border-radius:var(--r);color:var(--text2)}
+.plan-main{display:flex;flex:1;overflow:hidden}
+.plan-side{width:240px;flex-shrink:0;overflow-y:auto;border-right:.5px solid var(--border);background:var(--bg2)}
+.stabs{display:flex;border-bottom:.5px solid var(--border);flex-shrink:0}
+.stab{flex:1;padding:7px 4px;border:none;background:none;font-size:12px;cursor:pointer;font-family:inherit;color:var(--text2);border-bottom:2px solid transparent}
+.stab.on{color:var(--text);border-bottom-color:var(--gold);font-weight:500}
+.sc{display:none;padding:10px}.sc.on{display:block}
+.psl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin:10px 0 6px}
+.pfield{margin-bottom:8px}
+.pfield label{display:block;font-size:11px;color:var(--text2);margin-bottom:3px}
+.pfield input,.pfield select{width:100%;padding:5px 8px;border:.5px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);font-size:12px;font-family:inherit;outline:none}
+.pfield input:focus,.pfield select:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(186,117,23,.12)}
+.pg2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cat-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);padding:8px 10px 4px;display:flex;align-items:center;gap:5px;border-top:.5px solid var(--border);margin-top:4px}
+.cat-lbl:first-child{border-top:none;margin-top:0}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:0 10px 6px}
+.fbtn{padding:6px 4px;border:.5px solid var(--border);border-radius:var(--r);background:var(--bg2);font-size:11px;cursor:pointer;text-align:center;color:var(--text);font-family:inherit;line-height:1.3}
+.fbtn:hover{background:var(--gold-l);border-color:var(--gold);color:var(--gold)}
+.fbtn span{display:block;font-size:10px;color:var(--text2);margin-top:1px}
+.ritem{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:var(--r);margin-bottom:3px;font-size:12px}
+.canvas-wrap{flex:1;overflow:auto;background:#ECEAE4;position:relative}
+.canvas-inner{padding:50px;display:inline-block;min-width:100%;min-height:100%}
+#planSvg{display:block;cursor:default}
+@media(max-width:900px){.two-col{grid-template-columns:1fr!important}}
+@media(max-width:640px){.nav{padding:0 12px}.nt{padding:0 10px;font-size:12px}.page{padding:14px 12px 60px}.plan-side{width:200px}}
+
+/* 3D VIEW */
+.v3d-app{display:flex;flex-direction:column;height:720px;border:.5px solid var(--border);border-radius:var(--rl);overflow:hidden;background:#12141e}
+.v3d-tb{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg2);border-bottom:.5px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+.v3d-title{font-size:13px;font-weight:600;color:var(--gold)}
+.v3d-main{display:flex;flex:1;overflow:hidden}
+.v3d-side{width:230px;flex-shrink:0;border-right:.5px solid var(--border);background:var(--bg2);overflow-y:auto;padding:10px}
+.v3d-canvas{flex:1;position:relative;overflow:hidden;background:#12141e}
+#c3d{width:100%;height:100%;display:block}
+.v3d-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:4px 14px;border-radius:99px;pointer-events:none;white-space:nowrap}
+.v3d-cat{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);padding:8px 0 4px;border-top:.5px solid var(--border);margin-top:6px}
+.v3d-cat:first-of-type{border-top:none;margin-top:0}
+.v3d-fgrid{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:4px}
+.v3d-fbtn{padding:5px 4px;border:.5px solid var(--border);border-radius:var(--r);background:var(--bg2);font-size:11px;cursor:pointer;text-align:center;font-family:inherit;line-height:1.3}
+.v3d-fbtn:hover{background:var(--gold-l);border-color:var(--gold);color:var(--gold)}
+.v3d-fbtn small{display:block;font-size:9px;color:var(--text2)}
+.v3d-ritem{display:flex;justify-content:space-between;align-items:center;padding:4px 7px;border-radius:var(--r);margin-bottom:3px;font-size:12px;background:var(--bg3)}
+.cbadge{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
+.v3d-btn{padding:4px 11px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg2);font-size:12px;cursor:pointer;font-family:inherit;color:var(--text);white-space:nowrap}
+.v3d-btn:hover{background:var(--bg3)}
+.v3d-btn-gold{background:var(--gold-l);border-color:var(--gold);color:var(--gold);font-weight:500}.v3d-btn-gold:hover{background:var(--gold-m)}
+.v3d-btn.on{background:var(--gold-l);border-color:var(--gold);color:var(--gold);font-weight:500}
+@media print{.nav,.plan-toolbar,.plan-side,footer{display:none!important}.plan-app{height:auto;border:none}.canvas-wrap{overflow:visible!important}.canvas-inner{padding:0!important}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="logo-box">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <rect x="2" y="2" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <rect x="11" y="2" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <rect x="2" y="11" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <rect x="11" y="11" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <line x1="5.5" y1="9" x2="5.5" y2="11" stroke="#BA7517" stroke-width="1.4"/>
+        <line x1="14.5" y1="9" x2="14.5" y2="11" stroke="#BA7517" stroke-width="1.4"/>
+        <line x1="9" y1="5.5" x2="11" y2="5.5" stroke="#BA7517" stroke-width="1.4"/>
+        <line x1="9" y1="14.5" x2="11" y2="14.5" stroke="#BA7517" stroke-width="1.4"/>
+      </svg>
+    </div>
+    <div>
+      <div class="nav-brand">Linaro</div>
+      <div class="nav-sub">Presupuestación arquitectónica</div>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nt on"  onclick="goTab('budget',this)">Presupuesto</button>
+    <button class="nt"     onclick="goTab('carpentry',this)">Despiece</button>
+    <button class="nt"     onclick="goTab('melaminicos',this)">Melamínicos</button>
+    <button class="nt"     onclick="goTab('plans',this)">Planos</button>
+    <button class="nt"     onclick="goTab('vista3d',this)">Vista 3D</button>
+  </div>
+</nav>
+
+<div class="page">
+
+<!-- ========= PRESUPUESTO ========= -->
+<div id="budget" class="module on">
+  <div class="card mb16">
+    <div class="sl">Datos del proyecto</div>
+    <div class="g4 mb12">
+      <div class="field"><label>Proyecto</label><input type="text" id="pName" placeholder="Cocina familiar…"></div>
+      <div class="field"><label>Cliente</label><input type="text" id="pClient" placeholder="Nombre del cliente"></div>
+      <div class="field"><label>Ubicación</label><input type="text" id="pLoc" placeholder="Ciudad, estado"></div>
+      <div class="field"><label>Fecha</label><input type="date" id="pDate"></div>
+    </div>
+    <div class="flex gap12 wrap">
+      <div class="field"><label>Moneda</label>
+        <select id="cur" onchange="recalc()" style="min-width:90px"><option>USD</option><option>Bs</option><option>COP</option><option>EUR</option></select>
+      </div>
+      <div class="field"><label>IVA</label>
+        <select id="iva" onchange="recalc();recalcDis()" style="min-width:115px">
+          <option value="0">Sin IVA (0%)</option><option value="8">8%</option><option value="16" selected>16%</option>
+        </select>
+      </div>
+      <div class="field"><label>Utilidad (%)</label>
+        <input type="number" id="util" value="0" min="0" max="100" oninput="recalc()" style="width:90px">
+      </div>
+    </div>
+  </div>
+  <div class="dis-card mb16">
+    <div class="sl" style="color:var(--blue)">Honorarios de diseño — $6 / m²</div>
+    <div class="g3 mb12">
+      <div class="field"><label>Área a diseñar (m²)</label><input type="number" id="disM2" value="0" min="0" step="0.5" oninput="recalcDis()"></div>
+      <div class="field"><label>Tarifa por m² (USD)</label><input type="number" id="disTarifa" value="6" min="0" step="0.5" oninput="recalcDis()"></div>
+      <div class="field"><label>Descripción</label><input type="text" id="disDesc" value="Honorarios de diseño"></div>
+    </div>
+    <div class="flex gap12 mb12 wrap">
+      <div class="dis-metric"><div class="mlabel">Subtotal diseño</div><div class="mval tblue" id="disSubtotal">USD 0.00</div></div>
+      <div class="dis-metric"><div class="mlabel">Con IVA incluido</div><div class="mval tblue" id="disConIva">USD 0.00</div></div>
+    </div>
+    <button class="btn btn-blue btn-sm" onclick="addDiseno()">+ Agregar honorarios al presupuesto</button>
+  </div>
+  <div class="flexb mb12 wrap gap8">
+    <div class="flex gap8 wrap">
+      <button class="cat-btn on" id="cb-cocina" onclick="setCat('cocina',this)">Cocina</button>
+      <button class="cat-btn" id="cb-closet" onclick="setCat('closet',this)">Closet</button>
+      <button class="cat-btn" id="cb-civil" onclick="setCat('civil',this)">Obra civil</button>
+    </div>
+    <div class="flex gap8 wrap">
+      <button class="btn" onclick="loadTpl()">Cargar plantilla</button>
+      <button class="btn btn-gold" onclick="addRow()">+ Ítem</button>
+      <button class="btn btn-green" onclick="exportPDF()">⬇ Exportar PDF</button>
+    </div>
+  </div>
+  <div class="card mb16" style="overflow-x:auto">
+    <table>
+      <thead><tr>
+        <th style="width:28px">#</th><th>Descripción</th>
+        <th style="width:75px">Unidad</th>
+        <th class="tr" style="width:82px">Cantidad</th>
+        <th class="tr" style="width:118px">Precio unit.</th>
+        <th class="tr" style="width:125px">Total</th>
+        <th style="width:32px"></th>
+      </tr></thead>
+      <tbody id="tbody">
+        <tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><p>Carga una plantilla, agrega ítems o importa desde Despiece</p></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="display:flex;justify-content:flex-end">
+    <div class="card" style="min-width:300px">
+      <div class="sl">Resumen</div>
+      <div class="sr"><span class="muted">Subtotal obra / carpintería</span><span class="mono" id="subs">—</span></div>
+      <div class="sr"><span class="muted tblue" id="disLbl">Diseño (0 m²)</span><span class="mono tblue" id="sDis">—</span></div>
+      <div class="sr"><span class="muted" id="ulbl">Utilidad (0%)</span><span class="mono" id="sutil">—</span></div>
+      <div class="sr"><span class="muted" id="ilbl">IVA (16%)</span><span class="mono" id="siva">—</span></div>
+      <div class="stot"><span>Total</span><span class="mono tgold" id="stot">—</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========= DESPIECE ========= -->
+<div id="carpentry" class="module">
+  <div style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start" class="two-col">
+    <div>
+      <div class="card mb12">
+        <div class="sl">Nuevo módulo</div>
+        <div class="field"><label>Nombre del mueble</label><input type="text" id="pN" value="Mueble bajo"></div>
+        <div class="g2">
+          <div class="field"><label>Ancho (mm)</label><input type="number" id="pW" value="600"></div>
+          <div class="field"><label>Alto (mm)</label><input type="number" id="pH" value="720"></div>
+          <div class="field"><label>Profundidad (mm)</label><input type="number" id="pD" value="550"></div>
+          <div class="field"><label>Espesor tablero (mm)</label><input type="number" id="pT" value="18"></div>
+          <div class="field"><label>N° entrepaños (Sólido horizontal)</label><input type="number" id="pS" value="1" min="0"></div>
+          <div class="field"><label>N° divisores verticales (Sólido vertical)</label><input type="number" id="pVD" value="0" min="0"></div>
+          <div class="field"><label>N° cajones</label><input type="number" id="pCaj" value="0" min="0"></div>
+          <div class="field"><label>N° puertas batientes</label><input type="number" id="pDr" value="2" min="0"></div>
+          <div class="field"><label>N° puertas corredizas</label><input type="number" id="pSlide" value="0" min="0"></div>
+          <div class="field" style="display:flex;align-items:center;gap:8px">
+            <input type="checkbox" id="pDF" style="width:auto;flex-shrink:0">
+            <label for="pDF" style="margin:0;cursor:pointer">Doble fondo (Sólido)</label>
+          </div>
+        </div>
+        <div class="field"><label>Material tablero (de biblioteca)</label>
+          <select id="pMat"><option value="">— Registra materiales en Melamínicos —</option></select>
+        </div>
+        <div class="field" style="display:flex;align-items:center;gap:8px;padding:4px 0">
+          <input type="checkbox" id="pDblFondo" style="width:auto;flex-shrink:0">
+          <label for="pDblFondo" style="font-size:12px;cursor:pointer;color:var(--text)">Incluir sólido (doble fondo)</label>
+        </div>
+        <div class="field"><label>Tipo de tapacanto</label>
+          <select id="pTcType">
+            <option value="PVC 0.4mm">PVC 0.4mm (económico)</option>
+            <option value="PVC 1mm" selected>PVC 1mm (estándar)</option>
+            <option value="PVC 2mm">PVC 2mm (grueso)</option>
+            <option value="ABS 1mm">ABS 1mm</option>
+            <option value="Madera natural">Madera natural enchapada</option>
+          </select>
+        </div>
+        <div class="divider"></div>
+        <div class="sl">Herrajes — puertas batientes</div>
+        <div class="field"><label>Tipo de bisagra</label>
+          <select id="pBisType">
+            <option value="cazoleta_std">Cazoleta 35mm estándar</option>
+            <option value="cazoleta_freno">Cazoleta 35mm con freno (soft-close)</option>
+            <option value="sobrepuesta">Sobrepuesta estándar</option>
+            <option value="sobrepuesta_freno">Sobrepuesta con freno</option>
+            <option value="piano">Piano / continua (ml)</option>
+          </select>
+        </div>
+        <div class="sl" style="margin-top:6px">Herrajes — cajones</div>
+        <div class="field"><label>Tipo de corredera</label>
+          <select id="pCorType">
+            <option value="telescopica">Telescópica 45kg</option>
+            <option value="telescopica_freno">Telescópica con freno (soft-close)</option>
+            <option value="ball">Ball bearing 40kg</option>
+            <option value="invisible_freno">Guía invisible con freno (undermount)</option>
+          </select>
+        </div>
+        <div class="divider"></div>
+        <div class="sl">Perfil de gola</div>
+        <div class="field"><label>Gola para puertas batientes</label>
+          <select id="pGolaB" onchange="showGolaInfo()">
+            <option value="none">Sin gola — jalador externo</option>
+            <option value="L">Gola tipo L (horizontal — perfil superior)</option>
+            <option value="C">Gola tipo C (vertical — perfil lateral)</option>
+            <option value="LC">Gola L + C (marco completo)</option>
+          </select>
+        </div>
+        <div class="field"><label>Gola para puertas corredizas</label>
+          <select id="pGolaS">
+            <option value="none">Sin gola — jalador externo</option>
+            <option value="L">Gola tipo L (horizontal)</option>
+            <option value="C">Gola tipo C (vertical)</option>
+            <option value="LC">Gola L + C</option>
+          </select>
+        </div>
+        <div class="gola-info" id="golaInfo"></div>
+        <button class="btn btn-gold" onclick="calcCuts()" style="width:100%;margin-top:4px">Calcular despiece</button>
+      </div>
+      <div class="card" id="matCard" style="display:none">
+        <div class="sl">Costo de material</div>
+        <div class="metric mb8"><div class="mlabel">Área total tablero ≥15mm</div><div class="mval" id="mArea">0.00 m²</div></div>
+        <div class="metric mb8"><div class="mlabel">Láminas necesarias</div><div class="mval tgold" id="mSheets">—</div></div>
+        <div class="metric"><div class="mlabel">Costo estimado material</div><div class="mval tgold" id="mCost">—</div></div>
+      </div>
+    </div>
+    <div id="cutBox">
+      <div class="empty card">
+        <div class="empty-icon">🪵</div>
+        <p>Agrega un módulo para generar el despiece</p>
+        <p style="font-size:12px;margin-top:6px;color:var(--text3)">Tableros · Tapacanto · Herrajes · Gola L/C · Guías invisibles</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========= MELAMÍNICOS ========= -->
+<div id="melaminicos" class="module">
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start" class="two-col">
+    <div class="card">
+      <div class="sl">Registrar melamínico</div>
+      <div class="field"><label>Nombre / referencia</label><input type="text" id="mNombre" placeholder="MDF Blanco Hueso 18mm"></div>
+      <div class="field"><label>Color / acabado</label><input type="text" id="mColor" placeholder="Blanco Hueso, Nogal…"></div>
+      <div class="field"><label>Proveedor</label><input type="text" id="mProv" placeholder="Nombre del proveedor"></div>
+      <div class="g2">
+        <div class="field"><label>Ancho lámina (mm)</label><input type="number" id="mAncho" value="2440"></div>
+        <div class="field"><label>Alto lámina (mm)</label><input type="number" id="mAlto" value="1220"></div>
+        <div class="field"><label>Espesor (mm)</label><input type="number" id="mEspesor" value="18"></div>
+        <div class="field"><label>Precio por lámina</label><input type="number" id="mPrecio" value="0" step="0.01"></div>
+        <div class="field"><label>Moneda</label>
+          <select id="mMoneda"><option>USD</option><option>Bs</option><option>COP</option></select>
+        </div>
+        <div class="field"><label>Stock</label>
+          <select id="mStock"><option value="1">En stock</option><option value="0">Sin stock</option></select>
+        </div>
+      </div>
+      <div class="field"><label>Notas</label><input type="text" id="mNotas" placeholder="Observaciones…"></div>
+      <button class="btn btn-gold" onclick="addMel()" style="width:100%">+ Registrar melamínico</button>
+    </div>
+    <div>
+      <div class="flexb mb12">
+        <div style="font-size:14px;font-weight:600">Biblioteca de melamínicos</div>
+        <span class="muted" style="font-size:12px" id="melCount">0 materiales registrados</span>
+      </div>
+      <div id="melList">
+        <div class="empty card">
+          <div class="empty-icon">🗂️</div>
+          <p>Registra tus melamínicos para usarlos en el despiece</p>
+          <p style="font-size:12px;margin-top:6px;color:var(--text3)">El precio por lámina calcula automáticamente el costo del módulo</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========= PLANOS ========= -->
+<div id="plans" class="module">
+  <div class="plan-app">
+    <div class="plan-toolbar">
+      <span class="ptitle">Linaro — Planos</span>
+      <div class="tsep"></div>
+      <button class="tbtn" onclick="adjSc(1.3)">+ zoom</button>
+      <button class="tbtn" onclick="adjSc(1/1.3)">− zoom</button>
+      <span class="scbadge" id="scBadge">1:25</span>
+      <div class="tsep"></div>
+      <div id="selBar" style="display:none;align-items:center;gap:6px">
+        <span id="selName" style="font-size:12px;font-weight:500;color:var(--text)"></span>
+        <button class="tbtn" onclick="rotSel()">↻ rotar 90°</button>
+        <button class="tbtn tbtn-del" onclick="delSel()">× eliminar</button>
+        <div class="tsep"></div>
+      </div>
+      <button class="tbtn" onclick="window.print()" style="margin-left:auto">imprimir plano</button>
+    </div>
+    <div class="plan-main">
+      <div class="plan-side">
+        <div class="stabs">
+          <button class="stab on" onclick="setSTab('rooms',this)">Ambientes</button>
+          <button class="stab" onclick="setSTab('furn',this)">Muebles</button>
+          <button class="stab" onclick="setSTab('psel',this)">Editar</button>
+        </div>
+        <div id="sc-rooms" class="sc on">
+          <div class="psl">Agregar ambiente</div>
+          <div class="pfield"><label>Nombre</label><input type="text" id="rName" value="Cocina"></div>
+          <div class="pg2">
+            <div class="pfield"><label>Ancho (m)</label><input type="number" id="rW" value="3.5" step="0.1" min="0.5"></div>
+            <div class="pfield"><label>Largo (m)</label><input type="number" id="rH" value="4" step="0.1" min="0.5"></div>
+          </div>
+          <div class="pfield"><label>Tipo</label>
+            <select id="rType">
+              <option value="room">Ambiente general</option>
+              <option value="kitchen">Cocina</option>
+              <option value="closet">Closet / vestier</option>
+              <option value="bath">Baño</option>
+              <option value="bed">Habitación</option>
+            </select>
+          </div>
+          <button class="tbtn tbtn-gold" onclick="addPRoom()" style="width:100%">+ agregar ambiente</button>
+          <div style="height:.5px;background:var(--border);margin:12px 0"></div>
+          <div id="rList"></div>
+        </div>
+        <div id="sc-furn" class="sc">
+          <div class="cat-lbl">Cocina</div>
+          <div class="fgrid">
+            <button class="fbtn" onclick="addF('mb')">Mueble bajo<span>600×550</span></button>
+            <button class="fbtn" onclick="addF('ma')">Mueble alto<span>600×300</span></button>
+            <button class="fbtn" onclick="addF('isla')">Isla cocina<span>1200×900</span></button>
+            <button class="fbtn" onclick="addF('freg')">Fregadero<span>800×550</span></button>
+            <button class="fbtn" onclick="addF('estufa')">Estufa<span>600×600</span></button>
+            <button class="fbtn" onclick="addF('refri')">Refrigerador<span>700×700</span></button>
+          </div>
+          <div class="cat-lbl">Closet</div>
+          <div class="fgrid">
+            <button class="fbtn" onclick="addF('closet')">Closet recto<span>1200×600</span></button>
+            <button class="fbtn" onclick="addF('cajmod')">Módulo cajones<span>500×550</span></button>
+          </div>
+          <div class="cat-lbl">Dormitorio</div>
+          <div class="fgrid">
+            <button class="fbtn" onclick="addF('camas')">Cama sencilla<span>1000×2000</span></button>
+            <button class="fbtn" onclick="addF('camad')">Cama doble<span>1400×2000</span></button>
+            <button class="fbtn" onclick="addF('camaq')">Cama queen<span>1600×2000</span></button>
+            <button class="fbtn" onclick="addF('velador')">Velador<span>500×500</span></button>
+          </div>
+          <div class="cat-lbl">Sala / comedor</div>
+          <div class="fgrid">
+            <button class="fbtn" onclick="addF('sofa2')">Sofá 2p<span>1600×900</span></button>
+            <button class="fbtn" onclick="addF('sofa3')">Sofá 3p<span>2100×900</span></button>
+            <button class="fbtn" onclick="addF('mesa4')">Mesa 4p<span>1200×800</span></button>
+            <button class="fbtn" onclick="addF('mesa6')">Mesa 6p<span>1800×900</span></button>
+            <button class="fbtn" onclick="addF('mesac')">Mesa centro<span>1200×600</span></button>
+            <button class="fbtn" onclick="addF('tvstand')">Mueble TV<span>1500×450</span></button>
+          </div>
+          <div class="cat-lbl">Baño</div>
+          <div class="fgrid">
+            <button class="fbtn" onclick="addF('inodoro')">Inodoro<span>380×650</span></button>
+            <button class="fbtn" onclick="addF('lavamanos')">Lavamanos<span>500×450</span></button>
+            <button class="fbtn" onclick="addF('ducha')">Ducha<span>900×900</span></button>
+            <button class="fbtn" onclick="addF('tina')">Bañera<span>700×1600</span></button>
+          </div>
+        </div>
+        <div id="sc-psel" class="sc">
+          <div id="selPanel" style="color:var(--text2);font-size:12px;text-align:center;padding:24px 8px">
+            Haz clic en un mueble para editar sus propiedades
+          </div>
+        </div>
+      </div>
+      <div class="canvas-wrap" id="cw">
+        <div class="canvas-inner">
+          <svg id="planSvg"></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<footer>Hecho con <span>Linaro</span> — Presupuestación arquitectónica profesional</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const UNITS=['ml','m²','m³','und','gbl','pto','kg','lt','hr','día','glb','par','m'];
+let items=[],pieces=[],melaminicos=[],curCat='cocina',_id=0;
+let pRooms=[],pFurn=[],pSel=null,pDrag=null,pSc=65;
+const uid=()=>'e'+(++_id);
+const fmt=n=>new Intl.NumberFormat('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n||0);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
+
+const TPLS={
+  cocina:[{d:'Mueble bajo con puertas MDF enchapado',u:'ml',q:1,p:0},{d:'Mueble alto con puertas MDF enchapado',u:'ml',q:1,p:0},{d:'Encimera de granito natural',u:'ml',q:1,p:0},{d:'Fregadero de acero inoxidable',u:'und',q:1,p:0},{d:'Grifería mezcladora cocina',u:'und',q:1,p:0},{d:'Instalación sanitaria cocina',u:'gbl',q:1,p:0},{d:'Revestimiento piso porcelanato',u:'m²',q:0,p:0},{d:'Pintura de paredes',u:'m²',q:0,p:0}],
+  closet:[{d:'Módulo lateral MDF 18mm enchapado',u:'und',q:2,p:0},{d:'Cajones con guías telescópicas',u:'und',q:4,p:0},{d:'Barra colgadora con soporte cromado',u:'ml',q:1,p:0},{d:'Puertas corredizas con perfil aluminio',u:'m²',q:0,p:0},{d:'Módulo de zapatos inclinado',u:'und',q:1,p:0},{d:'Panel superior e inferior MDF',u:'und',q:2,p:0}],
+  civil:[{d:'Demolición y limpieza de área',u:'m²',q:0,p:0},{d:'Mampostería de bloque',u:'m²',q:0,p:0},{d:'Repello y friso de paredes',u:'m²',q:0,p:0},{d:'Nivelación de piso con mortero',u:'m²',q:0,p:0},{d:'Revestimiento piso porcelanato',u:'m²',q:0,p:0},{d:'Pintura de paredes (2 manos)',u:'m²',q:0,p:0},{d:'Instalación eléctrica — puntos',u:'pto',q:0,p:0},{d:'Instalación sanitaria — puntos',u:'pto',q:0,p:0},{d:'Mano de obra general',u:'gbl',q:1,p:0}]
+};
+
+function goTab(id,btn){document.querySelectorAll('.module').forEach(m=>m.classList.remove('on'));document.querySelectorAll('.nt').forEach(t=>t.classList.remove('on'));document.getElementById(id).classList.add('on');btn.classList.add('on');}
+function setCat(cat,btn){curCat=cat;document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+function loadTpl(){items=(TPLS[curCat]||[]).map(t=>({id:uid(),d:t.d,u:t.u,q:t.q,p:t.p}));renderTbl();}
+function addRow(){items.push({id:uid(),d:'',u:'und',q:1,p:0});renderTbl();}
+function delRow(id){items=items.filter(x=>x.id!==id);renderTbl();}
+function upd(id,f,v){const it=items.find(x=>x.id===id);if(it){it[f]=v;recalc();}}
+
+function recalcDis(){
+  const m2=parseFloat(document.getElementById('disM2').value)||0,tar=parseFloat(document.getElementById('disTarifa').value)||6,iva=parseFloat(document.getElementById('iva').value)||0,cur=document.getElementById('cur').value,sub=m2*tar;
+  document.getElementById('disSubtotal').textContent=`${cur} ${fmt(sub)}`;
+  document.getElementById('disConIva').textContent=`${cur} ${fmt(sub*(1+iva/100))}`;
+  recalc();
+}
+function addDiseno(){
+  const m2=parseFloat(document.getElementById('disM2').value)||0,tar=parseFloat(document.getElementById('disTarifa').value)||6,desc=document.getElementById('disDesc').value||'Honorarios de diseño';
+  if(m2<=0){toast('Indica los m² a diseñar primero');return;}
+  items.push({id:uid(),d:`${desc} ($${tar}/m²)`,u:'m²',q:m2,p:tar});
+  renderTbl();toast(`✓ Diseño (${m2} m² × $${tar}) agregado al presupuesto`);
+}
+function renderTbl(){
+  const tb=document.getElementById('tbody');
+  if(!items.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><p>Carga una plantilla, agrega ítems o importa desde Despiece</p></div></td></tr>';recalc();return;}
+  const cur=document.getElementById('cur').value;
+  tb.innerHTML=items.map((it,i)=>{
+    const tot=(parseFloat(it.q)||0)*(parseFloat(it.p)||0),uopts=UNITS.map(u=>`<option${u===it.u?' selected':''}>${u}</option>`).join('');
+    return`<tr><td class="mono muted" style="font-size:11px">${i+1}</td><td><input value="${esc(it.d)}" onchange="upd('${it.id}','d',this.value)" placeholder="Descripción…" style="min-width:180px"></td><td><select onchange="upd('${it.id}','u',this.value)" style="font-size:12px">${uopts}</select></td><td class="tr"><input type="number" value="${it.q}" onchange="upd('${it.id}','q',this.value)" style="width:68px;text-align:right" step="0.01"></td><td class="tr"><input type="number" value="${it.p}" onchange="upd('${it.id}','p',this.value)" style="width:95px;text-align:right" step="0.01"></td><td class="tr mono" style="font-size:13px;color:${tot>0?'#BA7517':'#999'}">${fmt(tot)}</td><td><button class="btn btn-sm btn-del" onclick="delRow('${it.id}')">×</button></td></tr>`;
+  }).join('');
+  recalc();
+}
+function recalc(){
+  const cur=document.getElementById('cur').value,ivaR=parseFloat(document.getElementById('iva').value)||0,utR=parseFloat(document.getElementById('util').value)||0,m2=parseFloat(document.getElementById('disM2').value)||0,tar=parseFloat(document.getElementById('disTarifa').value)||6;
+  const sub=items.reduce((s,it)=>s+(parseFloat(it.q)||0)*(parseFloat(it.p)||0),0),dis=m2*tar,utA=(sub+dis)*(utR/100),base=sub+dis+utA,ivaA=base*(ivaR/100),tot=base+ivaA;
+  document.getElementById('subs').textContent=`${cur} ${fmt(sub)}`;
+  document.getElementById('disLbl').textContent=`Diseño (${m2} m² × $${tar})`;
+  document.getElementById('sDis').textContent=m2>0?`${cur} ${fmt(dis)}`:'—';
+  document.getElementById('ulbl').textContent=`Utilidad (${utR}%)`;
+  document.getElementById('sutil').textContent=`${cur} ${fmt(utA)}`;
+  document.getElementById('ilbl').textContent=`IVA (${ivaR}%)`;
+  document.getElementById('siva').textContent=`${cur} ${fmt(ivaA)}`;
+  document.getElementById('stot').textContent=`${cur} ${fmt(tot)}`;
+}
+
+/* ===== MELAMÍNICOS ===== */
+function addMel(){
+  const nombre=document.getElementById('mNombre').value;if(!nombre){toast('Escribe el nombre del melamínico');return;}
+  const m={id:uid(),nombre,color:document.getElementById('mColor').value,proveedor:document.getElementById('mProv').value,ancho:parseFloat(document.getElementById('mAncho').value)||2440,alto:parseFloat(document.getElementById('mAlto').value)||1220,espesor:parseFloat(document.getElementById('mEspesor').value)||18,precio:parseFloat(document.getElementById('mPrecio').value)||0,moneda:document.getElementById('mMoneda').value,stock:parseInt(document.getElementById('mStock').value),notas:document.getElementById('mNotas').value};
+  melaminicos.push(m);renderMelList();updateMatSelect();
+  document.getElementById('mNombre').value='';document.getElementById('mColor').value='';document.getElementById('mNotas').value='';
+  toast(`✓ "${m.nombre}" registrado en la biblioteca`);
+}
+function delMel(id){melaminicos=melaminicos.filter(m=>m.id!==id);renderMelList();updateMatSelect();}
+function renderMelList(){
+  const list=document.getElementById('melList');
+  document.getElementById('melCount').textContent=`${melaminicos.length} material${melaminicos.length!==1?'es':''} registrado${melaminicos.length!==1?'s':''}`;
+  if(!melaminicos.length){list.innerHTML='<div class="empty card"><div class="empty-icon">🗂️</div><p>Registra tus melamínicos para usarlos en el despiece</p></div>';return;}
+  list.innerHTML=melaminicos.map(m=>{
+    const al=(m.ancho*m.alto/1e6).toFixed(3),pm2=m.precio>0?(m.precio/(m.ancho*m.alto/1e6)).toFixed(2):'—';
+    return`<div class="mel-card"><div class="mel-head"><div class="flex gap8 wrap" style="align-items:center"><span style="font-size:14px;font-weight:600">${esc(m.nombre)}</span>${m.color?`<span class="tag">${esc(m.color)}</span>`:''}<span class="stock-badge ${m.stock?'in-stock':'no-stock'}">${m.stock?'En stock':'Sin stock'}</span></div><button class="btn btn-sm btn-del" onclick="delMel('${m.id}')">Eliminar</button></div><div class="mel-body"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px"><div><div class="mlabel">Dimensiones lámina</div><div style="font-size:14px;font-weight:600;font-family:monospace">${m.ancho}×${m.alto}mm</div><div style="font-size:12px;color:var(--text2)">${m.espesor}mm · ${al} m²/lám</div></div><div><div class="mlabel">Precio / lámina</div><div class="mel-price">${m.moneda} ${fmt(m.precio)}</div></div><div><div class="mlabel">Precio / m²</div><div style="font-size:15px;font-weight:600;font-family:monospace;color:var(--blue)">${pm2!=='—'?m.moneda+' '+pm2:'—'}</div></div><div><div class="mlabel">Proveedor</div><div style="font-size:13px">${esc(m.proveedor)||'—'}</div>${m.notas?`<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">${esc(m.notas)}</div>`:''}</div></div></div></div>`;
+  }).join('');
+}
+function updateMatSelect(){
+  const sel=document.getElementById('pMat');
+  sel.innerHTML='<option value="">— Seleccionar de la biblioteca —</option>';
+  melaminicos.forEach(m=>{sel.innerHTML+=`<option value="${m.id}">${esc(m.nombre)}${m.color?' — '+m.color:''} (${m.espesor}mm)</option>`;});
+  if(!melaminicos.length)sel.innerHTML='<option value="">— Registra materiales en la pestaña Melamínicos —</option>';
+}
+
+/* ===== DESPIECE ===== */
+const GOLA_INFO={L:'Gola tipo L — perfil horizontal en el canto SUPERIOR. Se mide en ml según el ancho de cada puerta.',C:'Gola tipo C — perfil vertical en el canto LATERAL (lado de apertura). Se mide en ml según el alto.',LC:'Gola L + C — perfil superior + lateral formando marco. Se calculan ambos perfiles.'};
+function showGolaInfo(){const v=document.getElementById('pGolaB').value,b=document.getElementById('golaInfo');if(v==='none'){b.style.display='none';return;}b.textContent=GOLA_INFO[v]||'';b.style.display='block';}
+function bisLabel(t){return{cazoleta_std:'Bisagra cazoleta 35mm estándar',cazoleta_freno:'Bisagra cazoleta 35mm con freno (soft-close)',sobrepuesta:'Bisagra sobrepuesta estándar',sobrepuesta_freno:'Bisagra sobrepuesta con freno',piano:'Bisagra piano / continua'}[t]||t;}
+function corLabel(t){return{telescopica:'Corredera telescópica 45kg',telescopica_freno:'Corredera telescópica con freno (soft-close)',ball:'Corredera ball bearing 40kg',invisible_freno:'Guía invisible con freno (undermount)'}[t]||t;}
+function calcHerrajes(W,H,dr,slide,caj,bisType,corType,golaB,golaS){
+  const h=[];
+  if(dr>0){const nb=H>=1500?4:H>=900?3:2;h.push({n:bisLabel(bisType),qty:nb*dr,unit:'und',note:`${nb} c/puerta × ${dr} puertas`});if(bisType==='piano')h.push({n:'Bisagra piano continua',qty:Math.ceil(H/1000)*dr,unit:'m',note:`${Math.ceil(H/1000)}ml c/puerta`});if(golaB==='none'||!golaB)h.push({n:'Jalador / tirador ext. puerta batiente',qty:dr,unit:'und',note:'1 por puerta'});}
+  if(slide>0){h.push({n:'Perfil aluminio corredera sup+inf',qty:slide,unit:'par',note:'1 par por juego corredizo'});if(golaS==='none'||!golaS)h.push({n:'Jalador / tirador ext. puerta corrediza',qty:slide,unit:'und',note:'1 por hoja'});}
+  if(caj>0){h.push({n:corLabel(corType),qty:caj,unit:'par',note:`1 par × ${caj} cajones`});h.push({n:'Jalador / tirador cajón',qty:caj,unit:'und',note:'1 por cajón'});}
+  if(dr>0||slide>0||caj>0)h.push({n:'Tornillos para herrajes (surtido)',qty:1,unit:'gbl',note:'Montaje general'});
+  return h;
+}
+function calcGola(W,H,dr,slide,golaB,golaS){
+  const g=[];
+  function addG(type,wm,hm,qty,o){const wl=(wm/1000).toFixed(3),hl=(hm/1000).toFixed(3);if(type==='L'||type==='LC')g.push({n:`Perfil gola tipo L — ${o}`,calc:`${wl}ml × ${qty} = ${(wm/1000*qty).toFixed(3)}ml`,total:parseFloat((wm/1000*qty).toFixed(3))});if(type==='C'||type==='LC')g.push({n:`Perfil gola tipo C — ${o}`,calc:`${hl}ml × ${qty} = ${(hm/1000*qty).toFixed(3)}ml`,total:parseFloat((hm/1000*qty).toFixed(3))});}
+  if(dr>0&&golaB&&golaB!=='none')addG(golaB,Math.round(W/dr),H,dr,'puerta batiente');
+  if(slide>0&&golaS&&golaS!=='none')addG(golaS,Math.round((W/2)+20),H-10,slide*2,'puerta corrediza');
+  return g;
+}
+function calcTapacanto(cuts,tcType){
+  const tc=[];cuts.forEach(c=>{const[w,h]=c.dims.split(' × ').map(Number);let mpu=0;
+  const n=c.n;
+  if(n==='Costado izquierdo'||n==='Costado derecho')mpu=(h*2)/1000;
+  else if(n==='Tapa'||n==='Base'||n==='Sólido horizontal'||n==='Sólido vertical'||n==='Sólido (doble fondo)')mpu=w/1000;
+  else if(n.startsWith('Panel (puerta'))mpu=(w*2+h*2)/1000;
+  else if(n==='Panel (cajón)')mpu=(w*2+h*2)/1000;
+  else if(n==='Costado cajón izquierdo'||n==='Costado cajón derecho')mpu=(h*2)/1000;
+  if(mpu>0){const total=parseFloat((mpu*c.qty).toFixed(3));tc.push({pieza:c.n,mpu:parseFloat(mpu.toFixed(3)),qty:c.qty,total,tcType});}});return tc;
+}
+function calcCuts(){
+  const name=document.getElementById('pN').value||'Módulo';
+  const W=parseFloat(document.getElementById('pW').value)||600;
+  const H=parseFloat(document.getElementById('pH').value)||720;
+  const D=parseFloat(document.getElementById('pD').value)||550;
+  const T=parseFloat(document.getElementById('pT').value)||18;
+  const sh=parseInt(document.getElementById('pS').value)||0;
+  const vd=parseInt(document.getElementById('pVD').value)||0;
+  const caj=parseInt(document.getElementById('pCaj').value)||0;
+  const dr=parseInt(document.getElementById('pDr').value)||0;
+  const slide=parseInt(document.getElementById('pSlide').value)||0;
+  const df=document.getElementById('pDF').checked;
+  const bisType=document.getElementById('pBisType').value;
+  const corType=document.getElementById('pCorType').value;
+  const golaB=document.getElementById('pGolaB').value;
+  const golaS=document.getElementById('pGolaS').value;
+  const tcType=document.getElementById('pTcType').value;
+  const matId=document.getElementById('pMat').value;
+  const matObj=melaminicos.find(m=>m.id===matId)||null;
+  const ml=matObj?`${matObj.nombre} ${matObj.espesor}mm`:`MDF ${T}mm`;
+  const mat3=`MDF 3mm`, mat5=`MDF 5mm`, mat15=`MDF 15mm`;
+
+  // Estructura principal — cada costado separado con su nombre
+  const cuts=[
+    {n:'Costado izquierdo', dims:`${D} × ${H}`,      qty:1, mat:ml,   thick:T},
+    {n:'Costado derecho',   dims:`${D} × ${H}`,      qty:1, mat:ml,   thick:T},
+    {n:'Tapa',              dims:`${W-2*T} × ${D}`,  qty:1, mat:ml,   thick:T},
+    {n:'Base',              dims:`${W-2*T} × ${D}`,  qty:1, mat:ml,   thick:T},
+    {n:'Trasera',           dims:`${W-2*T} × ${H-T}`,qty:1, mat:mat3, thick:3},
+  ];
+
+  // Sólidos horizontales (entrepaños)
+  if(sh>0) cuts.push({n:'Sólido horizontal (entrepaño)', dims:`${W-2*T-2} × ${D-50}`, qty:sh, mat:ml, thick:T});
+
+  // Sólidos verticales (divisores)
+  if(vd>0) cuts.push({n:'Sólido vertical (divisor)',     dims:`${H-2*T} × ${D-50}`,   qty:vd, mat:ml, thick:T});
+
+  // Doble fondo
+  if(df)   cuts.push({n:'Sólido (doble fondo)',           dims:`${W-2*T-2} × ${D-150}`,qty:1,  mat:ml, thick:T});
+
+  // Cajones — costados individuales
+  if(caj>0){
+    const ch=Math.floor((H*0.4)/caj);
+    cuts.push({n:'Panel (cajón)',               dims:`${W-2*T} × ${ch-4}`,     qty:caj,   mat:ml,   thick:T});
+    cuts.push({n:'Costado cajón izquierdo',     dims:`${D-100} × ${ch-30}`,    qty:caj,   mat:mat15,thick:15});
+    cuts.push({n:'Costado cajón derecho',       dims:`${D-100} × ${ch-30}`,    qty:caj,   mat:mat15,thick:15});
+    cuts.push({n:'Base cajón',                  dims:`${W-2*T-50} × ${D-100}`, qty:caj,   mat:mat5, thick:5});
+  }
+
+  // Puertas
+  if(dr>0)    cuts.push({n:'Panel (puerta batiente)',   dims:`${Math.round(W/dr)} × ${H}`,     qty:dr,      mat:ml, thick:T});
+  if(slide>0) cuts.push({n:'Panel (puerta corrediza)', dims:`${Math.round((W/2)+20)} × ${H-10}`,qty:slide*2, mat:ml, thick:T});
+
+  const herrajes=calcHerrajes(W,H,dr,slide,caj,bisType,corType,golaB,golaS);
+  const gola=calcGola(W,H,dr,slide,golaB,golaS);
+  const tapacanto=calcTapacanto(cuts,tcType);
+  pieces.push({id:uid(),name,W,H,D,T,cuts,herrajes,gola,tapacanto,tcType,bisType,corType,golaB,golaS,matObj,vd,df});
+  renderCuts();document.getElementById('matCard').style.display='block';updMat();
+}
+function delPiece(id){pieces=pieces.filter(p=>p.id!==id);renderCuts();if(!pieces.length)document.getElementById('matCard').style.display='none';}
+function addToPresupuesto(pid){
+  const p=pieces.find(x=>x.id===pid);if(!p)return;
+  items.push({id:uid(),d:`[Tableros] ${p.name} — ${p.matObj?p.matObj.nombre:'MDF'} ${p.T}mm`,u:'gbl',q:1,p:p.matObj?.precio||0});
+  if(p.tapacanto.length){const tt=parseFloat(p.tapacanto.reduce((s,t)=>s+t.total,0).toFixed(3));items.push({id:uid(),d:`[Tapacanto] ${p.tcType} — ${p.name}`,u:'ml',q:tt,p:0});}
+  p.herrajes.forEach(h=>items.push({id:uid(),d:`[Herraje] ${h.n} — ${p.name}`,u:h.unit,q:h.qty,p:0}));
+  p.gola.forEach(g=>items.push({id:uid(),d:`[Gola] ${g.n}`,u:'ml',q:g.total,p:0}));
+  renderTbl();toast(`✓ "${p.name}" agregado con tableros, tapacanto, herrajes y gola`);
+}
+function renderCuts(){
+  const box=document.getElementById('cutBox');
+  if(!pieces.length){box.innerHTML='<div class="empty card"><div class="empty-icon">🪵</div><p>Agrega un módulo para generar el despiece</p></div>';return;}
+  box.innerHTML=pieces.map((p,i)=>{
+    const tt=p.tapacanto.reduce((s,t)=>s+t.total,0).toFixed(3);
+    return`<div class="card mb12"><div class="flexb mb12 wrap gap8"><div class="flex gap8 wrap" style="align-items:center"><span class="badge bg">#${i+1}</span><span style="font-size:14px;font-weight:600">${esc(p.name)}</span><span class="tag">${p.W}×${p.H}×${p.D}mm</span><span class="tag">e:${p.T}mm</span>${p.matObj?`<span class="badge bbl">${esc(p.matObj.nombre)}</span>`:''}</div><div class="flex gap8"><button class="btn btn-green btn-sm" onclick="addToPresupuesto('${p.id}')">→ Al presupuesto</button><button class="btn btn-sm btn-del" onclick="delPiece('${p.id}')">Eliminar</button></div></div>
+    <div class="sl">Tableros y paneles</div><div style="overflow-x:auto;margin-bottom:12px"><table><thead><tr><th>Pieza</th><th>Dimensiones (mm)</th><th class="tr">Cant.</th><th>Material</th><th class="tr">m²</th></tr></thead><tbody>${p.cuts.map(c=>{const[w,h]=c.dims.split(' × ').map(Number),ar=((w*h*c.qty)/1e6).toFixed(3);return`<tr><td>${c.n}</td><td><span class="tag">${c.dims}</span></td><td class="tr mono">${c.qty}</td><td class="muted" style="font-size:12px">${c.mat}</td><td class="tr mono muted" style="font-size:12px">${ar}</td></tr>`;}).join('')}</tbody></table></div>
+    ${p.tapacanto.length?`<div class="tc-box"><div class="tc-head"><span class="badge bpu">TAPACANTO</span>${p.tcType} — <span style="font-family:monospace;font-weight:600">Total: ${tt} ml</span></div>${p.tapacanto.map(t=>`<div class="tc-row"><div><span>${t.pieza}</span><span class="muted" style="font-size:11px;margin-left:6px">${t.mpu} ml/und × ${t.qty} = ${t.total} ml</span></div><span style="font-family:monospace;font-weight:600;color:var(--purple);min-width:60px;text-align:right">${t.total} ml</span></div>`).join('')}</div>`:''}
+    ${p.herrajes.length?`<div class="hw"><div class="hhead"><span class="badge bgr">HERRAJES</span>${bisLabel(p.bisType)} · ${corLabel(p.corType)}</div>${p.herrajes.map(h=>`<div class="hrow"><div><span>${h.n}</span><span class="muted" style="font-size:11px;margin-left:6px">${h.note}</span></div><span class="hqty">${h.qty} ${h.unit}</span></div>`).join('')}</div>`:''}
+    ${p.gola.length?`<div class="gola-box"><div class="gola-head"><span class="badge bbl">PERFILES GOLA</span></div>${p.gola.map(g=>`<div class="gola-row"><div><span>${g.n}</span><span class="muted" style="font-size:11px;margin-left:6px">${g.calc}</span></div><span style="font-family:monospace;font-weight:600;color:var(--blue);min-width:60px;text-align:right">${g.total} ml</span></div>`).join('')}</div>`:''}
+    ${p.matObj?`<div style="margin-top:10px;padding:10px 13px;background:var(--bg3);border-radius:var(--r);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><span style="font-size:13px;font-weight:600">${esc(p.matObj.nombre)}</span><div class="flex gap12"><span class="mono tgold" style="font-size:13px">${p.matObj.moneda} ${fmt(p.matObj.precio)} / lám</span></div></div>`:''}</div>`;
+  }).join('');
+}
+function updMat(){
+  const last=pieces[pieces.length-1],mo=last?.matObj||null;
+  const area=pieces.reduce((s,p)=>s+p.cuts.filter(c=>c.thick>=15).reduce((a,c)=>{const[w,h]=c.dims.split(' × ').map(Number);return a+(w*h*c.qty)/1e6;},0),0);
+  document.getElementById('mArea').textContent=area.toFixed(2)+' m²';
+  if(mo&&mo.precio>0){const la=mo.ancho*mo.alto/1e6,sh=Math.ceil(area/la),co=sh*mo.precio;document.getElementById('mSheets').textContent=`${sh} lámina${sh!==1?'s':''} de ${mo.ancho}×${mo.alto}mm`;document.getElementById('mCost').textContent=`${mo.moneda} ${fmt(co)}`;}
+  else{document.getElementById('mSheets').textContent='Registra un melamínico con precio';document.getElementById('mCost').textContent='—';}
+}
+
+/* ===== PDF ===== */
+function exportPDF(){
+  if(!window.jspdf){toast('Cargando librería PDF, intenta de nuevo…');return;}
+  const{jsPDF}=window.jspdf,doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'}),W=doc.internal.pageSize.getWidth();
+  const cur=document.getElementById('cur').value,ivaR=parseFloat(document.getElementById('iva').value)||0,utR=parseFloat(document.getElementById('util').value)||0,pName=document.getElementById('pName').value||'Sin nombre',pClient=document.getElementById('pClient').value||'—',pLoc=document.getElementById('pLoc').value||'—',pDate=document.getElementById('pDate').value||new Date().toISOString().slice(0,10),m2=parseFloat(document.getElementById('disM2').value)||0,tar=parseFloat(document.getElementById('disTarifa').value)||6;
+  doc.setFillColor(250,238,218);doc.rect(0,0,W,28,'F');doc.setFontSize(20);doc.setFont('helvetica','bold');doc.setTextColor(186,117,23);doc.text('Linaro',14,13);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(120,90,20);doc.text('Presupuestación arquitectónica',14,20);doc.setFontSize(10);doc.setTextColor(50,50,50);doc.text(`Proyecto: ${pName}`,14,35);doc.text(`Cliente: ${pClient}`,14,41);doc.text(`Ubicación: ${pLoc}`,14,47);doc.text(`Fecha: ${pDate}`,W-60,35);doc.text(`Moneda: ${cur}`,W-60,41);doc.setDrawColor(220,180,100);doc.setLineWidth(0.3);doc.line(14,52,W-14,52);
+  const rows=items.map((it,i)=>{const tot=(parseFloat(it.q)||0)*(parseFloat(it.p)||0);return[String(i+1),it.d,it.u,fmt(it.q),`${cur} ${fmt(it.p)}`,`${cur} ${fmt(tot)}`];});
+  doc.autoTable({startY:55,head:[['#','Descripción','Unidad','Cantidad','Precio unit.','Total']],body:rows.length?rows:[['—','Sin ítems','','','','']],styles:{fontSize:9,cellPadding:3},headStyles:{fillColor:[186,117,23],textColor:255,fontStyle:'bold'},alternateRowStyles:{fillColor:[252,247,236]},columnStyles:{0:{cellWidth:8,halign:'center'},2:{cellWidth:18,halign:'center'},3:{cellWidth:20,halign:'right'},4:{cellWidth:32,halign:'right'},5:{cellWidth:32,halign:'right'}},margin:{left:14,right:14}});
+  const sub=items.reduce((s,it)=>s+(parseFloat(it.q)||0)*(parseFloat(it.p)||0),0),dis=m2*tar,utA=(sub+dis)*(utR/100),base=sub+dis+utA,ivaA=base*(ivaR/100),tot=base+ivaA,fy=(doc.lastAutoTable?doc.lastAutoTable.finalY:60)+8;
+  doc.autoTable({startY:fy,body:[['','','','','Subtotal obra/carpintería',`${cur} ${fmt(sub)}`],['','','','',`Honorarios diseño (${m2}m² × $${tar})`,`${cur} ${fmt(dis)}`],['','','','',`Utilidad (${utR}%)`,`${cur} ${fmt(utA)}`],['','','','',`IVA (${ivaR}%)`,`${cur} ${fmt(ivaA)}`],['','','','','TOTAL',`${cur} ${fmt(tot)}`]],styles:{fontSize:9},columnStyles:{4:{fontStyle:'bold',halign:'right'},5:{halign:'right',cellWidth:32}},didParseCell:d=>{if(d.row.index===4){d.cell.styles.fontStyle='bold';d.cell.styles.textColor=[186,117,23];}},margin:{left:14,right:14}});
+  doc.setFontSize(7);doc.setTextColor(160,140,120);doc.text('Presupuesto generado con Linaro — Valores estimados, sujetos a condiciones del mercado.',14,doc.lastAutoTable.finalY+10);
+  doc.save(`linaro_${pName.replace(/\s+/g,'_')}.pdf`);toast('PDF exportado correctamente');
+}
+
+/* ===== PLANOS ===== */
+const RSTYLE={room:{fill:'#F5F2EB',stroke:'#8B7355',txt:'#5C4A2A'},kitchen:{fill:'#EEF5E8',stroke:'#3B6D11',txt:'#27500A'},closet:{fill:'#EFEEFD',stroke:'#534AB7',txt:'#3C3489'},bath:{fill:'#E8F5F0',stroke:'#0F6E56',txt:'#085041'},bed:{fill:'#F5EEF4',stroke:'#8B3565',txt:'#6A2050'}};
+const FCAT={
+  mb:{n:'Mueble bajo',wm:600,dm:550,fill:'#D4C5A9',type:'cab'},ma:{n:'Mueble alto',wm:600,dm:300,fill:'#E5DDD0',type:'upper',dash:true},
+  isla:{n:'Isla cocina',wm:1200,dm:900,fill:'#C8B89A',type:'island'},freg:{n:'Fregadero',wm:800,dm:550,fill:'#C0C8C0',type:'sink'},
+  estufa:{n:'Estufa',wm:600,dm:600,fill:'#C8C0BC',type:'stove'},refri:{n:'Refrigerador',wm:700,dm:700,fill:'#D0D8DC',type:'fridge'},
+  closet:{n:'Closet recto',wm:1200,dm:600,fill:'#C0D4C8',type:'closet'},cajmod:{n:'Módulo cajones',wm:500,dm:550,fill:'#C0D4C8',type:'cab'},
+  camas:{n:'Cama sencilla',wm:1000,dm:2000,fill:'#B8CAD8',type:'bed'},camad:{n:'Cama doble',wm:1400,dm:2000,fill:'#B8CAD8',type:'bed'},
+  camaq:{n:'Cama queen',wm:1600,dm:2000,fill:'#B8CAD8',type:'bed'},velador:{n:'Velador',wm:500,dm:500,fill:'#C4D0D8',type:'side'},
+  sofa2:{n:'Sofá 2p',wm:1600,dm:900,fill:'#C8B8D4',type:'sofa'},sofa3:{n:'Sofá 3p',wm:2100,dm:900,fill:'#C8B8D4',type:'sofa'},
+  mesa4:{n:'Mesa 4p',wm:1200,dm:800,fill:'#D4C8B8',type:'table'},mesa6:{n:'Mesa 6p',wm:1800,dm:900,fill:'#D4C8B8',type:'table'},
+  mesac:{n:'Mesa centro',wm:1200,dm:600,fill:'#D4C8B8',type:'table'},tvstand:{n:'Mueble TV',wm:1500,dm:450,fill:'#C8BCAC',type:'cab'},
+  inodoro:{n:'Inodoro',wm:380,dm:650,fill:'#C8E4E4',type:'toilet'},lavamanos:{n:'Lavamanos',wm:500,dm:450,fill:'#C8E4E4',type:'sink_b'},
+  ducha:{n:'Ducha',wm:900,dm:900,fill:'#D4F0F0',type:'shower'},tina:{n:'Bañera',wm:700,dm:1600,fill:'#D4F0F0',type:'tub'}
+};
+
+function fW(f){return f.rot?f.dm/1000:f.wm/1000}
+function fD(f){return f.rot?f.wm/1000:f.dm/1000}
+function fWlbl(f){return f.rot?f.dm+'mm':f.wm+'mm'}
+function fDlbl(f){return f.rot?f.wm+'mm':f.dm+'mm'}
+const m2p=m=>m*pSc,mm2p=mm=>mm/1000*pSc,p2m=p=>p/pSc,snp=v=>Math.round(v/0.05)*0.05;
+const PAD=55;
+
+function setSTab(id,btn){
+  document.querySelectorAll('.sc').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.stab').forEach(e=>e.classList.remove('on'));
+  document.getElementById('sc-'+id).classList.add('on');btn.classList.add('on');
+}
+
+function addPRoom(){
+  const name=document.getElementById('rName').value||'Ambiente',w=parseFloat(document.getElementById('rW').value)||3,h=parseFloat(document.getElementById('rH').value)||4,type=document.getElementById('rType').value,last=pRooms[pRooms.length-1],x=last?last.x+last.w+0.3:0.5;
+  pRooms.push({id:uid(),name,w,h,type,x,y:0.5});pRender();updRList();
+}
+function delPRoom(id){pRooms=pRooms.filter(r=>r.id!==id);pRender();updRList();}
+function updRList(){
+  const el=document.getElementById('rList');
+  if(!pRooms.length){el.innerHTML='<div style="font-size:12px;color:var(--text2);text-align:center;padding:12px">Sin ambientes</div>';return;}
+  el.innerHTML=pRooms.map(r=>{const s=RSTYLE[r.type]||RSTYLE.room;return`<div class="ritem" style="background:${s.fill};border:.5px solid ${s.stroke}"><span style="color:${s.txt};font-weight:500;font-size:12px">${r.name} <span style="font-weight:400;color:${s.stroke}">${r.w}×${r.h}m</span></span><button style="border:none;background:none;cursor:pointer;font-size:14px;color:#A32D2D;padding:0 2px" onclick="delPRoom('${r.id}')">×</button></div>`;}).join('');
+}
+
+function addF(key){
+  const cat=FCAT[key];if(!cat)return;
+  let x=1,y=1;if(pRooms.length){const r=pRooms[0];x=r.x+r.w/2-cat.wm/2000;y=r.y+r.h/2-cat.dm/2000;x=Math.max(r.x,x);y=Math.max(r.y,y);}
+  const f={id:uid(),key,n:cat.n,wm:cat.wm,dm:cat.dm,fill:cat.fill,type:cat.type,dash:cat.dash||false,x:snp(x),y:snp(y),rot:false};
+  pFurn.push(f);pSel=f.id;pRender();updPSel();
+  setSTab('psel',document.querySelectorAll('.stab')[2]);
+}
+function delSel(){if(!pSel)return;pFurn=pFurn.filter(f=>f.id!==pSel);pSel=null;pRender();updPSel();}
+function rotSel(){const f=pFurn.find(x=>x.id===pSel);if(f){f.rot=!f.rot;pRender();updPSel();}}
+function adjSc(factor){pSc=Math.max(25,Math.min(200,pSc*factor));document.getElementById('scBadge').textContent=`1:${Math.round(1000/(pSc*0.265))}`;pRender();}
+
+function updPSel(){
+  const bar=document.getElementById('selBar'),panel=document.getElementById('selPanel');
+  if(!pSel){bar.style.display='none';panel.innerHTML='<div style="color:var(--text2);font-size:12px;text-align:center;padding:24px 8px">Haz clic en un mueble para editar</div>';return;}
+  const f=pFurn.find(x=>x.id===pSel);if(!f){bar.style.display='none';return;}
+  bar.style.display='flex';document.getElementById('selName').textContent=f.n;
+  panel.innerHTML=`<div class="psl">Mueble seleccionado</div>
+    <div class="pfield"><label>Nombre</label><input type="text" value="${f.n}" onchange="updFP('${f.id}','n',this.value)"></div>
+    <div class="pg2">
+      <div class="pfield"><label>Ancho (mm)</label><input type="number" value="${f.wm}" min="50" onchange="updFP('${f.id}','wm',+this.value)"></div>
+      <div class="pfield"><label>Profund. (mm)</label><input type="number" value="${f.dm}" min="50" onchange="updFP('${f.id}','dm',+this.value)"></div>
+      <div class="pfield"><label>Pos. X (m)</label><input type="number" value="${f.x.toFixed(2)}" step="0.05" onchange="updFP('${f.id}','x',+this.value)"></div>
+      <div class="pfield"><label>Pos. Y (m)</label><input type="number" value="${f.y.toFixed(2)}" step="0.05" onchange="updFP('${f.id}','y',+this.value)"></div>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:6px">
+      <button class="tbtn tbtn-gold" onclick="rotSel()" style="flex:1">↻ rotar 90°</button>
+      <button class="tbtn tbtn-del" onclick="delSel()">× eliminar</button>
+    </div>`;
+}
+function updFP(id,prop,val){const f=pFurn.find(x=>x.id===id);if(f){f[prop]=val;pRender();updPSel();}}
+
+function furnDetail(f,fx,fy,fw,fd){
+  let s='',t=f.type;
+
+  // Mueble bajo — puertas batientes con arco de apertura y jalador
+  if(t==='cab'){
+    // Profundidad del mueble (banda trasera)
+    const bk=Math.min(fd*.1,5);
+    s+=`<rect x="${fx}" y="${fy}" width="${fw}" height="${bk}" fill="#7A6040" opacity="0.25"/>`;
+    // Tablero de encimera/tapa (borde frontal)
+    const ft=Math.min(fd*.08,5);
+    s+=`<rect x="${fx}" y="${fy+fd-ft}" width="${fw}" height="${ft}" fill="#907060" opacity="0.4"/>`;
+    // Dividir en puertas según ancho: 1 puerta ≤450px, 2 puertas si más
+    const nd=fw>m2p(.45)?2:1;
+    const pw=fw/nd;
+    for(let i=0;i<nd;i++){
+      const pdx=fx+i*pw;
+      // Marco de puerta
+      s+=`<rect x="${pdx+1.5}" y="${fy+bk+1.5}" width="${pw-3}" height="${fd-ft-bk-3}" fill="none" stroke="#6B5030" stroke-width="1.2" opacity="0.6"/>`;
+      // Arco de apertura (cuarto de círculo desde esquina frontal)
+      const ar=Math.min(pw-4,fd-ft-bk-4);
+      const hinge_side= i===0 ? pdx+2 : pdx+pw-2;
+      const arc_dx = i===0 ? pw-3 : -(pw-3);
+      s+=`<path d="M ${hinge_side} ${fy+fd-ft-1.5} A ${ar} ${ar} 0 0 ${i===0?0:1} ${hinge_side+arc_dx} ${fy+fd-ft-1.5-ar}" fill="none" stroke="#BA7517" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.5"/>`;
+      // Jalador centrado
+      const jx=pdx+pw/2;
+      const jy=fy+fd-ft-8;
+      s+=`<line x1="${jx-5}" y1="${jy}" x2="${jx+5}" y2="${jy}" stroke="#555" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>`;
+    }
+  }
+
+  // Mueble alto — puertas con apertura vertical (colgante) y jalador
+  if(t==='upper'){
+    const bk=Math.min(fd*.12,4);
+    s+=`<rect x="${fx}" y="${fy}" width="${fw}" height="${bk}" fill="#7A6040" opacity="0.2"/>`;
+    const nd=fw>m2p(.45)?2:1;
+    const pw=fw/nd;
+    for(let i=0;i<nd;i++){
+      const pdx=fx+i*pw;
+      s+=`<rect x="${pdx+1.5}" y="${fy+bk+1.5}" width="${pw-3}" height="${fd-bk-3}" fill="none" stroke="#6B5030" stroke-width="1" stroke-dasharray="4,2" opacity="0.55"/>`;
+      // Jalador horizontal en la parte inferior de la puerta
+      const jx=pdx+pw/2,jy=fy+fd-5;
+      s+=`<line x1="${jx-5}" y1="${jy}" x2="${jx+5}" y2="${jy}" stroke="#555" stroke-width="2" stroke-linecap="round" opacity="0.6"/>`;
+    }
+  }
+  if(t==='closet'){const ry=fy+fd*.5;s+=`<line x1="${fx+8}" y1="${ry}" x2="${fx+fw-8}" y2="${ry}" stroke="#5A4A3A" stroke-width="2" opacity="0.45"/>`;for(let hx=fx+16;hx<fx+fw-16;hx+=Math.max(14,fw/6)){s+=`<line x1="${hx}" y1="${ry}" x2="${hx-5}" y2="${ry+8}" stroke="#5A4A3A" stroke-width="1" opacity="0.4"/><line x1="${hx}" y1="${ry}" x2="${hx+5}" y2="${ry+8}" stroke="#5A4A3A" stroke-width="1" opacity="0.4"/>`}}
+  if(t==='bed'){const ph=Math.min(fd*.18,18),pw=fw*.82;s+=`<rect x="${fx+fw/2-pw/2}" y="${fy+5}" width="${pw}" height="${ph}" fill="#D8D0E8" stroke="#9080A8" stroke-width="1" rx="4" opacity="0.65"/>`;s+=`<line x1="${fx+4}" y1="${fy+fd-6}" x2="${fx+fw-4}" y2="${fy+fd-6}" stroke="#9080A8" stroke-width="1" opacity="0.4"/>`;}
+  if(t==='sofa'){const bh=fd*.28;s+=`<rect x="${fx+2}" y="${fy+2}" width="${fw-4}" height="${bh}" fill="#A898B4" opacity="0.35" rx="2"/>`;const ns=Math.round(fw/42);for(let i=1;i<ns;i++){const sx=fx+fw/ns*i;s+=`<line x1="${sx}" y1="${fy+bh}" x2="${sx}" y2="${fy+fd-5}" stroke="#9080A8" stroke-width="1" opacity="0.35"/>`;}}
+  if(t==='table'){s+=`<ellipse cx="${fx+fw/2}" cy="${fy+fd/2}" rx="${fw*.38}" ry="${fd*.38}" fill="none" stroke="#7A6A5A" stroke-width="1" opacity="0.3"/>`;}
+  if(t==='island'){
+    // Encimera isla con borde y zona de trabajo
+    s+=`<rect x="${fx+3}" y="${fy+3}" width="${fw-6}" height="${fd-6}" fill="none" stroke="#7A6A5A" stroke-width="1.5" opacity="0.4" rx="3"/>`;
+    // Línea de puertas alrededor
+    const nd=Math.max(2,Math.round(fw/m2p(.45)));
+    for(let i=1;i<nd;i++){const lx=fx+fw/nd*i;s+=`<line x1="${lx}" y1="${fy+4}" x2="${lx}" y2="${fy+fd-4}" stroke="#8B7355" stroke-width="0.8" opacity="0.35"/>`;}
+    // Jaladores frontales
+    for(let i=0;i<nd;i++){const cx=fx+fw/nd*(i+.5);s+=`<line x1="${cx-6}" y1="${fy+fd-5}" x2="${cx+6}" y2="${fy+fd-5}" stroke="#555" stroke-width="2" stroke-linecap="round" opacity="0.6"/>`;}
+  }
+  if(t==='sink'){
+    // Zona del mueble bajo (detrás del fregadero)
+    const sz=fd*.35;
+    s+=`<rect x="${fx}" y="${fy}" width="${fw}" height="${sz}" fill="#B8C4B8" opacity="0.3"/>`;
+    // Cuba del fregadero
+    const sx=fx+fw*.1,sy=fy+sz+2,sw=fw*.8,sdp=fd*.55;
+    s+=`<rect x="${sx}" y="${sy}" width="${sw}" height="${sdp}" fill="#A0C8C0" stroke="#5A8888" stroke-width="1.5" rx="4" opacity="0.75"/>`;
+    // Desagüe
+    s+=`<circle cx="${fx+fw/2}" cy="${sy+sdp/2}" r="4" fill="#5A8888" opacity="0.6"/>`;
+    s+=`<circle cx="${fx+fw/2}" cy="${sy+sdp/2}" r="2" fill="#3A6868" opacity="0.8"/>`;
+    // Grifo
+    s+=`<line x1="${fx+fw*.5}" y1="${sy+4}" x2="${fx+fw*.5}" y2="${sy-6}" stroke="#7A7A7A" stroke-width="2" stroke-linecap="round"/>`;
+    s+=`<line x1="${fx+fw*.42}" y1="${sy-6}" x2="${fx+fw*.58}" y2="${sy-6}" stroke="#7A7A7A" stroke-width="2" stroke-linecap="round"/>`;
+  }
+  if(t==='stove'){[[.28,.28],[.72,.28],[.28,.72],[.72,.72]].forEach(([bx,by])=>{s+=`<circle cx="${fx+fw*bx}" cy="${fy+fd*by}" r="${Math.min(fw,fd)*.1}" fill="#888" stroke="#555" stroke-width="1" opacity="0.55"/>`;});}
+  if(t==='fridge'){s+=`<line x1="${fx+fw*.8}" y1="${fy+fd*.22}" x2="${fx+fw*.8}" y2="${fy+fd*.55}" stroke="#999" stroke-width="3" opacity="0.5"/>`;s+=`<line x1="${fx+6}" y1="${fy+fd*.45}" x2="${fx+fw-6}" y2="${fy+fd*.45}" stroke="#999" stroke-width="0.8" opacity="0.3"/>`;}
+  if(t==='toilet'){s+=`<rect x="${fx+3}" y="${fy+2}" width="${fw-6}" height="${fd*.38}" fill="#A8D0D0" stroke="#5A9898" stroke-width="1" rx="3" opacity="0.7"/>`;s+=`<ellipse cx="${fx+fw/2}" cy="${fy+fd*.72}" rx="${fw*.4}" ry="${fd*.26}" fill="#A8D0D0" stroke="#5A9898" stroke-width="1" opacity="0.7"/>`;}
+  if(t==='sink_b'){s+=`<ellipse cx="${fx+fw/2}" cy="${fy+fd/2}" rx="${fw*.38}" ry="${fd*.38}" fill="#A8D0D0" stroke="#5A9898" stroke-width="1.5" opacity="0.7"/>`;s+=`<circle cx="${fx+fw/2}" cy="${fy+fd/2}" r="3" fill="#5A9898" opacity="0.6"/>`;}
+  if(t==='shower'){for(let i=-2;i<=10;i++){const o=i*Math.min(fw,fd)*.11;s+=`<line x1="${fx+o}" y1="${fy}" x2="${fx+o+fd}" y2="${fy+fd}" stroke="#5A9898" stroke-width="0.8" opacity="0.2"/>`;}s+=`<rect x="${fx+1}" y="${fy+1}" width="${fw-2}" height="${fd-2}" fill="none" stroke="#5A9898" stroke-width="1.5" rx="2"/>`;}
+  if(t==='tub'){s+=`<rect x="${fx+8}" y="${fy+8}" width="${fw-16}" height="${fd-16}" fill="#B8E8E8" stroke="#4A8888" stroke-width="1" rx="${Math.min(fw,fd)*.12}" opacity="0.7"/>`;s+=`<circle cx="${fx+fw/2}" cy="${fy+fd*.88}" r="5" fill="#4A8888" opacity="0.5"/>`;}
+  return s;
+}
+
+function dimH(x1,y1,x2,y2,lbl,ey){
+  const ec='#888',dc='#222',lw=lbl.length*6+10,cx=(x1+x2)/2;
+  return`<line x1="${x1}" y1="${ey-3}" x2="${x1}" y2="${y1+3}" stroke="${ec}" stroke-width="0.7"/>
+<line x1="${x2}" y1="${ey-3}" x2="${x2}" y2="${y1+3}" stroke="${ec}" stroke-width="0.7"/>
+<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y1}" stroke="${dc}" stroke-width="1.2" marker-start="url(#aR)" marker-end="url(#aF)"/>
+<rect x="${cx-lw/2}" y="${y1-8}" width="${lw}" height="12" fill="rgba(236,234,228,0.92)" rx="2"/>
+<text x="${cx}" y="${y1+1.5}" text-anchor="middle" font-size="10" fill="${dc}" font-family="monospace" font-weight="600">${lbl}</text>`;
+}
+function dimV(x1,y1,x2,y2,lbl,ex){
+  const ec='#888',dc='#222',lw=lbl.length*6+10,cy=(y1+y2)/2;
+  return`<line x1="${ex+3}" y1="${y1}" x2="${x1-3}" y2="${y1}" stroke="${ec}" stroke-width="0.7"/>
+<line x1="${ex+3}" y1="${y2}" x2="${x1-3}" y2="${y2}" stroke="${ec}" stroke-width="0.7"/>
+<line x1="${x1}" y1="${y1}" x2="${x1}" y2="${y2}" stroke="${dc}" stroke-width="1.2" marker-start="url(#aR)" marker-end="url(#aF)"/>
+<rect x="${x1+3}" y="${cy-7}" width="${lw}" height="12" fill="rgba(236,234,228,0.92)" rx="2"/>
+<text x="${x1+5}" y="${cy+2.5}" text-anchor="start" font-size="10" fill="${dc}" font-family="monospace" font-weight="600">${lbl}</text>`;
+}
+
+function pRender(){
+  const svg=document.getElementById('planSvg');
+  if(!svg)return;
+  let maxX=5,maxY=5;
+  pRooms.forEach(r=>{maxX=Math.max(maxX,r.x+r.w+1.5);maxY=Math.max(maxY,r.y+r.h+1.5);});
+  pFurn.forEach(f=>{maxX=Math.max(maxX,f.x+fW(f)+1.5);maxY=Math.max(maxY,f.y+fD(f)+1.5);});
+  const W=m2p(maxX)+PAD*2,H=m2p(maxY)+PAD*2;
+  svg.setAttribute('width',W);svg.setAttribute('height',H);
+
+  let o=`<defs>
+    <marker id="aF" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#333"/></marker>
+    <marker id="aR" markerWidth="8" markerHeight="6" refX="1" refY="3" orient="auto"><polygon points="8 0,0 3,8 6" fill="#333"/></marker>
+  </defs>`;
+  o+=`<rect width="${W}" height="${H}" fill="#ECEAE4"/>`;
+
+  o+=`<g opacity="0.18">`;
+  for(let gx=0;gx<maxX+0.5;gx+=0.1){const px=m2p(gx)+PAD,mj=Math.abs(gx-Math.round(gx))<0.005;o+=`<line x1="${px}" y1="0" x2="${px}" y2="${H}" stroke="#7B6E5E" stroke-width="${mj?1:0.3}"/>`;}
+  for(let gy=0;gy<maxY+0.5;gy+=0.1){const py=m2p(gy)+PAD,mj=Math.abs(gy-Math.round(gy))<0.005;o+=`<line x1="0" y1="${py}" x2="${W}" y2="${py}" stroke="#7B6E5E" stroke-width="${mj?1:0.3}"/>`;}
+  o+=`</g>`;
+
+  pRooms.forEach(r=>{
+    const s=RSTYLE[r.type]||RSTYLE.room,rx=m2p(r.x)+PAD,ry=m2p(r.y)+PAD,rw=m2p(r.w),rh=m2p(r.h);
+    o+=`<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="3" data-rid="${r.id}"/>`;
+    const fs=Math.max(10,Math.min(15,rw/r.name.length*0.85));
+    o+=`<text x="${rx+rw/2}" y="${ry+rh/2-6}" text-anchor="middle" font-size="${fs}" font-weight="600" fill="${s.txt}" font-family="sans-serif">${r.name}</text>`;
+    o+=`<text x="${rx+rw/2}" y="${ry+rh/2+10}" text-anchor="middle" font-size="${Math.max(9,fs-2)}" fill="${s.stroke}" font-family="monospace">${r.w}×${r.h}m · ${(r.w*r.h).toFixed(1)}m²</text>`;
+    o+=dimH(rx,ry-30,rx+rw,ry-30,`${Math.round(r.w*1000)}mm`,ry);
+    o+=dimV(rx+rw+32,ry,rx+rw+32,ry+rh,`${Math.round(r.h*1000)}mm`,rx+rw);
+  });
+
+  pFurn.forEach(f=>{
+    const fw=fW(f),fd=fD(f),fx=m2p(f.x)+PAD,fy=m2p(f.y)+PAD,fwp=m2p(fw),fdp=m2p(fd),isSel=f.id===pSel;
+    o+=`<g data-fid="${f.id}" style="cursor:move">`;
+    o+=`<rect x="${fx}" y="${fy}" width="${fwp}" height="${fdp}" fill="${f.fill}" stroke="${isSel?'#BA7517':'#6B5B45'}" stroke-width="${isSel?2.5:1.5}" stroke-dasharray="${f.dash?'5,3':'none'}" rx="2"/>`;
+    o+=furnDetail(f,fx,fy,fwp,fdp);
+    const lfs=Math.max(8,Math.min(12,fwp/(f.n.length+1)*1.5));
+    o+=`<text x="${fx+fwp/2}" y="${fy+fdp/2+4}" text-anchor="middle" font-size="${lfs}" fill="#2E1F0A" font-family="sans-serif" font-weight="500">${f.n}</text>`;
+    o+=dimH(fx,fy-22,fx+fwp,fy-22,fWlbl(f),fy);
+    o+=dimV(fx+fwp+22,fy,fx+fwp+22,fy+fdp,fDlbl(f),fx+fwp);
+    o+=`</g>`;
+  });
+
+  const sbX=PAD,sbY=H-22,sbL=m2p(1);
+  o+=`<g><rect x="${sbX}" y="${sbY-4}" width="${sbL}" height="6" fill="none" stroke="#666" stroke-width="1"/><rect x="${sbX}" y="${sbY-4}" width="${sbL/2}" height="6" fill="#888"/><text x="${sbX}" y="${sbY+10}" font-size="9" fill="#666" font-family="monospace">0</text><text x="${sbX+sbL/2}" y="${sbY+10}" font-size="9" fill="#666" font-family="monospace" text-anchor="middle">0.5m</text><text x="${sbX+sbL}" y="${sbY+10}" font-size="9" fill="#666" font-family="monospace" text-anchor="end">1m</text></g>`;
+  svg.innerHTML=o;
+}
+
+const planSvg=document.getElementById('planSvg');
+planSvg.addEventListener('mousedown',e=>{
+  const fg=e.target.closest('[data-fid]');
+  if(fg){e.preventDefault();const fid=fg.dataset.fid;pSel=fid;const f=pFurn.find(x=>x.id===fid);if(!f)return;const pt=svgPt(e);pDrag={id:fid,ox:pt.x-f.x,oy:pt.y-f.y};pRender();updPSel();setSTab('psel',document.querySelectorAll('.stab')[2]);}
+  else if(!e.target.closest('[data-rid]')&&(e.target===planSvg)){pSel=null;pRender();updPSel();}
+});
+planSvg.addEventListener('mousemove',e=>{if(!pDrag)return;const f=pFurn.find(x=>x.id===pDrag.id);if(!f)return;const pt=svgPt(e);f.x=snp(pt.x-pDrag.ox);f.y=snp(pt.y-pDrag.oy);pRender();});
+planSvg.addEventListener('mouseup',()=>{if(pDrag){pDrag=null;updPSel();}});
+planSvg.addEventListener('mouseleave',()=>{pDrag=null;});
+function svgPt(e){const rect=planSvg.getBoundingClientRect();return{x:p2m(e.clientX-rect.left-PAD),y:p2m(e.clientY-rect.top-PAD)};}
+
+document.getElementById('pDate').value=new Date().toISOString().slice(0,10);
+document.getElementById('scBadge').textContent=`1:${Math.round(1000/(pSc*0.265))}`;
+updRList();pRender();
+
+/* ===== VISTA 3D ===== */
+(function(){
+const VS=`attribute vec3 aPos;attribute vec3 aNorm;attribute vec3 aCol;uniform mat4 uMVP;uniform mat4 uM;varying vec3 vNorm;varying vec3 vCol;void main(){vNorm=normalize(mat3(uM)*aNorm);vCol=aCol;gl_Position=uMVP*vec4(aPos,1.0);}`;
+const FS=`precision mediump float;varying vec3 vNorm;varying vec3 vCol;void main(){vec3 L=normalize(vec3(1.,2.,1.5));float d=max(dot(vNorm,L),0.);vec3 L2=normalize(vec3(-1.,1.,-1.));float d2=max(dot(vNorm,L2),0.)*.3;gl_FragColor=vec4(vCol*(0.35+d*.65+d2),1.);}`;
+let gl3,prog3,posB3,normB3,colB3,uMVP3,uM3,aPos3,aNorm3,aCol3;
+let v3rooms=[],v3furns=[],v3objs=[],v3showW=true,v3showC=true;
+let v3theta=Math.PI/5,v3phi=Math.PI/4,v3dist=12,v3tx=0,v3ty=0,v3tz=0;
+let v3inited=false,v3furnOff=0;
+const RCOLS=['#BA7517','#185FA5','#27500A','#8B3565','#0F6E56','#993C1D'];
+const V3FOBS={mb:{n:'Mueble bajo',w:.6,hh:.87,d:.55,col:'#C8B49A',top:'#D8C8B0'},ma:{n:'Mueble alto',w:.6,hh:2.1,d:.32,col:'#D8CEC0',top:'#E0D8CC'},isla:{n:'Isla',w:1.2,hh:.9,d:.9,col:'#B8A888',top:'#C8B898'},refri:{n:'Refri',w:.7,hh:1.8,d:.7,col:'#C8D4DC',top:'#D0DCE4'},estufa:{n:'Estufa',w:.6,hh:.87,d:.6,col:'#888',top:'#666'},camad:{n:'Cama doble',w:1.4,hh:.55,d:2.0,col:'#8090A8',top:'#B0BED0'},camaq:{n:'Cama queen',w:1.6,hh:.55,d:2.0,col:'#8090A8',top:'#B0BED0'},closet3d:{n:'Closet',w:1.2,hh:2.2,d:.6,col:'#A89878',top:'#B8A888'},velador:{n:'Velador',w:.5,hh:.6,d:.5,col:'#B0A090',top:'#C0B0A0'},sofa:{n:'Sofá 3p',w:2.1,hh:.85,d:.9,col:'#8878A8',top:'#A898C0'},mesa:{n:'Mesa',w:1.2,hh:.75,d:.8,col:'#A08060',top:'#B09070'},tv:{n:'Mueble TV',w:1.5,hh:.5,d:.45,col:'#505868',top:'#60687A'},inodoro:{n:'Inodoro',w:.38,hh:.45,d:.65,col:'#D0E8E8',top:'#E0F4F4'},ducha:{n:'Ducha',w:.9,hh:.05,d:.9,col:'#B0D4D8',top:'#C0E4E8'},tina:{n:'Bañera',w:.7,hh:.55,d:1.6,col:'#B0D8DC',top:'#C0E8EC'}};
+
+function v3init(){
+  const canvas=document.getElementById('c3d');if(!canvas)return false;
+  gl3=canvas.getContext('webgl',{antialias:true})||canvas.getContext('experimental-webgl');if(!gl3)return false;
+  function mkS(t,s){const sh=gl3.createShader(t);gl3.shaderSource(sh,s);gl3.compileShader(sh);return sh;}
+  prog3=gl3.createProgram();gl3.attachShader(prog3,mkS(gl3.VERTEX_SHADER,VS));gl3.attachShader(prog3,mkS(gl3.FRAGMENT_SHADER,FS));gl3.linkProgram(prog3);gl3.useProgram(prog3);
+  aPos3=gl3.getAttribLocation(prog3,'aPos');aNorm3=gl3.getAttribLocation(prog3,'aNorm');aCol3=gl3.getAttribLocation(prog3,'aCol');
+  uMVP3=gl3.getUniformLocation(prog3,'uMVP');uM3=gl3.getUniformLocation(prog3,'uM');
+  posB3=gl3.createBuffer();normB3=gl3.createBuffer();colB3=gl3.createBuffer();
+  gl3.enable(gl3.DEPTH_TEST);gl3.enable(gl3.CULL_FACE);gl3.clearColor(.07,.08,.12,1);
+  // mouse
+  canvas.addEventListener('mousedown',e=>{v3mouse.down=true;v3mouse.lx=e.clientX;v3mouse.ly=e.clientY;});
+  canvas.addEventListener('mouseup',()=>{v3mouse.down=false;});
+  canvas.addEventListener('mousemove',e=>{if(!v3mouse.down)return;const dx=e.clientX-v3mouse.lx,dy=e.clientY-v3mouse.ly;if(e.shiftKey){v3tx-=dx*.015*v3dist/8;v3ty+=dy*.015*v3dist/8;}else{v3theta-=dx*.008;v3phi=Math.max(.05,Math.min(Math.PI/2-.01,v3phi+dy*.006));}v3mouse.lx=e.clientX;v3mouse.ly=e.clientY;v3render();});
+  canvas.addEventListener('wheel',e=>{v3dist=Math.max(2,Math.min(40,v3dist+e.deltaY*.02));v3render();},{passive:true});
+  new ResizeObserver(()=>v3render()).observe(canvas.parentElement);
+  return true;
+}
+const v3mouse={down:false,lx:0,ly:0};
+
+function v3mat4(){return new Float32Array(16);}
+function v3id(m){for(let i=0;i<16;i++)m[i]=0;m[0]=m[5]=m[10]=m[15]=1;return m;}
+function v3mul(a,b){const c=v3mat4();for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[i+k*4]*b[k+j*4];c[i+j*4]=s;}return c;}
+function v3persp(fov,asp,n,f){const t=Math.tan(fov/2),m=v3mat4();m[0]=1/(asp*t);m[5]=1/t;m[10]=-(f+n)/(f-n);m[11]=-1;m[14]=-2*f*n/(f-n);return m;}
+function v3look(ex,ey,ez,tx,ty,tz){let fx=tx-ex,fy=ty-ey,fz=tz-ez;const fl=Math.sqrt(fx*fx+fy*fy+fz*fz);fx/=fl;fy/=fl;fz/=fl;let rx=fy*0-fz*1,ry=fz*0-fx*0,rz=fx*1-fy*0;const rl=Math.sqrt(rx*rx+ry*ry+rz*rz);rx/=rl;ry/=rl;rz/=rl;const ux=ry*fz-rz*fy,uy=rz*fx-rx*fz,uz=rx*fy-ry*fx;const m=v3mat4();m[0]=rx;m[4]=ry;m[8]=rz;m[1]=ux;m[5]=uy;m[9]=uz;m[2]=-fx;m[6]=-fy;m[10]=-fz;m[12]=-(rx*ex+ry*ey+rz*ez);m[13]=-(ux*ex+uy*ey+uz*ez);m[14]=(fx*ex+fy*ey+fz*ez);m[15]=1;return m;}
+function v3tr(x,y,z){const m=v3id(v3mat4());m[12]=x;m[13]=y;m[14]=z;return m;}
+function v3hex(h){const r=parseInt(h.slice(1,3),16)/255,g=parseInt(h.slice(3,5),16)/255,b=parseInt(h.slice(5,7),16)/255;return[r,g,b];}
+function v3box(w,h,d,col){
+  const[r,g,b]=typeof col==='string'?v3hex(col):col;
+  const hw=w/2,hh=h/2,hd=d/2;
+  const faces=[[-hw,-hh,hd,hw,-hh,hd,hw,hh,hd,-hw,hh,hd,0,0,1],[hw,-hh,-hd,-hw,-hh,-hd,-hw,hh,-hd,hw,hh,-hd,0,0,-1],[-hw,-hh,-hd,-hw,-hh,hd,-hw,hh,hd,-hw,hh,-hd,-1,0,0],[hw,-hh,hd,hw,-hh,-hd,hw,hh,-hd,hw,hh,hd,1,0,0],[-hw,hh,hd,hw,hh,hd,hw,hh,-hd,-hw,hh,-hd,0,1,0],[-hw,-hh,-hd,hw,-hh,-hd,hw,-hh,hd,-hw,-hh,hd,0,-1,0]];
+  const pos=[],norm=[],color=[];
+  faces.forEach(f=>{const nx=f[12],ny=f[13],nz=f[14];[[0,1,2],[0,2,3]].forEach(tri=>tri.forEach(i=>{pos.push(f[i*3],f[i*3+1],f[i*3+2]);norm.push(nx,ny,nz);color.push(r,g,b);}));});
+  return{pos,norm,color};
+}
+function v3merge(gs){const pos=[],norm=[],color=[];gs.forEach(g=>{pos.push(...g.pos);norm.push(...g.norm);color.push(...g.color);});return{pos,norm,color};}
+function v3upload(geo){gl3.bindBuffer(gl3.ARRAY_BUFFER,posB3);gl3.bufferData(gl3.ARRAY_BUFFER,new Float32Array(geo.pos),gl3.STATIC_DRAW);gl3.bindBuffer(gl3.ARRAY_BUFFER,normB3);gl3.bufferData(gl3.ARRAY_BUFFER,new Float32Array(geo.norm),gl3.STATIC_DRAW);gl3.bindBuffer(gl3.ARRAY_BUFFER,colB3);gl3.bufferData(gl3.ARRAY_BUFFER,new Float32Array(geo.color),gl3.STATIC_DRAW);}
+function v3bind(buf,loc,sz){gl3.bindBuffer(gl3.ARRAY_BUFFER,buf);gl3.vertexAttribPointer(loc,sz,gl3.FLOAT,false,0,0);gl3.enableVertexAttribArray(loc);}
+
+function v3draw(geo,tx,ty,tz){
+  const model=v3tr(tx,ty,tz),mvp=v3mul(v3vp,model);
+  v3upload(geo);v3bind(posB3,aPos3,3);v3bind(normB3,aNorm3,3);v3bind(colB3,aCol3,3);
+  gl3.uniformMatrix4fv(uMVP3,false,mvp);gl3.uniformMatrix4fv(uM3,false,model);
+  gl3.drawArrays(gl3.TRIANGLES,0,geo.pos.length/3);
+}
+let v3vp=v3mat4();
+
+function v3rebuild(){
+  v3objs=[];
+  v3rooms.forEach(r=>{
+    const wc=v3hex(r.col),flc=[.72,.68,.60],cc=[.9,.9,.9],wt=.12;
+    v3objs.push({geo:v3box(r.w,.02,r.h,flc),tx:r.ox+r.w/2,ty:-.01,tz:r.oz+r.h/2,tag:'floor'});
+    v3objs.push({geo:v3box(r.w,.02,r.h,cc),tx:r.ox+r.w/2,ty:r.alt+.01,tz:r.oz+r.h/2,tag:'ceil'});
+    v3objs.push({geo:v3box(r.w+wt*2,r.alt,wt,wc),tx:r.ox+r.w/2,ty:r.alt/2,tz:r.oz-wt/2,tag:'wall'});
+    v3objs.push({geo:v3box(r.w+wt*2,r.alt,wt,wc),tx:r.ox+r.w/2,ty:r.alt/2,tz:r.oz+r.h+wt/2,tag:'wall'});
+    v3objs.push({geo:v3box(wt,r.alt,r.h,wc),tx:r.ox-wt/2,ty:r.alt/2,tz:r.oz+r.h/2,tag:'wall'});
+    v3objs.push({geo:v3box(wt,r.alt,r.h,wc),tx:r.ox+r.w+wt/2,ty:r.alt/2,tz:r.oz+r.h/2,tag:'wall'});
+  });
+  v3furns.forEach(f=>{
+    const body=v3box(f.w,f.hh*.85,f.d,f.col);
+    const top=v3box(f.w*.96,f.hh*.15,f.d*.96,f.top);
+    for(let i=1;i<top.pos.length;i+=3)top.pos[i]+=f.hh*.85/2+f.hh*.15/2;
+    v3objs.push({geo:v3merge([body,top]),tx:f.ox+f.w/2,ty:f.hh/2,tz:f.oz+f.d/2,tag:'furn'});
+  });
+  v3render();
+}
+
+function v3render(){
+  const canvas=document.getElementById('c3d');if(!canvas||!gl3)return;
+  const cw=canvas.parentElement;canvas.width=cw.clientWidth;canvas.height=cw.clientHeight;
+  gl3.viewport(0,0,canvas.width,canvas.height);gl3.clear(gl3.COLOR_BUFFER_BIT|gl3.DEPTH_BUFFER_BIT);
+  const asp=canvas.width/canvas.height,proj=v3persp(Math.PI/3.2,asp,.1,200);
+  const ex=v3tx+v3dist*Math.cos(v3phi)*Math.sin(v3theta),ey=v3ty+v3dist*Math.sin(v3phi),ez=v3tz+v3dist*Math.cos(v3phi)*Math.cos(v3theta);
+  v3vp=v3mul(proj,v3look(ex,ey,ez,v3tx,v3ty,v3tz));
+  // grid
+  for(let i=-12;i<=12;i++){const lg=v3box(.008,.001,24,[.28,.26,.22]);v3draw(lg,i,0,0);}
+  v3objs.forEach(o=>{if(o.tag==='wall'&&!v3showW)return;if(o.tag==='ceil'&&!v3showC)return;v3draw(o.geo,o.tx,o.ty,o.tz);});
+}
+
+window.v3addRoom=function(){
+  const name=document.getElementById('v3rName').value||'Ambiente',w=parseFloat(document.getElementById('v3rW').value)||4,h=parseFloat(document.getElementById('v3rH').value)||3,alt=parseFloat(document.getElementById('v3rAlt').value)||2.6,col=document.getElementById('v3rCol').value;
+  const last=v3rooms[v3rooms.length-1],ox=last?last.ox+last.w+0.3:0;
+  v3rooms.push({name,w,h,alt,col,ox,oz:0});v3rebuild();v3updList();
+};
+window.v3addObj=function(key){
+  const def=V3FOBS[key];if(!def)return;
+  const ox=v3rooms.length?v3rooms[0].ox+.5:0.5,oz=v3rooms.length?v3rooms[0].oz+.5:0.5;
+  v3furns.push({...def,ox:ox+v3furnOff%2.5,oz:oz+(Math.floor(v3furnOff/2.5))*1.2});v3furnOff+=.6;v3rebuild();
+};
+window.v3setView=function(m,btn){
+  document.querySelectorAll('[id^=v3btn]').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  if(m==='persp'){v3theta=Math.PI/5;v3phi=Math.PI/4;v3dist=12;v3tx=v3ty=v3tz=0;}
+  else if(m==='top'){v3phi=Math.PI/2-.01;v3theta=0;v3dist=14;}
+  else if(m==='front'){v3phi=.01;v3theta=0;v3dist=12;}
+  v3render();
+};
+window.v3resetCam=function(){v3theta=Math.PI/5;v3phi=Math.PI/4;v3dist=12;v3tx=v3ty=v3tz=0;v3render();};
+window.v3toggleWalls=function(){v3showW=!v3showW;const b=document.getElementById('v3btnW');b.textContent='Muros '+(v3showW?'ON':'OFF');b.className='v3d-btn'+(v3showW?' on':'');v3render();};
+window.v3toggleCeil=function(){v3showC=!v3showC;const b=document.getElementById('v3btnC');b.textContent='Techo '+(v3showC?'ON':'OFF');b.className='v3d-btn'+(v3showC?' on':'');v3render();};
+function v3updList(){
+  const el=document.getElementById('v3rList');if(!el)return;
+  el.innerHTML=v3rooms.map((r,i)=>`<div class="v3d-ritem"><span><span class="cbadge" style="background:${RCOLS[i%RCOLS.length]}"></span>${r.name} <span style="font-size:10px;opacity:.6">${r.w}×${r.h}m</span></span><button onclick="v3rooms.splice(${i},1);v3rebuild();v3updList()" style="border:none;background:none;cursor:pointer;color:#A32D2D;font-size:13px">×</button></div>`).join('');
+}
+
+// init when 3D tab is clicked
+const origGoTab=window.goTab;
+window.goTab=function(id,btn){
+  origGoTab(id,btn);
+  if(id==='vista3d'&&!v3inited){v3inited=v3init();v3rebuild();}
+  else if(id==='vista3d'){v3render();}
+};
+})();
+
+</script>
+</body>
+</html>
