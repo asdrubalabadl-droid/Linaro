@@ -281,6 +281,13 @@ footer span{color:var(--gold);font-weight:500}
           <input type="checkbox" id="pDblFondo" style="width:auto;flex-shrink:0">
           <label for="pDblFondo" style="font-size:12px;cursor:pointer;color:var(--text)">Incluir sólido (doble fondo)</label>
         </div>
+        <div class="field"><label>Espesor trasera (fondo)</label>
+          <select id="pTrasera">
+            <option value="6">MDF 6mm (estándar)</option>
+            <option value="10">MDF 10mm</option>
+            <option value="18">MDF 18mm (igual al tablero)</option>
+          </select>
+        </div>
         <div class="field"><label>Tipo de tapacanto</label>
           <select id="pTcType">
             <option value="PVC 0.4mm">PVC 0.4mm (económico)</option>
@@ -619,6 +626,7 @@ function calcCuts(){
   const golaB=document.getElementById('pGolaB').value;
   const golaS=document.getElementById('pGolaS').value;
   const tcType=document.getElementById('pTcType').value;
+  const traseraT=parseInt(document.getElementById('pTrasera').value)||6;
   const matId=document.getElementById('pMat').value;
   const matObj=melaminicos.find(m=>m.id===matId)||null;
   const ml=matObj?`${matObj.nombre} ${matObj.espesor}mm`:`MDF ${T}mm`;
