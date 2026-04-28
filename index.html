@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Linaro — Presupuestación Arquitectónica</title>
 <meta name="description" content="Linaro — Presupuestación profesional de cocinas, closets, obras civiles, despiece de carpintería, melamínicos y planos con muebles">
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <style>
@@ -142,6 +145,14 @@ footer span{color:var(--gold);font-weight:500}
 .v3d-btn-gold{background:var(--gold-l);border-color:var(--gold);color:var(--gold);font-weight:500}.v3d-btn-gold:hover{background:var(--gold-m)}
 .v3d-btn.on{background:var(--gold-l);border-color:var(--gold);color:var(--gold);font-weight:500}
 
+/* FIREBASE SYNC */
+.sync-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--gold-l);z-index:9999;transition:opacity .4s}
+.sync-bar-fill{height:100%;background:var(--gold);width:0%;transition:width .4s}
+.online-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:99px;font-weight:500}
+.online-badge.connected{background:#EAF3DE;color:#27500A}
+.online-badge.offline{background:#FCEBEB;color:#A32D2D}
+.online-badge.syncing{background:#FAEEDA;color:#BA7517}
+.online-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
 /* DATABASE */
 .db-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:16px}
 .db-card{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:box-shadow .15s}
@@ -185,8 +196,12 @@ footer span{color:var(--gold);font-weight:500}
     <button class="nt"     onclick="goTab('plans',this)">Planos</button>
     <button class="nt"     onclick="goTab('vista3d',this)">Vista 3D</button>
     <button class="nt"     onclick="goTab('database',this)">📁 Proyectos</button>
+    <div style="margin-left:auto;flex-shrink:0">
+    <span class="online-badge offline" id="syncBadge"><span class="online-dot"></span><span id="syncText">Conectando…</span></span>
   </div>
+</div>
 </nav>
+<div class="sync-bar"><div class="sync-bar-fill" id="syncFill"></div></div>
 
 <div class="page">
 
@@ -1081,7 +1096,345 @@ window.goTab=function(id,btn){
 })();
 
 
-/* ===== BASE DE DATOS (localStorage) ===== */
+/* ===== FIREBASE + localStorage ===== */
+
+// ── Firebase init ──────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyBjjJMG04Uwo5Pe89Fu3ero_afILIpIAjg",
+  authDomain: "linaroarq.firebaseapp.com",
+  databaseURL: "https://linaroarq-default-rtdb.firebaseio.com",
+  projectId: "linaroarq",
+  storageBucket: "linaroarq.firebasestorage.app",
+  messagingSenderId: "442475602899",
+  appId: "1:442475602899:web:f466e47e6518b283d10526",
+  measurementId: "G-FV647WY3DD"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+let fbConnected = false;
+
+// ── Connection status ──────────────────────────────────────────────────────
+db.ref('.info/connected').on('value', snap => {
+  fbConnected = snap.val() === true;
+  const badge = document.getElementById('syncBadge');
+  const txt   = document.getElementById('syncText');
+  if (!badge) return;
+  if (fbConnected) {
+    badge.className = 'online-badge connected';
+    txt.textContent = 'Firebase conectado';
+  } else {
+    badge.className = 'online-badge offline';
+    txt.textContent = 'Sin conexión';
+  }
+});
+
+function setSyncing(on) {
+  const badge = document.getElementById('syncBadge');
+  const fill  = document.getElementById('syncFill');
+  if (!badge) return;
+  if (on) {
+    badge.className = 'online-badge syncing';
+    document.getElementById('syncText').textContent = 'Guardando…';
+    if (fill) { fill.style.width='100%'; }
+  } else {
+    badge.className = fbConnected ? 'online-badge connected' : 'online-badge offline';
+    document.getElementById('syncText').textContent = fbConnected ? 'Firebase conectado' : 'Sin conexión';
+    if (fill) { setTimeout(() => { fill.style.width='0%'; }, 600); }
+  }
+}
+
+// ── localStorage helpers ───────────────────────────────────────────────────
+function dbGetAll() {
+  try { return JSON.parse(localStorage.getItem(DB_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+function dbSaveAllLocal(projects) {
+  localStorage.setItem(DB_KEY, JSON.stringify(projects));
+}
+
+// ── Save to Firebase ───────────────────────────────────────────────────────
+async function fbSaveProject(snap) {
+  if (!fbConnected) return false;
+  setSyncing(true);
+  try {
+    const key = snap.projectName.replace(/[.#$\[\]]/g, '_');
+    await db.ref('projects/' + key).set(snap);
+    setSyncing(false);
+    return true;
+  } catch(e) {
+    console.error('Firebase save error:', e);
+    setSyncing(false);
+    return false;
+  }
+}
+
+// ── Load all from Firebase ─────────────────────────────────────────────────
+async function fbLoadAll() {
+  if (!fbConnected) return null;
+  try {
+    const snap = await db.ref('projects').get();
+    if (!snap.exists()) return [];
+    const data = snap.val();
+    return Object.values(data).sort((a,b)=>
+      new Date(b.savedAt||0) - new Date(a.savedAt||0));
+  } catch(e) { return null; }
+}
+
+// ── Snapshot current state ─────────────────────────────────────────────────
+function dbSnapshot() {
+  return {
+    version: 3,
+    savedAt: new Date().toISOString(),
+    projectName: document.getElementById('pName').value || 'Sin nombre',
+    client:   document.getElementById('pClient').value  || '',
+    location: document.getElementById('pLoc').value     || '',
+    date:     document.getElementById('pDate').value    || '',
+    currency: document.getElementById('cur').value,
+    iva:      document.getElementById('iva').value,
+    utility:  document.getElementById('util').value,
+    disM2:    document.getElementById('disM2').value,
+    disTarifa:document.getElementById('disTarifa').value,
+    disDesc:  document.getElementById('disDesc').value,
+    items:       JSON.parse(JSON.stringify(items)),
+    pieces:      JSON.parse(JSON.stringify(pieces)),
+    melaminicos: JSON.parse(JSON.stringify(melaminicos)),
+    pRooms:      JSON.parse(JSON.stringify(pRooms)),
+    pFurn:       JSON.parse(JSON.stringify(pFurn)),
+  };
+}
+
+// ── Restore snapshot ───────────────────────────────────────────────────────
+function dbRestore(snap) {
+  document.getElementById('pName').value     = snap.projectName || '';
+  document.getElementById('pClient').value   = snap.client      || '';
+  document.getElementById('pLoc').value      = snap.location    || '';
+  document.getElementById('pDate').value     = snap.date        || '';
+  document.getElementById('cur').value       = snap.currency    || 'USD';
+  document.getElementById('iva').value       = snap.iva         || '16';
+  document.getElementById('util').value      = snap.utility     || '0';
+  document.getElementById('disM2').value     = snap.disM2       || '0';
+  document.getElementById('disTarifa').value = snap.disTarifa   || '6';
+  document.getElementById('disDesc').value   = snap.disDesc     || 'Honorarios de diseño';
+  items       = snap.items       || [];
+  pieces      = snap.pieces      || [];
+  melaminicos = snap.melaminicos || [];
+  pRooms      = snap.pRooms      || [];
+  pFurn       = snap.pFurn       || [];
+  renderTbl(); renderCuts(); updateMatSelect();
+  updRList(); pRender(); recalc(); recalcDis();
+}
+
+// ── Save current project ───────────────────────────────────────────────────
+async function dbSaveCurrent() {
+  const snap = dbSnapshot();
+  const customName = (document.getElementById('dbProjName').value || '').trim();
+  if (customName) snap.projectName = customName;
+  // local save
+  const projects = dbGetAll();
+  const idx = projects.findIndex(p => p.projectName === snap.projectName);
+  if (idx >= 0) {
+    if (!confirm(`Ya existe "${snap.projectName}". ¿Reemplazar?`)) return;
+    projects[idx] = snap;
+  } else {
+    projects.unshift(snap);
+  }
+  dbSaveAllLocal(projects);
+  // firebase save
+  const ok = await fbSaveProject(snap);
+  dbRender();
+  toast(`✓ "${snap.projectName}" guardado${ok ? ' en Firebase ☁️' : ' localmente'}`);
+  showAutosave(`"${snap.projectName}" guardado${ok ? ' en Firebase ☁️' : ' localmente'}`);
+}
+
+// ── Load project ───────────────────────────────────────────────────────────
+async function dbLoad(idx) {
+  const projects = await dbGetMerged();
+  const snap = projects[idx];
+  if (!snap) return;
+  if (!confirm(`¿Cargar "${snap.projectName}"? Se reemplazará lo que tengas abierto.`)) return;
+  dbRestore(snap);
+  toast(`✓ "${snap.projectName}" cargado`);
+  document.querySelectorAll('.nt').forEach(b => b.classList.remove('on'));
+  document.querySelector('.nt').classList.add('on');
+  goTab('budget', document.querySelector('.nt'));
+}
+
+// ── Delete project ─────────────────────────────────────────────────────────
+async function dbDelete(idx) {
+  const projects = await dbGetMerged();
+  const snap = projects[idx];
+  if (!snap || !confirm(`¿Eliminar "${snap.projectName}"? No se puede deshacer.`)) return;
+  // local
+  const local = dbGetAll().filter(p => p.projectName !== snap.projectName);
+  dbSaveAllLocal(local);
+  // firebase
+  if (fbConnected) {
+    const key = snap.projectName.replace(/[.#$\[\]]/g, '_');
+    await db.ref('projects/' + key).remove();
+  }
+  dbRender(); toast('Proyecto eliminado');
+}
+
+// ── Duplicate ──────────────────────────────────────────────────────────────
+async function dbDuplicate(idx) {
+  const projects = await dbGetMerged();
+  const snap = JSON.parse(JSON.stringify(projects[idx]));
+  snap.projectName = snap.projectName + ' (copia)';
+  snap.savedAt = new Date().toISOString();
+  const local = dbGetAll();
+  local.unshift(snap);
+  dbSaveAllLocal(local);
+  await fbSaveProject(snap);
+  dbRender(); toast(`✓ Copia: "${snap.projectName}"`);
+}
+
+// ── Merge local + firebase ─────────────────────────────────────────────────
+async function dbGetMerged() {
+  const local = dbGetAll();
+  const remote = await fbLoadAll();
+  if (!remote) return local;
+  // merge: remote wins on conflict
+  const map = {};
+  local.forEach(p => { map[p.projectName] = p; });
+  remote.forEach(p => { map[p.projectName] = p; }); // remote overwrites
+  return Object.values(map).sort((a,b) =>
+    new Date(b.savedAt||0) - new Date(a.savedAt||0));
+}
+
+// ── Export all ────────────────────────────────────────────────────────────
+async function dbExportAll() {
+  const projects = await dbGetMerged();
+  if (!projects.length) { toast('No hay proyectos para exportar'); return; }
+  const blob = new Blob([JSON.stringify(projects,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `linaro_proyectos_${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+  toast(`✓ ${projects.length} proyecto(s) exportado(s)`);
+}
+
+// ── Export one ────────────────────────────────────────────────────────────
+async function dbExportOne(idx) {
+  const projects = await dbGetMerged();
+  const snap = projects[idx]; if (!snap) return;
+  const blob = new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `linaro_${snap.projectName.replace(/\s+/g,'_')}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+  toast(`✓ "${snap.projectName}" exportado`);
+}
+
+// ── Import ────────────────────────────────────────────────────────────────
+async function dbImport(event) {
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      let data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) data = [data];
+      const local = dbGetAll();
+      let added = 0;
+      for (const snap of data) {
+        if (!snap.projectName) continue;
+        const i = local.findIndex(p => p.projectName === snap.projectName);
+        if (i >= 0) local[i] = snap; else { local.unshift(snap); added++; }
+        await fbSaveProject(snap);
+      }
+      dbSaveAllLocal(local);
+      dbRender();
+      toast(`✓ ${added} proyecto(s) importado(s)`);
+    } catch(err) { toast('Error al leer el archivo JSON'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ── Render project grid ───────────────────────────────────────────────────
+async function dbRender() {
+  const grid = document.getElementById('dbGrid'); if (!grid) return;
+  grid.innerHTML = '<div class="db-empty" style="padding:30px"><div style="font-size:20px">⏳</div><p>Cargando proyectos…</p></div>';
+  const projects = await dbGetMerged();
+  if (!projects.length) {
+    grid.innerHTML = '<div class="db-empty"><div style="font-size:32px;margin-bottom:10px">📁</div><p style="font-size:14px">No hay proyectos guardados aún.</p><p style="font-size:12px;margin-top:6px">Completa el presupuesto y haz clic en "💾 Guardar".</p></div>';
+    return;
+  }
+  grid.innerHTML = projects.map((p,i) => {
+    const date = p.savedAt ? new Date(p.savedAt).toLocaleDateString('es-VE',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    const sub = (p.items||[]).reduce((s,it)=>s+(parseFloat(it.q)||0)*(parseFloat(it.p)||0),0);
+    const isFirebase = fbConnected;
+    return `<div class="db-card">
+      <div class="db-card-head">
+        <div>
+          <div style="font-size:15px;font-weight:600;margin-bottom:4px">${esc(p.projectName||'Sin nombre')}</div>
+          ${p.client   ? `<div style="font-size:12px;color:var(--text2)">👤 ${esc(p.client)}</div>` : ''}
+          ${p.location ? `<div style="font-size:12px;color:var(--text2)">📍 ${esc(p.location)}</div>` : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <span class="db-badge">${p.currency||'USD'}</span>
+          <span style="font-size:10px;color:var(--text3)">${isFirebase?'☁️ Firebase':'💾 Local'}</span>
+        </div>
+      </div>
+      <div class="db-card-body">
+        <div class="db-stat">Ítems presupuesto: <span>${(p.items||[]).length}</span></div>
+        <div class="db-stat">Módulos despiece: <span>${(p.pieces||[]).length}</span></div>
+        <div class="db-stat">Melamínicos: <span>${(p.melaminicos||[]).length}</span></div>
+        <div class="db-stat">Ambientes plano: <span>${(p.pRooms||[]).length}</span></div>
+        ${sub>0?`<div class="db-stat" style="margin-top:6px">Total: <span style="color:var(--gold)">${p.currency||'USD'} ${fmt(sub)}</span></div>`:''}
+        <div style="font-size:11px;color:var(--text3);margin-top:8px">📅 ${date}</div>
+      </div>
+      <div class="db-card-foot">
+        <button class="btn btn-gold btn-sm" onclick="dbLoad(${i})">📂 Cargar</button>
+        <button class="btn btn-sm" onclick="dbDuplicate(${i})">⎘ Duplicar</button>
+        <button class="btn btn-sm" onclick="dbExportOne(${i})">⬇ JSON</button>
+        <button class="btn btn-sm btn-del" onclick="dbDelete(${i})">× Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Autosave every 90s ────────────────────────────────────────────────────
+function dbAutoSave() {
+  if (!items.length && !pieces.length && !melaminicos.length) return;
+  const snap = dbSnapshot();
+  snap.projectName = (snap.projectName && snap.projectName !== 'Sin nombre')
+    ? snap.projectName : 'Autoguardado';
+  localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(snap));
+  if (fbConnected) fbSaveProject(snap);
+}
+setInterval(dbAutoSave, 90000);
+
+// ── Show autosave message ─────────────────────────────────────────────────
+function showAutosave(msg) {
+  const bar = document.getElementById('autosaveBar');
+  const txt = document.getElementById('autosaveMsg');
+  if (!bar || !txt) return;
+  txt.textContent = msg || 'Guardado automáticamente';
+  bar.style.display = 'flex';
+  setTimeout(() => { bar.style.display = 'none'; }, 5000);
+}
+
+// ── Restore autosave on load ──────────────────────────────────────────────
+window.addEventListener('load', () => {
+  try {
+    const as = localStorage.getItem(AUTOSAVE_KEY);
+    if (as) {
+      const snap = JSON.parse(as);
+      if ((snap.items&&snap.items.length) || (snap.melaminicos&&snap.melaminicos.length)) {
+        dbRestore(snap);
+        showAutosave('Sesión anterior restaurada automáticamente');
+      }
+    }
+  } catch(e) {}
+  setTimeout(dbRender, 1500); // wait for firebase connection
+});
+
+// ── Override goTab ────────────────────────────────────────────────────────
+const _origGoTab2 = window.goTab;
+window.goTab = function(id, btn) {
+  _origGoTab2(id, btn);
+  if (id === 'database') dbRender();
+};
 const DB_KEY = 'linaro_projects_v1';
 const AUTOSAVE_KEY = 'linaro_autosave_v1';
 
