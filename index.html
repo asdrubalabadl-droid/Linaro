@@ -98,6 +98,7 @@ td input:focus{background:var(--bg3);padding:2px 5px;border-radius:4px}
 .in-stock{background:var(--green-l);color:var(--green)}.no-stock{background:var(--red-l);color:var(--red)}
 .empty{text-align:center;padding:48px 20px;color:var(--text2)}
 .empty-icon{font-size:30px;margin-bottom:10px}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 .toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:var(--green-l);padding:11px 18px;border-radius:var(--r);font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:340px}
 .toast.show{opacity:1}
 footer{text-align:center;padding:32px;font-size:12px;color:var(--text3);border-top:.5px solid var(--border);background:var(--bg2)}
@@ -174,6 +175,35 @@ footer span{color:var(--gold);font-weight:500}
 .login-btn:active{transform:scale(.98)}
 .login-err{background:#FCEBEB;border:1px solid #F7C1C1;border-radius:8px;color:#A32D2D;font-size:13px;padding:10px 14px;margin-top:12px;display:none;text-align:left}
 .login-footer{font-size:11px;color:#bbb;margin-top:20px}
+/* LOGIN */
+.login-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.login-box{background:#fff;border-radius:20px;padding:44px 40px;width:100%;max-width:380px;box-shadow:0 24px 80px rgba(0,0,0,.4);text-align:center}
+.login-logo{width:56px;height:56px;background:#FAEEDA;border:1.5px solid #BA7517;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.login-title{font-size:26px;font-weight:700;color:#1a1a1a;letter-spacing:-.02em;margin-bottom:4px}
+.login-sub{font-size:13px;color:#888;margin-bottom:32px}
+.login-field{margin-bottom:16px;text-align:left}
+.login-field label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+.login-field input{width:100%;padding:12px 14px;border:1.5px solid #E0DDD8;border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s;background:#FAFAF8}
+.login-field input:focus{border-color:#BA7517;box-shadow:0 0 0 3px rgba(186,117,23,.12);background:#fff}
+.login-btn{width:100%;padding:13px;background:linear-gradient(135deg,#BA7517,#D4890A);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;transition:opacity .15s,transform .1s;letter-spacing:.01em}
+.login-btn:hover{opacity:.92;transform:translateY(-1px)}
+.login-btn:active{transform:translateY(0)}
+.login-error{background:#FFF0F0;border:1px solid #FFCCCC;border-radius:8px;padding:10px 14px;font-size:13px;color:#C0392B;margin-top:12px;display:none}
+.login-footer{font-size:11px;color:#BBB;margin-top:20px}
+/* LOGIN */
+.login-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a1206 0%,#2C1F08 50%,#1a1206 100%);display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:0}
+.login-box{background:#fff;border-radius:20px;padding:40px 44px;width:100%;max-width:400px;box-shadow:0 24px 80px rgba(0,0,0,.5);text-align:center}
+.login-logo{width:56px;height:56px;background:#FAEEDA;border:1.5px solid #BA7517;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.login-title{font-size:26px;font-weight:700;color:#1a1a1a;letter-spacing:-.03em;margin-bottom:4px}
+.login-sub{font-size:13px;color:#888;margin-bottom:28px}
+.login-field{margin-bottom:14px;text-align:left}
+.login-field label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em}
+.login-field input{width:100%;padding:11px 14px;border:1.5px solid #E0DDD8;border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s;color:#1a1a1a;background:#FAFAF8}
+.login-field input:focus{border-color:#BA7517;box-shadow:0 0 0 3px rgba(186,117,23,.12)}
+.login-btn{width:100%;padding:12px;background:#BA7517;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:6px;transition:background .15s;letter-spacing:.01em}
+.login-btn:hover{background:#A06010}
+.login-error{color:#A32D2D;font-size:13px;margin-top:10px;display:none;padding:8px 12px;background:#FCEBEB;border-radius:8px}
+.login-footer{font-size:11px;color:#CCC;margin-top:20px;text-align:center}
 /* FIREBASE SYNC */
 .sync-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--gold-l);z-index:9999;transition:opacity .4s}
 .sync-bar-fill{height:100%;background:var(--gold);width:0%;transition:width .4s}
@@ -259,6 +289,68 @@ footer span{color:var(--gold);font-weight:500}
     <div class="login-footer">Linaro 2025 - Solo acceso autorizado</div>
   </div>
 </div>
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
+        <rect x="2" y="2" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <rect x="11" y="2" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <rect x="2" y="11" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <rect x="11" y="11" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <line x1="5.5" y1="9" x2="5.5" y2="11" stroke="#BA7517" stroke-width="1.4"/>
+        <line x1="14.5" y1="9" x2="14.5" y2="11" stroke="#BA7517" stroke-width="1.4"/>
+        <line x1="9" y1="5.5" x2="11" y2="5.5" stroke="#BA7517" stroke-width="1.4"/>
+        <line x1="9" y1="14.5" x2="11" y2="14.5" stroke="#BA7517" stroke-width="1.4"/>
+      </svg>
+    </div>
+    <div class="login-title">Linaro</div>
+    <div class="login-sub">Presupuestación arquitectónica</div>
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" id="loginUser" placeholder="Ingresa tu usuario" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="loginPass" placeholder="Ingresa tu contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Iniciar sesión</button>
+    <div class="login-error" id="loginError">Usuario o contraseña incorrectos. Intenta de nuevo.</div>
+    <div class="login-footer">Linaro © 2025 — Todos los derechos reservados</div>
+  </div>
+</div>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay" class="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
+        <rect x="2" y="2" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <rect x="11" y="2" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <rect x="2" y="11" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <rect x="11" y="11" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <line x1="5.5" y1="9" x2="5.5" y2="11" stroke="#BA7517" stroke-width="1.4"/>
+        <line x1="14.5" y1="9" x2="14.5" y2="11" stroke="#BA7517" stroke-width="1.4"/>
+        <line x1="9" y1="5.5" x2="11" y2="5.5" stroke="#BA7517" stroke-width="1.4"/>
+        <line x1="9" y1="14.5" x2="11" y2="14.5" stroke="#BA7517" stroke-width="1.4"/>
+      </svg>
+    </div>
+    <div class="login-title">Linaro</div>
+    <div class="login-sub">Presupuestación arquitectónica</div>
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" id="loginUser" placeholder="Tu usuario" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Ingresar</button>
+    <div class="login-error" id="loginError">Usuario o contraseña incorrectos</div>
+  </div>
+  <div class="login-footer">Linaro © 2025 — Todos los derechos reservados</div>
+</div>
+
 <nav class="nav">
   <div class="nav-logo">
     <div class="logo-box">
@@ -1832,6 +1924,104 @@ function doLogin(){
   if(sessionStorage.getItem(LS_SESSION)==='1'){
     var ls = document.getElementById('loginScreen');
     if(ls) ls.style.display='none';
+  }
+})();
+
+
+/* ===== LOGIN ===== */
+const LOGIN_KEY = 'linaro_session_v1';
+const CORRECT_USER = 'Linaro';
+const CORRECT_PASS = 'Asdru20101999';
+
+function doLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const err  = document.getElementById('loginError');
+  if (user === CORRECT_USER && pass === CORRECT_PASS) {
+    // save session
+    sessionStorage.setItem(LOGIN_KEY, '1');
+    // hide overlay with fade
+    const overlay = document.getElementById('loginOverlay');
+    overlay.style.transition = 'opacity .5s';
+    overlay.style.opacity = '0';
+    setTimeout(() => { overlay.style.display = 'none'; }, 500);
+    err.style.display = 'none';
+  } else {
+    err.style.display = 'block';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+    // shake animation
+    const box = overlay ? overlay.querySelector('.login-box') : null;
+    if (box) {
+      box.style.animation = 'none';
+      box.style.transform = 'translateX(-8px)';
+      setTimeout(() => box.style.transform = 'translateX(8px)', 80);
+      setTimeout(() => box.style.transform = 'translateX(-5px)', 160);
+      setTimeout(() => box.style.transform = 'translateX(5px)', 240);
+      setTimeout(() => box.style.transform = 'translateX(0)',   320);
+    }
+  }
+}
+
+// check session on load
+(function checkSession() {
+  if (sessionStorage.getItem(LOGIN_KEY) === '1') {
+    const overlay = document.getElementById('loginOverlay');
+    if (overlay) overlay.style.display = 'none';
+  } else {
+    // focus user field
+    setTimeout(() => {
+      const u = document.getElementById('loginUser');
+      if (u) u.focus();
+    }, 300);
+  }
+})();
+
+/* ===== LOGIN ===== */
+const LOGIN_KEY = 'linaro_session';
+const VALID_USER = 'Linaro';
+const VALID_PASS = 'Asdru20101999';
+
+function doLogin(){
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+  if(u === VALID_USER && p === VALID_PASS){
+    // save session for 8 hours
+    const session = {user: u, exp: Date.now() + 8*60*60*1000};
+    sessionStorage.setItem(LOGIN_KEY, JSON.stringify(session));
+    const overlay = document.getElementById('loginOverlay');
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity .4s';
+    setTimeout(()=>{ overlay.style.display='none'; }, 400);
+    err.style.display = 'none';
+  } else {
+    err.style.display = 'block';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+    // shake animation
+    const box = document.querySelector('.login-box');
+    box.style.animation = 'shake .35s ease';
+    setTimeout(()=>{ box.style.animation = ''; }, 400);
+  }
+}
+
+function checkSession(){
+  try{
+    const raw = sessionStorage.getItem(LOGIN_KEY);
+    if(!raw) return false;
+    const s = JSON.parse(raw);
+    if(s.user === VALID_USER && s.exp > Date.now()) return true;
+    sessionStorage.removeItem(LOGIN_KEY);
+    return false;
+  } catch(e){ return false; }
+}
+
+// check on load
+(function(){
+  if(checkSession()){
+    const ov = document.getElementById('loginOverlay');
+    if(ov) ov.style.display='none';
   }
 })();
 
