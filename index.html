@@ -1,3 +1,17 @@
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.login-box{background:#fff;border-radius:20px;padding:40px 36px;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.4);text-align:center}
+.login-logo{width:52px;height:52px;background:#FAEEDA;border:2px solid #BA7517;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.login-title{font-size:26px;font-weight:700;color:#1a1a1a;letter-spacing:-.03em;margin-bottom:4px}
+.login-sub{font-size:13px;color:#888;margin-bottom:28px}
+.login-field{text-align:left;margin-bottom:16px}
+.login-field label{display:block;font-size:12px;font-weight:600;color:#444;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.login-field input{width:100%;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;background:#fafafa;box-sizing:border-box}
+.login-field input:focus{border-color:#BA7517;box-shadow:0 0 0 3px rgba(186,117,23,.12);background:#fff}
+.login-btn{width:100%;padding:13px;background:linear-gradient(135deg,#BA7517,#D4891E);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;transition:opacity .15s;letter-spacing:.02em}
+.login-btn:hover{opacity:.9}
+.login-err{background:#FCEBEB;border:1px solid #F7C1C1;border-radius:8px;color:#A32D2D;font-size:13px;padding:10px 14px;margin-top:12px;display:none;text-align:left}
+.login-footer{font-size:11px;color:#bbb;margin-top:20px}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -145,6 +159,21 @@ footer span{color:var(--gold);font-weight:500}
 .v3d-btn-gold{background:var(--gold-l);border-color:var(--gold);color:var(--gold);font-weight:500}.v3d-btn-gold:hover{background:var(--gold-m)}
 .v3d-btn.on{background:var(--gold-l);border-color:var(--gold);color:var(--gold);font-weight:500}
 
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.login-box{background:#fff;border-radius:20px;padding:40px 36px;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.4);text-align:center}
+.login-logo{width:52px;height:52px;background:#FAEEDA;border:2px solid #BA7517;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.login-title{font-size:26px;font-weight:700;color:#1a1a1a;letter-spacing:-.03em;margin-bottom:4px}
+.login-sub{font-size:13px;color:#888;margin-bottom:28px}
+.login-field{text-align:left;margin-bottom:16px}
+.login-field label{display:block;font-size:12px;font-weight:600;color:#444;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.login-field input{width:100%;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;background:#fafafa}
+.login-field input:focus{border-color:#BA7517;box-shadow:0 0 0 3px rgba(186,117,23,.12);background:#fff}
+.login-btn{width:100%;padding:13px;background:linear-gradient(135deg,#BA7517,#D4891E);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;transition:opacity .15s,transform .1s;letter-spacing:.02em}
+.login-btn:hover{opacity:.92}
+.login-btn:active{transform:scale(.98)}
+.login-err{background:#FCEBEB;border:1px solid #F7C1C1;border-radius:8px;color:#A32D2D;font-size:13px;padding:10px 14px;margin-top:12px;display:none;text-align:left}
+.login-footer{font-size:11px;color:#bbb;margin-top:20px}
 /* FIREBASE SYNC */
 .sync-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--gold-l);z-index:9999;transition:opacity .4s}
 .sync-bar-fill{height:100%;background:var(--gold);width:0%;transition:width .4s}
@@ -170,6 +199,66 @@ footer span{color:var(--gold);font-weight:500}
 </head>
 <body>
 
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg width="24" height="24" viewBox="0 0 20 20" fill="none">
+        <rect x="2" y="2" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <rect x="11" y="2" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <rect x="2" y="11" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <rect x="11" y="11" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <line x1="5.5" y1="9" x2="5.5" y2="11" stroke="#BA7517" stroke-width="1.4"/>
+        <line x1="14.5" y1="9" x2="14.5" y2="11" stroke="#BA7517" stroke-width="1.4"/>
+        <line x1="9" y1="5.5" x2="11" y2="5.5" stroke="#BA7517" stroke-width="1.4"/>
+        <line x1="9" y1="14.5" x2="11" y2="14.5" stroke="#BA7517" stroke-width="1.4"/>
+      </svg>
+    </div>
+    <div class="login-title">Linaro</div>
+    <div class="login-sub">Presupuestación arquitectónica profesional</div>
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" id="loginUser" placeholder="Ingresa tu usuario" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="loginPass" placeholder="Ingresa tu contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Iniciar sesión</button>
+    <div class="login-err" id="loginErr">⚠️ Usuario o contraseña incorrectos. Intenta de nuevo.</div>
+    <div class="login-footer">Linaro © 2025 — Solo acceso autorizado</div>
+  </div>
+</div>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg width="24" height="24" viewBox="0 0 20 20" fill="none">
+        <rect x="2" y="2" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <rect x="11" y="2" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <rect x="2" y="11" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <rect x="11" y="11" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
+        <line x1="5.5" y1="9" x2="5.5" y2="11" stroke="#BA7517" stroke-width="1.4"/>
+        <line x1="14.5" y1="9" x2="14.5" y2="11" stroke="#BA7517" stroke-width="1.4"/>
+        <line x1="9" y1="5.5" x2="11" y2="5.5" stroke="#BA7517" stroke-width="1.4"/>
+        <line x1="9" y1="14.5" x2="11" y2="14.5" stroke="#BA7517" stroke-width="1.4"/>
+      </svg>
+    </div>
+    <div class="login-title">Linaro</div>
+    <div class="login-sub">Presupuestacion arquitectonica profesional</div>
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" id="loginUser" placeholder="Ingresa tu usuario" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label>Contrasena</label>
+      <input type="password" id="loginPass" placeholder="Ingresa tu contrasena" autocomplete="current-password">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Iniciar sesion</button>
+    <div class="login-err" id="loginErr">Usuario o contrasena incorrectos. Intenta de nuevo.</div>
+    <div class="login-footer">Linaro 2025 - Solo acceso autorizado</div>
+  </div>
+</div>
 <nav class="nav">
   <div class="nav-logo">
     <div class="logo-box">
@@ -1416,17 +1505,8 @@ function showAutosave(msg) {
 
 // ── Restore autosave on load ──────────────────────────────────────────────
 window.addEventListener('load', () => {
-  try {
-    const as = localStorage.getItem(AUTOSAVE_KEY);
-    if (as) {
-      const snap = JSON.parse(as);
-      if ((snap.items&&snap.items.length) || (snap.melaminicos&&snap.melaminicos.length)) {
-        dbRestore(snap);
-        showAutosave('Sesión anterior restaurada automáticamente');
-      }
-    }
-  } catch(e) {}
-  setTimeout(dbRender, 1500); // wait for firebase connection
+  // restore and render handled by login flow
+  setTimeout(dbRender, 1500);
 });
 
 // ── Override goTab ────────────────────────────────────────────────────────
@@ -1676,6 +1756,84 @@ window.goTab=function(id,btn){
   _origGoTab(id,btn);
   if(id==='database') dbRender();
 };
+
+/* ===== LOGIN ===== */
+const LOGIN_KEY = 'linaro_session_v1';
+const VALID_USER = 'Linaro';
+const VALID_PASS = 'Asdru20101999';
+
+function doLogin(){
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginErr');
+  if(u === VALID_USER && p === VALID_PASS){
+    sessionStorage.setItem(LOGIN_KEY,'1');
+    document.getElementById('loginScreen').style.display='none';
+    err.style.display='none';
+    // trigger autosave restore after login
+    try{
+      const as=localStorage.getItem(AUTOSAVE_KEY);
+      if(as){const snap=JSON.parse(as);if((snap.items&&snap.items.length)||(snap.melaminicos&&snap.melaminicos.length)){dbRestore(snap);showAutosave('Sesión anterior restaurada');}}
+    }catch(e){}
+    setTimeout(dbRender,1500);
+  } else {
+    err.style.display='block';
+    document.getElementById('loginPass').value='';
+    document.getElementById('loginPass').focus();
+    // shake animation
+    const box=document.querySelector('.login-box');
+    box.style.transform='translateX(-8px)';
+    setTimeout(()=>{box.style.transform='translateX(8px)';},80);
+    setTimeout(()=>{box.style.transform='translateX(-5px)';},160);
+    setTimeout(()=>{box.style.transform='translateX(0)';},240);
+    box.style.transition='transform .08s';
+  }
+}
+
+// Check session on load — if already logged in skip login screen
+(function(){
+  if(sessionStorage.getItem(LOGIN_KEY)==='1'){
+    const ls=document.getElementById('loginScreen');
+    if(ls) ls.style.display='none';
+  }
+})();
+
+/* ===== LOGIN ===== */
+(function(){
+  var LS_SESSION = 'linaro_sess_v1';
+  var VALID_USER = 'Linaro';
+  var VALID_PASS = 'Asdru20101999';
+
+  function doLogin(){
+    var u = document.getElementById('loginUser').value.trim();
+    var p = document.getElementById('loginPass').value;
+    var err = document.getElementById('loginErr');
+    if(u === VALID_USER && p === VALID_PASS){
+      sessionStorage.setItem(LS_SESSION,'1');
+      document.getElementById('loginScreen').style.display='none';
+      err.style.display='none';
+    } else {
+      err.style.display='block';
+      document.getElementById('loginPass').value='';
+      document.getElementById('loginPass').focus();
+    }
+  }
+  window.doLogin = doLogin;
+
+  // enter key on password field
+  document.addEventListener('DOMContentLoaded', function(){
+    var passEl = document.getElementById('loginPass');
+    var userEl = document.getElementById('loginUser');
+    if(passEl) passEl.addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+    if(userEl) userEl.addEventListener('keydown', function(e){ if(e.key==='Enter') passEl.focus(); });
+  });
+
+  // if already logged in this tab, hide login
+  if(sessionStorage.getItem(LS_SESSION)==='1'){
+    var ls = document.getElementById('loginScreen');
+    if(ls) ls.style.display='none';
+  }
+})();
 
 </script>
 </body>
