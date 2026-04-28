@@ -141,6 +141,19 @@ footer span{color:var(--gold);font-weight:500}
 .v3d-btn:hover{background:var(--bg3)}
 .v3d-btn-gold{background:var(--gold-l);border-color:var(--gold);color:var(--gold);font-weight:500}.v3d-btn-gold:hover{background:var(--gold-m)}
 .v3d-btn.on{background:var(--gold-l);border-color:var(--gold);color:var(--gold);font-weight:500}
+
+/* DATABASE */
+.db-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:16px}
+.db-card{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:box-shadow .15s}
+.db-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.db-card-head{padding:14px 16px;border-bottom:.5px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start}
+.db-card-body{padding:12px 16px}
+.db-card-foot{padding:10px 16px;border-top:.5px solid var(--border);display:flex;gap:8px;flex-wrap:wrap}
+.db-badge{display:inline-block;padding:1px 7px;border-radius:99px;font-size:11px;font-weight:500;background:var(--bg3);color:var(--text2)}
+.db-stat{font-size:12px;color:var(--text2);margin-bottom:3px}
+.db-stat span{color:var(--text);font-weight:500}
+.db-empty{text-align:center;padding:60px 20px;color:var(--text2);grid-column:1/-1}
+.autosave-bar{background:var(--green-l);border:.5px solid var(--green-b);border-radius:var(--r);padding:6px 14px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:8px;margin-bottom:12px}
 @media print{.nav,.plan-toolbar,.plan-side,footer{display:none!important}.plan-app{height:auto;border:none}.canvas-wrap{overflow:visible!important}.canvas-inner{padding:0!important}}
 </style>
 </head>
@@ -171,6 +184,7 @@ footer span{color:var(--gold);font-weight:500}
     <button class="nt"     onclick="goTab('melaminicos',this)">Melamínicos</button>
     <button class="nt"     onclick="goTab('plans',this)">Planos</button>
     <button class="nt"     onclick="goTab('vista3d',this)">Vista 3D</button>
+    <button class="nt"     onclick="goTab('database',this)">📁 Proyectos</button>
   </div>
 </nav>
 
@@ -1065,6 +1079,250 @@ window.goTab=function(id,btn){
   else if(id==='vista3d'){v3render();}
 };
 })();
+
+
+/* ===== BASE DE DATOS (localStorage) ===== */
+const DB_KEY = 'linaro_projects_v1';
+const AUTOSAVE_KEY = 'linaro_autosave_v1';
+
+function dbGetAll(){
+  try { return JSON.parse(localStorage.getItem(DB_KEY)||'[]'); }
+  catch(e){ return []; }
+}
+function dbSaveAll(projects){
+  localStorage.setItem(DB_KEY, JSON.stringify(projects));
+}
+
+function dbSnapshot(){
+  return {
+    version: 2,
+    savedAt: new Date().toISOString(),
+    projectName: document.getElementById('pName').value||'Sin nombre',
+    client: document.getElementById('pClient').value||'',
+    location: document.getElementById('pLoc').value||'',
+    date: document.getElementById('pDate').value||'',
+    currency: document.getElementById('cur').value,
+    iva: document.getElementById('iva').value,
+    utility: document.getElementById('util').value,
+    disM2: document.getElementById('disM2').value,
+    disTarifa: document.getElementById('disTarifa').value,
+    disDesc: document.getElementById('disDesc').value,
+    items: JSON.parse(JSON.stringify(items)),
+    pieces: JSON.parse(JSON.stringify(pieces)),
+    melaminicos: JSON.parse(JSON.stringify(melaminicos)),
+    pRooms: JSON.parse(JSON.stringify(pRooms)),
+    pFurn: JSON.parse(JSON.stringify(pFurn)),
+  };
+}
+
+function dbRestore(snap){
+  // project fields
+  document.getElementById('pName').value    = snap.projectName||'';
+  document.getElementById('pClient').value  = snap.client||'';
+  document.getElementById('pLoc').value     = snap.location||'';
+  document.getElementById('pDate').value    = snap.date||'';
+  document.getElementById('cur').value      = snap.currency||'USD';
+  document.getElementById('iva').value      = snap.iva||'16';
+  document.getElementById('util').value     = snap.utility||'0';
+  document.getElementById('disM2').value    = snap.disM2||'0';
+  document.getElementById('disTarifa').value= snap.disTarifa||'6';
+  document.getElementById('disDesc').value  = snap.disDesc||'Honorarios de diseño';
+  // state
+  items       = snap.items       || [];
+  pieces      = snap.pieces      || [];
+  melaminicos = snap.melaminicos || [];
+  pRooms      = snap.pRooms      || [];
+  pFurn       = snap.pFurn       || [];
+  // re-render
+  renderTbl();
+  renderCuts();
+  updateMatSelect();
+  updRList();
+  pRender();
+  recalc();
+  recalcDis();
+}
+
+function dbSaveCurrent(){
+  const snap = dbSnapshot();
+  const customName = document.getElementById('dbProjName').value.trim();
+  if(customName) snap.projectName = customName;
+  const projects = dbGetAll();
+  // check if same name exists → update
+  const idx = projects.findIndex(p=>p.projectName===snap.projectName);
+  if(idx>=0){
+    if(!confirm(`Ya existe un proyecto llamado "${snap.projectName}". ¿Deseas reemplazarlo?`))return;
+    projects[idx]=snap;
+  } else {
+    projects.unshift(snap);
+  }
+  dbSaveAll(projects);
+  dbRender();
+  toast(`✓ Proyecto "${snap.projectName}" guardado`);
+  showAutosave(`Proyecto "${snap.projectName}" guardado correctamente`);
+}
+
+function dbLoad(idx){
+  const projects=dbGetAll();
+  const snap=projects[idx];
+  if(!snap)return;
+  if(!confirm(`¿Cargar el proyecto "${snap.projectName}"? Se reemplazará lo que tengas abierto ahora.`))return;
+  dbRestore(snap);
+  toast(`✓ "${snap.projectName}" cargado`);
+  // switch to budget tab
+  goTab('budget', document.querySelector('.nt'));
+  document.querySelectorAll('.nt').forEach(b=>{b.classList.remove('on');});
+  document.querySelector('.nt').classList.add('on');
+}
+
+function dbDelete(idx){
+  const projects=dbGetAll();
+  if(!confirm(`¿Eliminar el proyecto "${projects[idx]?.projectName}"? Esta acción no se puede deshacer.`))return;
+  projects.splice(idx,1);
+  dbSaveAll(projects);
+  dbRender();
+  toast('Proyecto eliminado');
+}
+
+function dbDuplicate(idx){
+  const projects=dbGetAll();
+  const snap=JSON.parse(JSON.stringify(projects[idx]));
+  snap.projectName=snap.projectName+' (copia)';
+  snap.savedAt=new Date().toISOString();
+  projects.splice(idx+1,0,snap);
+  dbSaveAll(projects);
+  dbRender();
+  toast(`✓ Copia creada: "${snap.projectName}"`);
+}
+
+function dbExportAll(){
+  const projects=dbGetAll();
+  if(!projects.length){toast('No hay proyectos para exportar');return;}
+  const blob=new Blob([JSON.stringify(projects,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`linaro_proyectos_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();URL.revokeObjectURL(a.href);
+  toast(`✓ ${projects.length} proyecto${projects.length!==1?'s':''} exportado${projects.length!==1?'s':''}`);
+}
+
+function dbExportOne(idx){
+  const projects=dbGetAll();
+  const snap=projects[idx];
+  if(!snap)return;
+  const blob=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`linaro_${snap.projectName.replace(/\s+/g,'_')}.json`;
+  a.click();URL.revokeObjectURL(a.href);
+  toast(`✓ "${snap.projectName}" exportado`);
+}
+
+function dbImport(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      let data=JSON.parse(e.target.result);
+      if(!Array.isArray(data)) data=[data];
+      const projects=dbGetAll();
+      let added=0;
+      data.forEach(snap=>{
+        if(snap.projectName){
+          const exists=projects.findIndex(p=>p.projectName===snap.projectName);
+          if(exists>=0) projects[exists]=snap;
+          else{projects.unshift(snap);added++;}
+        }
+      });
+      dbSaveAll(projects);dbRender();
+      toast(`✓ ${added} proyecto${added!==1?'s':''} importado${added!==1?'s':''}`);
+    } catch(err){toast('Error al leer el archivo JSON');}
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+function dbRender(){
+  const projects=dbGetAll();
+  const grid=document.getElementById('dbGrid');
+  if(!grid)return;
+  if(!projects.length){
+    grid.innerHTML='<div class="db-empty"><div style="font-size:32px;margin-bottom:10px">📁</div><p style="font-size:14px">No hay proyectos guardados aún.</p><p style="font-size:12px;margin-top:6px">Completa el presupuesto y haz clic en "Guardar proyecto actual".</p></div>';
+    return;
+  }
+  grid.innerHTML=projects.map((p,i)=>{
+    const date=p.savedAt?new Date(p.savedAt).toLocaleDateString('es-VE',{day:'2-digit',month:'short',year:'numeric'}):'—';
+    const items_count=(p.items||[]).length;
+    const pieces_count=(p.pieces||[]).length;
+    const mel_count=(p.melaminicos||[]).length;
+    const rooms_count=(p.pRooms||[]).length;
+    const sub=(p.items||[]).reduce((s,it)=>s+(parseFloat(it.q)||0)*(parseFloat(it.p)||0),0);
+    const hasData=items_count>0||pieces_count>0;
+    return`<div class="db-card">
+      <div class="db-card-head">
+        <div>
+          <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">${esc(p.projectName||'Sin nombre')}</div>
+          ${p.client?`<div style="font-size:12px;color:var(--text2)">👤 ${esc(p.client)}</div>`:''}
+          ${p.location?`<div style="font-size:12px;color:var(--text2)">📍 ${esc(p.location)}</div>`:''}
+        </div>
+        <span class="db-badge">${p.currency||'USD'}</span>
+      </div>
+      <div class="db-card-body">
+        <div class="db-stat">Ítems presupuesto: <span>${items_count}</span></div>
+        <div class="db-stat">Módulos despiece: <span>${pieces_count}</span></div>
+        <div class="db-stat">Melamínicos: <span>${mel_count}</span></div>
+        <div class="db-stat">Ambientes plano: <span>${rooms_count}</span></div>
+        ${sub>0?`<div class="db-stat" style="margin-top:6px">Total: <span style="color:var(--gold)">${p.currency||'USD'} ${fmt(sub)}</span></div>`:''}
+        <div style="font-size:11px;color:var(--text3);margin-top:8px">Guardado: ${date}</div>
+      </div>
+      <div class="db-card-foot">
+        <button class="btn btn-gold btn-sm" onclick="dbLoad(${i})">📂 Cargar</button>
+        <button class="btn btn-sm" onclick="dbDuplicate(${i})">⎘ Duplicar</button>
+        <button class="btn btn-sm" onclick="dbExportOne(${i})">⬇ JSON</button>
+        <button class="btn btn-sm btn-del" onclick="dbDelete(${i})">× Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showAutosave(msg){
+  const bar=document.getElementById('autosaveBar');
+  const txt=document.getElementById('autosaveMsg');
+  if(!bar||!txt)return;
+  txt.textContent=msg||'Guardado automáticamente';
+  bar.style.display='flex';
+  setTimeout(()=>{bar.style.display='none';},4000);
+}
+
+// ── Auto-save every 60s if there's data ──────────────────────────────────────
+function dbAutoSave(){
+  if(!items.length&&!pieces.length&&!melaminicos.length)return;
+  const snap=dbSnapshot();
+  snap.projectName=(snap.projectName&&snap.projectName!=='Sin nombre')?snap.projectName:'Autoguardado';
+  localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(snap));
+}
+setInterval(dbAutoSave, 60000);
+
+// ── Restore autosave on load if exists ───────────────────────────────────────
+window.addEventListener('load',()=>{
+  dbRender();
+  // restore autosave silently
+  try{
+    const as=localStorage.getItem(AUTOSAVE_KEY);
+    if(as){
+      const snap=JSON.parse(as);
+      if((snap.items&&snap.items.length)||(snap.melaminicos&&snap.melaminicos.length)){
+        dbRestore(snap);
+        showAutosave('Sesión anterior restaurada automáticamente');
+      }
+    }
+  } catch(e){}
+});
+
+// ── Override goTab to render DB when entering ─────────────────────────────────
+const _origGoTab=window.goTab;
+window.goTab=function(id,btn){
+  _origGoTab(id,btn);
+  if(id==='database') dbRender();
+};
 
 </script>
 </body>
