@@ -1983,47 +1983,57 @@ const VALID_USER = 'Linaro';
 const VALID_PASS = 'Asdru20101999';
 
 function doLogin(){
-  const u = document.getElementById('loginUser').value.trim();
-  const p = document.getElementById('loginPass').value;
+  const u = (document.getElementById('loginUser').value || '').trim();
+  const p = (document.getElementById('loginPass').value || '');
   const err = document.getElementById('loginError');
   if(u === VALID_USER && p === VALID_PASS){
-    // save session for 8 hours
-    const session = {user: u, exp: Date.now() + 8*60*60*1000};
-    sessionStorage.setItem(LOGIN_KEY, JSON.stringify(session));
+    try {
+      sessionStorage.setItem(LOGIN_KEY, JSON.stringify({user:u, exp: Date.now() + 8*60*60*1000}));
+    } catch(e) {}
     const overlay = document.getElementById('loginOverlay');
-    overlay.style.opacity = '0';
-    overlay.style.transition = 'opacity .4s';
-    setTimeout(()=>{ overlay.style.display='none'; }, 400);
-    err.style.display = 'none';
+    if(overlay){
+      overlay.style.transition = 'opacity .35s';
+      overlay.style.opacity = '0';
+      setTimeout(()=>{ overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 380);
+    }
+    if(err) err.style.display = 'none';
   } else {
-    err.style.display = 'block';
-    document.getElementById('loginPass').value = '';
-    document.getElementById('loginPass').focus();
-    // shake animation
+    if(err) err.style.display = 'block';
+    const passEl = document.getElementById('loginPass');
+    if(passEl){ passEl.value = ''; passEl.focus(); }
     const box = document.querySelector('.login-box');
-    box.style.animation = 'shake .35s ease';
-    setTimeout(()=>{ box.style.animation = ''; }, 400);
+    if(box){
+      box.style.transition = 'transform .08s';
+      let count = 0;
+      const dirs = [-8,8,-6,6,-4,4,-2,2,0];
+      const shake = setInterval(()=>{
+        box.style.transform = `translateX(${dirs[count]}px)`;
+        count++;
+        if(count >= dirs.length){ clearInterval(shake); box.style.transform = ''; }
+      }, 40);
+    }
   }
 }
 
 function checkSession(){
-  try{
+  try {
     const raw = sessionStorage.getItem(LOGIN_KEY);
     if(!raw) return false;
     const s = JSON.parse(raw);
-    if(s.user === VALID_USER && s.exp > Date.now()) return true;
-    sessionStorage.removeItem(LOGIN_KEY);
-    return false;
+    return s && s.user === VALID_USER && s.exp > Date.now();
   } catch(e){ return false; }
 }
 
-// check on load
-(function(){
+document.addEventListener('DOMContentLoaded', function(){
+  const overlay = document.getElementById('loginOverlay');
+  if(!overlay) return;
   if(checkSession()){
-    const ov = document.getElementById('loginOverlay');
-    if(ov) ov.style.display='none';
+    overlay.style.display = 'none';
+  } else {
+    overlay.style.display = 'flex';
+    setTimeout(()=>{ const u=document.getElementById('loginUser'); if(u) u.focus(); }, 100);
   }
-})();
+});
 
 </script>
 </body>
