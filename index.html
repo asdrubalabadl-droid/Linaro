@@ -448,41 +448,127 @@ footer span{color:var(--gold);font-weight:500}
 
 <!-- ========= MELAMÍNICOS ========= -->
 <div id="melaminicos" class="module">
-  <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start" class="two-col">
-    <div class="card">
-      <div class="sl">Registrar melamínico</div>
-      <div class="field"><label>Nombre / referencia</label><input type="text" id="mNombre" placeholder="MDF Blanco Hueso 18mm"></div>
-      <div class="field"><label>Color / acabado</label><input type="text" id="mColor" placeholder="Blanco Hueso, Nogal…"></div>
-      <div class="field"><label>Proveedor</label><input type="text" id="mProv" placeholder="Nombre del proveedor"></div>
-      <div class="g2">
-        <div class="field"><label>Ancho lámina (mm)</label><input type="number" id="mAncho" value="2440"></div>
-        <div class="field"><label>Alto lámina (mm)</label><input type="number" id="mAlto" value="1220"></div>
-        <div class="field"><label>Espesor (mm)</label><input type="number" id="mEspesor" value="18"></div>
-        <div class="field"><label>Precio por lámina</label><input type="number" id="mPrecio" value="0" step="0.01"></div>
-        <div class="field"><label>Moneda</label>
-          <select id="mMoneda"><option>USD</option><option>Bs</option><option>COP</option></select>
+
+  <!-- Sub-tabs -->
+  <div style="display:flex;gap:2px;border-bottom:.5px solid var(--border);margin-bottom:20px">
+    <button class="nt on" id="invTab1" onclick="switchInvTab('tableros',this)" style="height:40px;padding:0 16px">🪵 Tableros melamínicos</button>
+    <button class="nt"    id="invTab2" onclick="switchInvTab('tapacanto',this)" style="height:40px;padding:0 16px">📏 Tapacanto</button>
+  </div>
+
+  <!-- ── TABLEROS ── -->
+  <div id="invTableros" style="display:block">
+    <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start" class="two-col">
+      <div class="card">
+        <div class="sl">Registrar melamínico</div>
+        <div class="field"><label>Nombre / referencia</label><input type="text" id="mNombre" placeholder="MDF Blanco Hueso 18mm"></div>
+        <div class="field"><label>Color / acabado</label><input type="text" id="mColor" placeholder="Blanco Hueso, Nogal…"></div>
+        <div class="field"><label>Proveedor</label><input type="text" id="mProv" placeholder="Nombre del proveedor"></div>
+        <div class="g2">
+          <div class="field"><label>Ancho lámina (mm)</label><input type="number" id="mAncho" value="2440"></div>
+          <div class="field"><label>Alto lámina (mm)</label><input type="number" id="mAlto" value="1220"></div>
+          <div class="field"><label>Espesor (mm)</label><input type="number" id="mEspesor" value="18"></div>
+          <div class="field"><label>Precio por lámina</label><input type="number" id="mPrecio" value="0" step="0.01"></div>
+          <div class="field"><label>Moneda</label>
+            <select id="mMoneda"><option>USD</option><option>Bs</option><option>COP</option></select>
+          </div>
+          <div class="field"><label>Stock</label>
+            <select id="mStock"><option value="1">En stock</option><option value="0">Sin stock</option></select>
+          </div>
         </div>
-        <div class="field"><label>Stock</label>
-          <select id="mStock"><option value="1">En stock</option><option value="0">Sin stock</option></select>
+        <div class="field"><label>Notas</label><input type="text" id="mNotas" placeholder="Observaciones…"></div>
+        <button class="btn btn-gold" onclick="addMel()" style="width:100%">+ Registrar melamínico</button>
+      </div>
+      <div>
+        <div class="flexb mb12">
+          <div style="font-size:14px;font-weight:600">Biblioteca de tableros</div>
+          <span class="muted" style="font-size:12px" id="melCount">0 tableros registrados</span>
         </div>
-      </div>
-      <div class="field"><label>Notas</label><input type="text" id="mNotas" placeholder="Observaciones…"></div>
-      <button class="btn btn-gold" onclick="addMel()" style="width:100%">+ Registrar melamínico</button>
-    </div>
-    <div>
-      <div class="flexb mb12">
-        <div style="font-size:14px;font-weight:600">Biblioteca de melamínicos</div>
-        <span class="muted" style="font-size:12px" id="melCount">0 materiales registrados</span>
-      </div>
-      <div id="melList">
-        <div class="empty card">
-          <div class="empty-icon">🗂️</div>
-          <p>Registra tus melamínicos para usarlos en el despiece</p>
-          <p style="font-size:12px;margin-top:6px;color:var(--text3)">El precio por lámina calcula automáticamente el costo del módulo</p>
+        <div id="melList">
+          <div class="empty card">
+            <div class="empty-icon">🗂️</div>
+            <p>Registra tus tableros melamínicos</p>
+            <p style="font-size:12px;margin-top:6px;color:var(--text3)">El precio por lámina calcula automáticamente el costo del módulo</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- ── TAPACANTO ── -->
+  <div id="invTapacanto" style="display:none">
+    <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start" class="two-col">
+      <div class="card">
+        <div class="sl">Registrar tapacanto</div>
+        <div class="field"><label>Descripción / referencia</label>
+          <input type="text" id="tcNombre" placeholder="PVC 1mm Blanco brillante">
+        </div>
+        <div class="field"><label>Color / acabado</label>
+          <input type="text" id="tcColor" placeholder="Blanco Hueso, Nogal…">
+        </div>
+        <div class="field"><label>Material</label>
+          <select id="tcMat">
+            <option>PVC</option>
+            <option>ABS</option>
+            <option>Madera natural</option>
+            <option>Aluminio</option>
+            <option>Melamínico</option>
+          </select>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Espesor (mm)</label>
+            <select id="tcEspesor">
+              <option value="0.4">0.4mm</option>
+              <option value="1" selected>1mm</option>
+              <option value="2">2mm</option>
+              <option value="3">3mm</option>
+            </select>
+          </div>
+          <div class="field"><label>Ancho del tapacanto (mm)</label>
+            <select id="tcAncho">
+              <option value="19">19mm</option>
+              <option value="22">22mm</option>
+              <option value="25">25mm</option>
+              <option value="42">42mm</option>
+              <option value="50">50mm</option>
+            </select>
+          </div>
+          <div class="field"><label>Longitud rollo (m)</label>
+            <input type="number" id="tcLargo" value="50" min="1" step="1">
+          </div>
+          <div class="field"><label>Precio por rollo</label>
+            <input type="number" id="tcPrecio" value="0" step="0.01">
+          </div>
+          <div class="field"><label>Moneda</label>
+            <select id="tcMoneda"><option>USD</option><option>Bs</option><option>COP</option></select>
+          </div>
+          <div class="field"><label>Stock</label>
+            <select id="tcStock"><option value="1">En stock</option><option value="0">Sin stock</option></select>
+          </div>
+        </div>
+        <div class="field"><label>Proveedor</label>
+          <input type="text" id="tcProv" placeholder="Nombre del proveedor">
+        </div>
+        <div class="field"><label>Notas</label>
+          <input type="text" id="tcNotas" placeholder="Observaciones…">
+        </div>
+        <button class="btn btn-gold" onclick="addTc()" style="width:100%">+ Registrar tapacanto</button>
+      </div>
+      <div>
+        <div class="flexb mb12">
+          <div style="font-size:14px;font-weight:600">Biblioteca de tapacanto</div>
+          <span class="muted" style="font-size:12px" id="tcCount">0 referencias registradas</span>
+        </div>
+        <div id="tcList">
+          <div class="empty card">
+            <div class="empty-icon">📏</div>
+            <p>Registra tus referencias de tapacanto</p>
+            <p style="font-size:12px;margin-top:6px;color:var(--text3)">PVC · ABS · Madera · Aluminio — con precio por rollo y precio por metro</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ========= PLANOS ========= -->
@@ -1191,6 +1277,7 @@ function dbSnapshot() {
     melaminicos: JSON.parse(JSON.stringify(melaminicos)),
     pRooms:      JSON.parse(JSON.stringify(pRooms)),
     pFurn:       JSON.parse(JSON.stringify(pFurn)),
+    tapacantosInv: JSON.parse(JSON.stringify(tapacantosInv)),
   };
 }
 
@@ -1210,7 +1297,9 @@ function dbRestore(snap) {
   pieces      = snap.pieces      || [];
   melaminicos = snap.melaminicos || [];
   pRooms      = snap.pRooms      || [];
-  pFurn       = snap.pFurn       || [];
+  pFurn          = snap.pFurn          || [];
+  tapacantosInv  = snap.tapacantosInv  || [];
+  renderTcList();
   renderTbl(); renderCuts(); updateMatSelect();
   updRList(); pRender(); recalc(); recalcDis();
 }
@@ -1694,6 +1783,97 @@ window.goTab=function(id,btn){
     }
   });
 })();
+
+/* ===== INVENTARIO TAPACANTO ===== */
+let tapacantosInv = [];
+
+function switchInvTab(tab, btn){
+  document.querySelectorAll('[id^=invTab]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('invTableros').style.display  = tab==='tableros'  ? 'block' : 'none';
+  document.getElementById('invTapacanto').style.display = tab==='tapacanto' ? 'block' : 'none';
+}
+
+function addTc(){
+  const nombre = document.getElementById('tcNombre').value;
+  if(!nombre){ toast('Escribe la descripción del tapacanto'); return; }
+  const t = {
+    id: uid(),
+    nombre,
+    color:    document.getElementById('tcColor').value,
+    mat:      document.getElementById('tcMat').value,
+    espesor:  parseFloat(document.getElementById('tcEspesor').value)||1,
+    ancho:    parseFloat(document.getElementById('tcAncho').value)||22,
+    largo:    parseFloat(document.getElementById('tcLargo').value)||50,
+    precio:   parseFloat(document.getElementById('tcPrecio').value)||0,
+    moneda:   document.getElementById('tcMoneda').value,
+    proveedor:document.getElementById('tcProv').value,
+    stock:    parseInt(document.getElementById('tcStock').value),
+    notas:    document.getElementById('tcNotas').value,
+  };
+  tapacantosInv.push(t);
+  renderTcList();
+  // clear form
+  document.getElementById('tcNombre').value='';
+  document.getElementById('tcColor').value='';
+  document.getElementById('tcProv').value='';
+  document.getElementById('tcNotas').value='';
+  document.getElementById('tcPrecio').value='0';
+  toast(`✓ "${t.nombre}" registrado en la biblioteca`);
+}
+
+function delTc(id){
+  tapacantosInv = tapacantosInv.filter(t=>t.id!==id);
+  renderTcList();
+}
+
+function renderTcList(){
+  const list = document.getElementById('tcList');
+  const count = document.getElementById('tcCount');
+  if(!list) return;
+  count.textContent = `${tapacantosInv.length} referencia${tapacantosInv.length!==1?'s':''} registrada${tapacantosInv.length!==1?'s':''}`;
+  if(!tapacantosInv.length){
+    list.innerHTML=`<div class="empty card"><div class="empty-icon">📏</div><p>Registra tus referencias de tapacanto</p></div>`;
+    return;
+  }
+  list.innerHTML = tapacantosInv.map(t=>{
+    const ppm = t.precio>0&&t.largo>0 ? (t.precio/t.largo).toFixed(3) : '—';
+    return `<div class="mel-card">
+      <div class="mel-head">
+        <div class="flex gap8 wrap" style="align-items:center">
+          <span style="font-size:14px;font-weight:600">${esc(t.nombre)}</span>
+          ${t.color?`<span class="tag">${esc(t.color)}</span>`:''}
+          <span class="tag">${t.mat}</span>
+          <span class="tag">${t.espesor}mm × ${t.ancho}mm</span>
+          <span class="stock-badge ${t.stock?'in-stock':'no-stock'}">${t.stock?'En stock':'Sin stock'}</span>
+        </div>
+        <button class="btn btn-sm btn-del" onclick="delTc('${t.id}')">Eliminar</button>
+      </div>
+      <div class="mel-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+          <div>
+            <div class="mlabel">Especificación</div>
+            <div style="font-size:14px;font-weight:600;font-family:monospace">${t.espesor}mm × ${t.ancho}mm</div>
+            <div style="font-size:12px;color:var(--text2)">${t.mat} · Rollo ${t.largo}m</div>
+          </div>
+          <div>
+            <div class="mlabel">Precio por rollo</div>
+            <div class="mel-price">${t.moneda} ${fmt(t.precio)}</div>
+          </div>
+          <div>
+            <div class="mlabel">Precio por metro</div>
+            <div style="font-size:15px;font-weight:600;font-family:monospace;color:var(--blue)">${ppm!=='—'?t.moneda+' '+ppm:'—'}</div>
+          </div>
+          <div>
+            <div class="mlabel">Proveedor</div>
+            <div style="font-size:13px">${esc(t.proveedor)||'—'}</div>
+            ${t.notas?`<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">${esc(t.notas)}</div>`:''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
 </script>
 </body>
 </html>
