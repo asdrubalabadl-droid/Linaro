@@ -1825,7 +1825,7 @@ window.goTab=function(id,btn){
   }
 
   tryLoadApp(0);
-})();<script>
+})();
 /* ===== LOGIN ===== */
 (function(){
   var SK = 'ln1';
@@ -1870,8 +1870,8 @@ window.goTab=function(id,btn){
 <script>
 (function(){
   function loadScript(src,cb){var s=document.createElement('script');s.src=src;s.onload=cb||function(){};s.onerror=function(){console.warn('CDN failed:',src);};document.head.appendChild(s);}
-  loadScript('https://cdn.jsdelivr.net/npm/firebase@9.22.0/compat/app.min.js',function(){
-    loadScript('https://cdn.jsdelivr.net/npm/firebase@9.22.0/compat/database.min.js',function(){
+  loadScript('https://unpkg.com/firebase@9.22.0/compat/app.js',function(){
+    loadScript('https://unpkg.com/firebase@9.22.0/compat/database.js',function(){
       if(typeof initFirebase==='function') initFirebase();
     });
   });
