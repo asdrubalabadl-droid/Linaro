@@ -201,14 +201,6 @@ footer span{color:var(--gold);font-weight:500}
 .login-btn:hover{background:#A06010}
 .login-error{color:#A32D2D;font-size:13px;margin-top:10px;display:none;padding:8px 12px;background:#FCEBEB;border-radius:8px}
 .login-footer{font-size:11px;color:#CCC;margin-top:20px;text-align:center}
-/* FIREBASE SYNC */
-.sync-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--gold-l);z-index:9999;transition:opacity .4s}
-.sync-bar-fill{height:100%;background:var(--gold);width:0%;transition:width .4s}
-.online-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:99px;font-weight:500}
-.online-badge.connected{background:#EAF3DE;color:#27500A}
-.online-badge.offline{background:#FCEBEB;color:#A32D2D}
-.online-badge.syncing{background:#FAEEDA;color:#BA7517}
-.online-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
 /* DATABASE */
 .db-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:16px}
 .db-card{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:box-shadow .15s}
@@ -223,6 +215,7 @@ footer span{color:var(--gold);font-weight:500}
 .autosave-bar{background:var(--green-l);border:.5px solid var(--green-b);border-radius:var(--r);padding:6px 14px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:8px;margin-bottom:12px}
 @media print{.nav,.plan-toolbar,.plan-side,footer{display:none!important}.plan-app{height:auto;border:none}.canvas-wrap{overflow:visible!important}.canvas-inner{padding:0!important}}
 </style>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/%3E%3Crect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/%3E%3Cpath d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/%3E%3Crect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/%3E%3C/svg%3E">
 </head>
 <body>
 
@@ -230,16 +223,12 @@ footer span{color:var(--gold);font-weight:500}
 <div id="loginOverlay" style="position:fixed;inset:0;background:linear-gradient(135deg,#1a1206,#2C1F08 50%,#1a1206);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;z-index:99999">
   <div id="loginBox" style="background:#fff;border-radius:20px;padding:40px 44px;width:90%;max-width:400px;box-shadow:0 24px 80px rgba(0,0,0,.5);text-align:center">
     <div style="width:56px;height:56px;background:#FAEEDA;border:1.5px solid #BA7517;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px">
-      <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
-        <rect x="2" y="2" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
-        <rect x="11" y="2" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
-        <rect x="2" y="11" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
-        <rect x="11" y="11" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
-        <line x1="5.5" y1="9" x2="5.5" y2="11" stroke="#BA7517" stroke-width="1.4"/>
-        <line x1="14.5" y1="9" x2="14.5" y2="11" stroke="#BA7517" stroke-width="1.4"/>
-        <line x1="9" y1="5.5" x2="11" y2="5.5" stroke="#BA7517" stroke-width="1.4"/>
-        <line x1="9" y1="14.5" x2="11" y2="14.5" stroke="#BA7517" stroke-width="1.4"/>
-      </svg>
+      <svg width="36" height="36" viewBox="0 0 64 64" fill="none">
+  <rect x="10" y="8"  width="7" height="48" rx="2" fill="#BA7517"/>
+  <rect x="10" y="49" width="30" height="7"  rx="2" fill="#BA7517"/>
+  <path d="M17 56 L42 8 L47 8 L22 56 Z" fill="#BA7517" opacity=".55"/>
+  <rect x="17" y="34" width="20" height="5" rx="1.5" fill="#BA7517"/>
+</svg>
     </div>
     <div style="font-size:26px;font-weight:700;color:#1a1a1a;letter-spacing:-.03em;margin-bottom:4px">Linaro</div>
     <div style="font-size:13px;color:#888;margin-bottom:28px">Presupuestación arquitectónica</div>
@@ -269,16 +258,12 @@ footer span{color:var(--gold);font-weight:500}
 <nav class="nav">
   <div class="nav-logo">
     <div class="logo-box">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <rect x="2" y="2" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
-        <rect x="11" y="2" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
-        <rect x="2" y="11" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
-        <rect x="11" y="11" width="7" height="7" rx="1" stroke="#BA7517" stroke-width="1.4" fill="none"/>
-        <line x1="5.5" y1="9" x2="5.5" y2="11" stroke="#BA7517" stroke-width="1.4"/>
-        <line x1="14.5" y1="9" x2="14.5" y2="11" stroke="#BA7517" stroke-width="1.4"/>
-        <line x1="9" y1="5.5" x2="11" y2="5.5" stroke="#BA7517" stroke-width="1.4"/>
-        <line x1="9" y1="14.5" x2="11" y2="14.5" stroke="#BA7517" stroke-width="1.4"/>
-      </svg>
+      <svg width="28" height="28" viewBox="0 0 64 64" fill="none">
+  <rect x="10" y="8"  width="7" height="48" rx="2" fill="#BA7517"/>
+  <rect x="10" y="49" width="30" height="7"  rx="2" fill="#BA7517"/>
+  <path d="M17 56 L42 8 L47 8 L22 56 Z" fill="#BA7517" opacity=".55"/>
+  <rect x="17" y="34" width="20" height="5" rx="1.5" fill="#BA7517"/>
+</svg>
     </div>
     <div>
       <div class="nav-brand">Linaro</div>
@@ -292,13 +277,8 @@ footer span{color:var(--gold);font-weight:500}
     <button class="nt"     onclick="goTab('plans',this)">Planos</button>
     <button class="nt"     onclick="goTab('vista3d',this)">Vista 3D</button>
     <button class="nt"     onclick="goTab('database',this)">📁 Proyectos</button>
-    <div style="margin-left:auto;flex-shrink:0">
-    <span class="online-badge offline" id="syncBadge"><span class="online-dot"></span><span id="syncText">Conectando…</span></span>
-  </div>
 </div>
 </nav>
-<div class="sync-bar"><div class="sync-bar-fill" id="syncFill"></div></div>
-
 <div class="page">
 
 <!-- ========= PRESUPUESTO ========= -->
@@ -1192,62 +1172,7 @@ window.goTab=function(id,btn){
 })();
 
 
-/* ===== FIREBASE + localStorage ===== */
-
-// ── Firebase init (safe — deferred) ────────────────────────────────────────
-let db = null;
-let fbConnected = false;
-
-function initFirebase(){
-  if(typeof firebase === 'undefined'){
-    console.warn('Firebase SDK not loaded, running in offline mode');
-    return;
-  }
-  try {
-    if(!firebase.apps.length){
-      firebase.initializeApp({
-        apiKey: "AIzaSyBjjJMG04Uwo5Pe89Fu3ero_afILIpIAjg",
-        authDomain: "linaroarq.firebaseapp.com",
-        databaseURL: "https://linaroarq-default-rtdb.firebaseio.com",
-        projectId: "linaroarq",
-        storageBucket: "linaroarq.firebasestorage.app",
-        messagingSenderId: "442475602899",
-        appId: "1:442475602899:web:f466e47e6518b283d10526"
-      });
-    }
-    db = firebase.database();
-    db.ref('.info/connected').on('value', snap => {
-      fbConnected = snap.val() === true;
-      const badge = document.getElementById('syncBadge');
-      const txt   = document.getElementById('syncText');
-      if(!badge) return;
-      if(fbConnected){
-        badge.className = 'online-badge connected';
-        txt.textContent = 'Firebase ☁️';
-      } else {
-        badge.className = 'online-badge offline';
-        txt.textContent = 'Sin conexión';
-      }
-    });
-  } catch(e){
-    console.warn('Firebase init error:', e);
-  }
-}
-
-function setSyncing(on) {
-  const badge = document.getElementById('syncBadge');
-  const fill  = document.getElementById('syncFill');
-  if (!badge) return;
-  if (on) {
-    badge.className = 'online-badge syncing';
-    document.getElementById('syncText').textContent = 'Guardando…';
-    if (fill) { fill.style.width='100%'; }
-  } else {
-    badge.className = fbConnected ? 'online-badge connected' : 'online-badge offline';
-    document.getElementById('syncText').textContent = fbConnected ? 'Firebase conectado' : 'Sin conexión';
-    if (fill) { setTimeout(() => { fill.style.width='0%'; }, 600); }
-  }
-}
+/* ===== BASE DE DATOS (localStorage) ===== */
 
 // ── localStorage helpers ───────────────────────────────────────────────────
 function dbGetAll() {
@@ -1258,34 +1183,8 @@ function dbSaveAllLocal(projects) {
   localStorage.setItem(DB_KEY, JSON.stringify(projects));
 }
 
-// ── Save to Firebase ───────────────────────────────────────────────────────
-async function fbSaveProject(snap) {
-  if (!fbConnected || !db) return false;
-  setSyncing(true);
-  try {
-    const key = snap.projectName.replace(/[.#$\[\]]/g, '_');
-    await db.ref('projects/' + key).set(snap);
-    setSyncing(false);
-    return true;
-  } catch(e) {
-    console.error('Firebase save error:', e);
-    setSyncing(false);
-    return false;
-  }
-}
-
-// ── Load all from Firebase ─────────────────────────────────────────────────
-async function fbLoadAll() {
-  if (!fbConnected || !db) return null;
-  try {
-    const snap = await db.ref('projects').get();
-    if (!snap.exists()) return [];
-    const data = snap.val();
-    return Object.values(data).sort((a,b)=>
-      new Date(b.savedAt||0) - new Date(a.savedAt||0));
-  } catch(e) { return null; }
-}
-
+async function fbSaveProject(snap){ return false; }
+async function fbLoadAll(){ return null; }
 // ── Snapshot current state ─────────────────────────────────────────────────
 function dbSnapshot() {
   return {
@@ -1345,11 +1244,10 @@ async function dbSaveCurrent() {
     projects.unshift(snap);
   }
   dbSaveAllLocal(projects);
-  // firebase save
-  const ok = await fbSaveProject(snap);
+  const ok = false;
   dbRender();
-  toast(`✓ "${snap.projectName}" guardado${ok ? ' en Firebase ☁️' : ' localmente'}`);
-  showAutosave(`"${snap.projectName}" guardado${ok ? ' en Firebase ☁️' : ' localmente'}`);
+  toast(`✓ "${snap.projectName}" guardado`);
+  showAutosave(`"${snap.projectName}" guardado correctamente`);
 }
 
 // ── Load project ───────────────────────────────────────────────────────────
@@ -1373,11 +1271,6 @@ async function dbDelete(idx) {
   // local
   const local = dbGetAll().filter(p => p.projectName !== snap.projectName);
   dbSaveAllLocal(local);
-  // firebase
-  if (fbConnected) {
-    const key = snap.projectName.replace(/[.#$\[\]]/g, '_');
-    await db.ref('projects/' + key).remove();
-  }
   dbRender(); toast('Proyecto eliminado');
 }
 
@@ -1390,21 +1283,11 @@ async function dbDuplicate(idx) {
   const local = dbGetAll();
   local.unshift(snap);
   dbSaveAllLocal(local);
-  await fbSaveProject(snap);
   dbRender(); toast(`✓ Copia: "${snap.projectName}"`);
 }
 
-// ── Merge local + firebase ─────────────────────────────────────────────────
 async function dbGetMerged() {
-  const local = dbGetAll();
-  const remote = await fbLoadAll();
-  if (!remote) return local;
-  // merge: remote wins on conflict
-  const map = {};
-  local.forEach(p => { map[p.projectName] = p; });
-  remote.forEach(p => { map[p.projectName] = p; }); // remote overwrites
-  return Object.values(map).sort((a,b) =>
-    new Date(b.savedAt||0) - new Date(a.savedAt||0));
+  return dbGetAll().sort((a,b) => new Date(b.savedAt||0) - new Date(a.savedAt||0));
 }
 
 // ── Export all ────────────────────────────────────────────────────────────
@@ -1445,8 +1328,7 @@ async function dbImport(event) {
         if (!snap.projectName) continue;
         const i = local.findIndex(p => p.projectName === snap.projectName);
         if (i >= 0) local[i] = snap; else { local.unshift(snap); added++; }
-        await fbSaveProject(snap);
-      }
+          }
       dbSaveAllLocal(local);
       dbRender();
       toast(`✓ ${added} proyecto(s) importado(s)`);
@@ -1468,7 +1350,6 @@ async function dbRender() {
   grid.innerHTML = projects.map((p,i) => {
     const date = p.savedAt ? new Date(p.savedAt).toLocaleDateString('es-VE',{day:'2-digit',month:'short',year:'numeric'}) : '—';
     const sub = (p.items||[]).reduce((s,it)=>s+(parseFloat(it.q)||0)*(parseFloat(it.p)||0),0);
-    const isFirebase = fbConnected;
     return `<div class="db-card">
       <div class="db-card-head">
         <div>
@@ -1476,10 +1357,7 @@ async function dbRender() {
           ${p.client   ? `<div style="font-size:12px;color:var(--text2)">👤 ${esc(p.client)}</div>` : ''}
           ${p.location ? `<div style="font-size:12px;color:var(--text2)">📍 ${esc(p.location)}</div>` : ''}
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-          <span class="db-badge">${p.currency||'USD'}</span>
-          <span style="font-size:10px;color:var(--text3)">${isFirebase?'☁️ Firebase':'💾 Local'}</span>
-        </div>
+        <span class="db-badge">${p.currency||'USD'}</span>
       </div>
       <div class="db-card-body">
         <div class="db-stat">Ítems presupuesto: <span>${(p.items||[]).length}</span></div>
@@ -1506,7 +1384,6 @@ function dbAutoSave() {
   snap.projectName = (snap.projectName && snap.projectName !== 'Sin nombre')
     ? snap.projectName : 'Autoguardado';
   localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(snap));
-  if (fbConnected) fbSaveProject(snap);
 }
 setInterval(dbAutoSave, 90000);
 
@@ -1780,103 +1657,5 @@ window.goTab=function(id,btn){
 
 
 </script>
-<script>
-// Load Firebase SDKs dynamically with fallback CDNs
-(function(){
-  function loadScript(src, cb, err){
-    var s=document.createElement('script');
-    s.src=src;
-    s.onload=cb||function(){};
-    s.onerror=err||function(){};
-    document.head.appendChild(s);
-  }
-
-  var CDNS = [
-    'https://cdn.jsdelivr.net/npm/firebase@9.22.0/compat/app.min.js',
-    'https://unpkg.com/firebase@9.22.0/compat/app.js',
-    'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js'
-  ];
-  var DB_CDNS = [
-    'https://cdn.jsdelivr.net/npm/firebase@9.22.0/compat/database.min.js',
-    'https://unpkg.com/firebase@9.22.0/compat/database.js',
-    'https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js'
-  ];
-
-  function tryLoadApp(idx){
-    if(idx >= CDNS.length){
-      console.warn('All Firebase CDNs failed — running offline');
-      return;
-    }
-    loadScript(CDNS[idx],
-      function(){ tryLoadDb(0); },
-      function(){ tryLoadApp(idx+1); }
-    );
-  }
-
-  function tryLoadDb(idx){
-    if(idx >= DB_CDNS.length){
-      console.warn('Firebase DB CDN failed');
-      return;
-    }
-    loadScript(DB_CDNS[idx],
-      function(){ initFirebase(); },
-      function(){ tryLoadDb(idx+1); }
-    );
-  }
-
-  tryLoadApp(0);
-})();
-/* ===== LOGIN ===== */
-(function(){
-  var SK = 'ln1';
-  var OU = 'Linaro';
-  var OP = 'Asdru20101999';
-
-  window.doLogin = function(){
-    var u = (document.getElementById('loginUser').value||'').trim();
-    var p =  document.getElementById('loginPass').value||'';
-    var err = document.getElementById('loginError');
-    if(u===OU && p===OP){
-      try{ sessionStorage.setItem(SK,'1'); }catch(e){}
-      var ov=document.getElementById('loginOverlay');
-      if(ov){ ov.style.transition='opacity .4s'; ov.style.opacity='0'; setTimeout(function(){ov.style.display='none';},420); }
-      if(err) err.style.display='none';
-    } else {
-      if(err) err.style.display='block';
-      var pe=document.getElementById('loginPass');
-      if(pe){ pe.value=''; pe.focus(); }
-      var bx=document.getElementById('loginBox');
-      if(bx){
-        var dirs=[-8,8,-6,6,-3,3,0],i=0;
-        var iv=setInterval(function(){
-          bx.style.transform='translateX('+dirs[i]+'px)';i++;
-          if(i>=dirs.length){clearInterval(iv);bx.style.transform='';}
-        },40);
-      }
-    }
-  };
-
-  document.addEventListener('DOMContentLoaded',function(){
-    var logged=false;
-    try{ logged=sessionStorage.getItem(SK)==='1'; }catch(e){}
-    var ov=document.getElementById('loginOverlay');
-    if(!ov)return;
-    if(logged){ ov.style.display='none'; }
-    else{ ov.style.display='flex'; setTimeout(function(){var u=document.getElementById('loginUser');if(u)u.focus();},150); }
-  });
-})();
-</script>
-
-<script>
-(function(){
-  function loadScript(src,cb){var s=document.createElement('script');s.src=src;s.onload=cb||function(){};s.onerror=function(){console.warn('CDN failed:',src);};document.head.appendChild(s);}
-  loadScript('https://unpkg.com/firebase@9.22.0/compat/app.js',function(){
-    loadScript('https://unpkg.com/firebase@9.22.0/compat/database.js',function(){
-      if(typeof initFirebase==='function') initFirebase();
-    });
-  });
-})();
-</script>
-
 </body>
 </html>
