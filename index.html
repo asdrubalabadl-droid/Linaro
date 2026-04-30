@@ -19,9 +19,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Linaro — Presupuestación Arquitectónica</title>
 <meta name="description" content="Linaro — Presupuestación profesional de cocinas, closets, obras civiles, despiece de carpintería, melamínicos y planos con muebles">
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <style>
@@ -1279,35 +1276,45 @@ window.goTab=function(id,btn){
 
 /* ===== FIREBASE + localStorage ===== */
 
-// ── Firebase init ──────────────────────────────────────────────────────────
-const firebaseConfig = {
-  apiKey: "AIzaSyBjjJMG04Uwo5Pe89Fu3ero_afILIpIAjg",
-  authDomain: "linaroarq.firebaseapp.com",
-  databaseURL: "https://linaroarq-default-rtdb.firebaseio.com",
-  projectId: "linaroarq",
-  storageBucket: "linaroarq.firebasestorage.app",
-  messagingSenderId: "442475602899",
-  appId: "1:442475602899:web:f466e47e6518b283d10526",
-  measurementId: "G-FV647WY3DD"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+// ── Firebase init (safe — deferred) ────────────────────────────────────────
+let db = null;
 let fbConnected = false;
 
-// ── Connection status ──────────────────────────────────────────────────────
-db.ref('.info/connected').on('value', snap => {
-  fbConnected = snap.val() === true;
-  const badge = document.getElementById('syncBadge');
-  const txt   = document.getElementById('syncText');
-  if (!badge) return;
-  if (fbConnected) {
-    badge.className = 'online-badge connected';
-    txt.textContent = 'Firebase conectado';
-  } else {
-    badge.className = 'online-badge offline';
-    txt.textContent = 'Sin conexión';
+function initFirebase(){
+  if(typeof firebase === 'undefined'){
+    console.warn('Firebase SDK not loaded, running in offline mode');
+    return;
   }
-});
+  try {
+    if(!firebase.apps.length){
+      firebase.initializeApp({
+        apiKey: "AIzaSyBjjJMG04Uwo5Pe89Fu3ero_afILIpIAjg",
+        authDomain: "linaroarq.firebaseapp.com",
+        databaseURL: "https://linaroarq-default-rtdb.firebaseio.com",
+        projectId: "linaroarq",
+        storageBucket: "linaroarq.firebasestorage.app",
+        messagingSenderId: "442475602899",
+        appId: "1:442475602899:web:f466e47e6518b283d10526"
+      });
+    }
+    db = firebase.database();
+    db.ref('.info/connected').on('value', snap => {
+      fbConnected = snap.val() === true;
+      const badge = document.getElementById('syncBadge');
+      const txt   = document.getElementById('syncText');
+      if(!badge) return;
+      if(fbConnected){
+        badge.className = 'online-badge connected';
+        txt.textContent = 'Firebase ☁️';
+      } else {
+        badge.className = 'online-badge offline';
+        txt.textContent = 'Sin conexión';
+      }
+    });
+  } catch(e){
+    console.warn('Firebase init error:', e);
+  }
+}
 
 function setSyncing(on) {
   const badge = document.getElementById('syncBadge');
@@ -1335,7 +1342,7 @@ function dbSaveAllLocal(projects) {
 
 // ── Save to Firebase ───────────────────────────────────────────────────────
 async function fbSaveProject(snap) {
-  if (!fbConnected) return false;
+  if (!fbConnected || !db) return false;
   setSyncing(true);
   try {
     const key = snap.projectName.replace(/[.#$\[\]]/g, '_');
@@ -1351,7 +1358,7 @@ async function fbSaveProject(snap) {
 
 // ── Load all from Firebase ─────────────────────────────────────────────────
 async function fbLoadAll() {
-  if (!fbConnected) return null;
+  if (!fbConnected || !db) return null;
   try {
     const snap = await db.ref('projects').get();
     if (!snap.exists()) return [];
@@ -1849,192 +1856,56 @@ window.goTab=function(id,btn){
   if(id==='database') dbRender();
 };
 
+
+
+
+
 /* ===== LOGIN ===== */
-const LOGIN_KEY = 'linaro_session_v1';
+const LOGIN_KEY  = 'linaro_sess';
 const VALID_USER = 'Linaro';
 const VALID_PASS = 'Asdru20101999';
 
 function doLogin(){
-  const u = document.getElementById('loginUser').value.trim();
-  const p = document.getElementById('loginPass').value;
-  const err = document.getElementById('loginErr');
-  if(u === VALID_USER && p === VALID_PASS){
-    sessionStorage.setItem(LOGIN_KEY,'1');
-    document.getElementById('loginScreen').style.display='none';
-    err.style.display='none';
-    // trigger autosave restore after login
-    try{
-      const as=localStorage.getItem(AUTOSAVE_KEY);
-      if(as){const snap=JSON.parse(as);if((snap.items&&snap.items.length)||(snap.melaminicos&&snap.melaminicos.length)){dbRestore(snap);showAutosave('Sesión anterior restaurada');}}
-    }catch(e){}
-    setTimeout(dbRender,1500);
-  } else {
-    err.style.display='block';
-    document.getElementById('loginPass').value='';
-    document.getElementById('loginPass').focus();
-    // shake animation
-    const box=document.querySelector('.login-box');
-    box.style.transform='translateX(-8px)';
-    setTimeout(()=>{box.style.transform='translateX(8px)';},80);
-    setTimeout(()=>{box.style.transform='translateX(-5px)';},160);
-    setTimeout(()=>{box.style.transform='translateX(0)';},240);
-    box.style.transition='transform .08s';
-  }
-}
-
-// Check session on load — if already logged in skip login screen
-(function(){
-  if(sessionStorage.getItem(LOGIN_KEY)==='1'){
-    const ls=document.getElementById('loginScreen');
-    if(ls) ls.style.display='none';
-  }
-})();
-
-/* ===== LOGIN ===== */
-(function(){
-  var LS_SESSION = 'linaro_sess_v1';
-  var VALID_USER = 'Linaro';
-  var VALID_PASS = 'Asdru20101999';
-
-  function doLogin(){
-    var u = document.getElementById('loginUser').value.trim();
-    var p = document.getElementById('loginPass').value;
-    var err = document.getElementById('loginErr');
-    if(u === VALID_USER && p === VALID_PASS){
-      sessionStorage.setItem(LS_SESSION,'1');
-      document.getElementById('loginScreen').style.display='none';
-      err.style.display='none';
-    } else {
-      err.style.display='block';
-      document.getElementById('loginPass').value='';
-      document.getElementById('loginPass').focus();
-    }
-  }
-  window.doLogin = doLogin;
-
-  // enter key on password field
-  document.addEventListener('DOMContentLoaded', function(){
-    var passEl = document.getElementById('loginPass');
-    var userEl = document.getElementById('loginUser');
-    if(passEl) passEl.addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
-    if(userEl) userEl.addEventListener('keydown', function(e){ if(e.key==='Enter') passEl.focus(); });
-  });
-
-  // if already logged in this tab, hide login
-  if(sessionStorage.getItem(LS_SESSION)==='1'){
-    var ls = document.getElementById('loginScreen');
-    if(ls) ls.style.display='none';
-  }
-})();
-
-
-/* ===== LOGIN ===== */
-const LOGIN_KEY = 'linaro_session_v1';
-const CORRECT_USER = 'Linaro';
-const CORRECT_PASS = 'Asdru20101999';
-
-function doLogin() {
-  const user = document.getElementById('loginUser').value.trim();
-  const pass = document.getElementById('loginPass').value;
-  const err  = document.getElementById('loginError');
-  if (user === CORRECT_USER && pass === CORRECT_PASS) {
-    // save session
-    sessionStorage.setItem(LOGIN_KEY, '1');
-    // hide overlay with fade
-    const overlay = document.getElementById('loginOverlay');
-    overlay.style.transition = 'opacity .5s';
-    overlay.style.opacity = '0';
-    setTimeout(() => { overlay.style.display = 'none'; }, 500);
-    err.style.display = 'none';
-  } else {
-    err.style.display = 'block';
-    document.getElementById('loginPass').value = '';
-    document.getElementById('loginPass').focus();
-    // shake animation
-    const box = overlay ? overlay.querySelector('.login-box') : null;
-    if (box) {
-      box.style.animation = 'none';
-      box.style.transform = 'translateX(-8px)';
-      setTimeout(() => box.style.transform = 'translateX(8px)', 80);
-      setTimeout(() => box.style.transform = 'translateX(-5px)', 160);
-      setTimeout(() => box.style.transform = 'translateX(5px)', 240);
-      setTimeout(() => box.style.transform = 'translateX(0)',   320);
-    }
-  }
-}
-
-// check session on load
-(function checkSession() {
-  if (sessionStorage.getItem(LOGIN_KEY) === '1') {
-    const overlay = document.getElementById('loginOverlay');
-    if (overlay) overlay.style.display = 'none';
-  } else {
-    // focus user field
-    setTimeout(() => {
-      const u = document.getElementById('loginUser');
-      if (u) u.focus();
-    }, 300);
-  }
-})();
-
-/* ===== LOGIN ===== */
-const LOGIN_KEY = 'linaro_session';
-const VALID_USER = 'Linaro';
-const VALID_PASS = 'Asdru20101999';
-
-function doLogin(){
-  const u = (document.getElementById('loginUser').value || '').trim();
-  const p = (document.getElementById('loginPass').value || '');
+  const u = (document.getElementById('loginUser').value||'').trim();
+  const p = (document.getElementById('loginPass').value||'');
   const err = document.getElementById('loginError');
-  if(u === VALID_USER && p === VALID_PASS){
-    try {
-      sessionStorage.setItem(LOGIN_KEY, JSON.stringify({user:u, exp: Date.now() + 8*60*60*1000}));
-    } catch(e) {}
-    const overlay = document.getElementById('loginOverlay');
-    if(overlay){
-      overlay.style.transition = 'opacity .35s';
-      overlay.style.opacity = '0';
-      setTimeout(()=>{ overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 380);
-    }
-    if(err) err.style.display = 'none';
+  if(u===VALID_USER && p===VALID_PASS){
+    try{ sessionStorage.setItem(LOGIN_KEY, JSON.stringify({u,exp:Date.now()+8*3600000})); }catch(e){}
+    const ov=document.getElementById('loginOverlay');
+    if(ov){ ov.style.transition='opacity .35s'; ov.style.opacity='0'; setTimeout(()=>ov.style.display='none',380); }
+    if(err) err.style.display='none';
   } else {
-    if(err) err.style.display = 'block';
-    const passEl = document.getElementById('loginPass');
-    if(passEl){ passEl.value = ''; passEl.focus(); }
-    const box = document.querySelector('.login-box');
-    if(box){
-      box.style.transition = 'transform .08s';
-      let count = 0;
-      const dirs = [-8,8,-6,6,-4,4,-2,2,0];
-      const shake = setInterval(()=>{
-        box.style.transform = `translateX(${dirs[count]}px)`;
-        count++;
-        if(count >= dirs.length){ clearInterval(shake); box.style.transform = ''; }
-      }, 40);
+    if(err) err.style.display='block';
+    const pe=document.getElementById('loginPass');
+    if(pe){ pe.value=''; pe.focus(); }
+    const bx=document.querySelector('.login-box');
+    if(bx){
+      let c=0,dirs=[-8,8,-6,6,-4,4,-2,2,0];
+      const iv=setInterval(()=>{bx.style.transform='translateX('+dirs[c]+'px)';c++;if(c>=dirs.length){clearInterval(iv);bx.style.transform='';}},40);
     }
   }
 }
 
 function checkSession(){
-  try {
-    const raw = sessionStorage.getItem(LOGIN_KEY);
-    if(!raw) return false;
-    const s = JSON.parse(raw);
-    return s && s.user === VALID_USER && s.exp > Date.now();
-  } catch(e){ return false; }
+  try{
+    const s=JSON.parse(sessionStorage.getItem(LOGIN_KEY)||'null');
+    return s&&s.u===VALID_USER&&s.exp>Date.now();
+  }catch(e){return false;}
 }
 
-document.addEventListener('DOMContentLoaded', function(){
-  const overlay = document.getElementById('loginOverlay');
-  if(!overlay) return;
+document.addEventListener('DOMContentLoaded',function(){
+  const ov=document.getElementById('loginOverlay');
+  if(!ov)return;
   if(checkSession()){
-    overlay.style.display = 'none';
+    ov.style.display='none';
   } else {
-    overlay.style.display = 'flex';
-    setTimeout(()=>{ const u=document.getElementById('loginUser'); if(u) u.focus(); }, 100);
+    ov.style.display='flex';
+    setTimeout(()=>{const u=document.getElementById('loginUser');if(u)u.focus();},150);
   }
 });
 
 </script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" onload="initFirebase()" onerror="console.warn('Firebase SDK failed to load')"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </body>
 </html>
