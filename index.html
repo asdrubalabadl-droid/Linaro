@@ -1656,6 +1656,58 @@ window.goTab=function(id,btn){
 
 
 
+
+/* ===== LOGIN ===== */
+(function(){
+  var SK = 'ln1';
+  var OU = 'Linaro';
+  var OP = 'Asdru20101999';
+
+  window.doLogin = function(){
+    var u = (document.getElementById('loginUser').value||'').trim();
+    var p =  document.getElementById('loginPass').value||'';
+    var err = document.getElementById('loginError');
+    if(u===OU && p===OP){
+      try{ sessionStorage.setItem(SK,'1'); }catch(e){}
+      var ov=document.getElementById('loginOverlay');
+      if(ov){
+        ov.style.transition='opacity .4s';
+        ov.style.opacity='0';
+        setTimeout(function(){ ov.style.display='none'; },420);
+      }
+      if(err) err.style.display='none';
+    } else {
+      if(err) err.style.display='block';
+      var pe=document.getElementById('loginPass');
+      if(pe){ pe.value=''; pe.focus(); }
+      var bx=document.getElementById('loginBox');
+      if(bx){
+        var dirs=[-8,8,-6,6,-3,3,0],i=0;
+        var iv=setInterval(function(){
+          bx.style.transform='translateX('+dirs[i]+'px)';
+          i++;
+          if(i>=dirs.length){ clearInterval(iv); bx.style.transform=''; }
+        },40);
+      }
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded',function(){
+    var logged=false;
+    try{ logged=sessionStorage.getItem(SK)==='1'; }catch(e){}
+    var ov=document.getElementById('loginOverlay');
+    if(!ov) return;
+    if(logged){
+      ov.style.display='none';
+    } else {
+      ov.style.display='flex';
+      setTimeout(function(){
+        var u=document.getElementById('loginUser');
+        if(u) u.focus();
+      },150);
+    }
+  });
+})();
 </script>
 </body>
 </html>
