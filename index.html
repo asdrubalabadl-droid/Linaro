@@ -1234,13 +1234,7 @@ function v3updList(){
   el.innerHTML=v3rooms.map((r,i)=>`<div class="v3d-ritem"><span><span class="cbadge" style="background:${RCOLS[i%RCOLS.length]}"></span>${r.name} <span style="font-size:10px;opacity:.6">${r.w}×${r.h}m</span></span><button onclick="v3rooms.splice(${i},1);v3rebuild();v3updList()" style="border:none;background:none;cursor:pointer;color:#A32D2D;font-size:13px">×</button></div>`).join('');
 }
 
-// init when 3D tab is clicked
-const origGoTab=window.goTab;
-window.goTab=function(id,btn){
-  origGoTab(id,btn);
-  if(id==='vista3d'&&!v3inited){v3inited=v3init();v3rebuild();}
-  else if(id==='vista3d'){v3render();}
-};
+// 3D init handled by central goTab
 })();
 
 
@@ -1479,10 +1473,21 @@ window.addEventListener('load', () => {
 });
 
 // ── Override goTab ────────────────────────────────────────────────────────
-const _origGoTab2 = window.goTab;
-window.goTab = function(id, btn) {
-  _origGoTab2(id, btn);
-  if (id === 'database') dbRender();
+// ── Central tab switch handler ──
+var _baseGoTab = window.goTab;
+window.goTab = function(id, btn){
+  _baseGoTab(id, btn);
+  if(id === 'database'){
+    dbRender();
+  }
+  if(id === 'vista3d'){
+    if(!v3inited){
+      v3inited = v3init();
+      v3rebuild();
+    } else {
+      setTimeout(function(){ v3render(); }, 80);
+    }
+  }
 };
 const DB_KEY = 'linaro_projects_v1';
 const AUTOSAVE_KEY = 'linaro_autosave_v1';
@@ -1720,11 +1725,7 @@ window.addEventListener('load',()=>{
 });
 
 // ── Override goTab to render DB when entering ─────────────────────────────────
-const _origGoTab=window.goTab;
-window.goTab=function(id,btn){
-  _origGoTab(id,btn);
-  if(id==='database') dbRender();
-};
+// DB render handled by central goTab
 
 
 
@@ -1765,6 +1766,25 @@ window.goTab=function(id,btn){
         },40);
       }
     }
+  };
+
+  // ── Import rooms from floor plan ──────────────────────────────────────
+  window.v3importFromPlan = function(){
+    if(!pRooms || !pRooms.length){
+      toast('No hay ambientes en el Plano. Agrégalos primero en la pestaña Planos.');
+      return;
+    }
+    v3rooms = [];
+    v3furns = [];
+    v3furnOff = 0;
+    pRooms.forEach(function(r){
+      var alt = 2.6;
+      var col = {kitchen:'#EEF5E8',closet:'#EFEEFD',bath:'#E8F5F0',bed:'#F5EEF4',room:'#F5F0E8'}[r.type]||'#F5F0E8';
+      v3rooms.push({name:r.name, w:r.W||r.w, h:r.H||r.h, alt:alt, col:col, ox:r.x||0, oz:r.y||0});
+    });
+    v3rebuild();
+    v3updList();
+    toast('✓ '+v3rooms.length+' ambiente(s) importados desde el Plano');
   };
 
   document.addEventListener('DOMContentLoaded',function(){
