@@ -82,6 +82,8 @@ td input:focus{background:var(--bg3);padding:2px 5px;border-radius:4px}
 .empty{text-align:center;padding:48px 20px;color:var(--text2)}
 .empty-icon{font-size:30px;margin-bottom:10px}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.inv-tab{padding:0 16px;border:none;background:none;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:inherit;height:40px}
+.inv-tab:hover{color:var(--text)}.inv-tab.on{color:var(--text);border-bottom-color:var(--gold);font-weight:500}
 .toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:var(--green-l);padding:11px 18px;border-radius:var(--r);font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:340px}
 .toast.show{opacity:1}
 footer{text-align:center;padding:32px;font-size:12px;color:var(--text3);border-top:.5px solid var(--border);background:var(--bg2)}
@@ -451,8 +453,8 @@ footer span{color:var(--gold);font-weight:500}
 
   <!-- Sub-tabs -->
   <div style="display:flex;gap:2px;border-bottom:.5px solid var(--border);margin-bottom:20px">
-    <button class="nt on" id="invTab1" onclick="switchInvTab('tableros',this)" style="height:40px;padding:0 16px">🪵 Tableros melamínicos</button>
-    <button class="nt"    id="invTab2" onclick="switchInvTab('tapacanto',this)" style="height:40px;padding:0 16px">📏 Tapacanto</button>
+    <button class="inv-tab on" id="invTab1" onclick="switchInvTab('tableros',this)" style="height:40px;padding:0 16px">🪵 Tableros melamínicos</button>
+    <button class="inv-tab" id="invTab2" onclick="switchInvTab('tapacanto',this)" style="height:40px;padding:0 16px">📏 Tapacanto</button>
   </div>
 
   <!-- ── TABLEROS ── -->
@@ -689,7 +691,13 @@ const TPLS={
   civil:[{d:'Demolición y limpieza de área',u:'m²',q:0,p:0},{d:'Mampostería de bloque',u:'m²',q:0,p:0},{d:'Repello y friso de paredes',u:'m²',q:0,p:0},{d:'Nivelación de piso con mortero',u:'m²',q:0,p:0},{d:'Revestimiento piso porcelanato',u:'m²',q:0,p:0},{d:'Pintura de paredes (2 manos)',u:'m²',q:0,p:0},{d:'Instalación eléctrica — puntos',u:'pto',q:0,p:0},{d:'Instalación sanitaria — puntos',u:'pto',q:0,p:0},{d:'Mano de obra general',u:'gbl',q:1,p:0}]
 };
 
-function goTab(id,btn){document.querySelectorAll('.module').forEach(m=>m.classList.remove('on'));document.querySelectorAll('.nt').forEach(t=>t.classList.remove('on'));document.getElementById(id).classList.add('on');btn.classList.add('on');}
+function goTab(id,btn){
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('on'));
+  document.querySelectorAll('.nt').forEach(t=>t.classList.remove('on'));
+  var el=document.getElementById(id);
+  if(el) el.classList.add('on');
+  if(btn) btn.classList.add('on');
+}
 function setCat(cat,btn){curCat=cat;document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
 function loadTpl(){items=(TPLS[curCat]||[]).map(t=>({id:uid(),d:t.d,u:t.u,q:t.q,p:t.p}));renderTbl();}
 function addRow(){items.push({id:uid(),d:'',u:'und',q:1,p:0});renderTbl();}
@@ -737,9 +745,11 @@ function addMel(){
   const m={id:uid(),nombre,color:document.getElementById('mColor').value,proveedor:document.getElementById('mProv').value,ancho:parseFloat(document.getElementById('mAncho').value)||2440,alto:parseFloat(document.getElementById('mAlto').value)||1220,espesor:parseFloat(document.getElementById('mEspesor').value)||18,precio:parseFloat(document.getElementById('mPrecio').value)||0,moneda:document.getElementById('mMoneda').value,stock:parseInt(document.getElementById('mStock').value),notas:document.getElementById('mNotas').value};
   melaminicos.push(m);renderMelList();updateMatSelect();
   document.getElementById('mNombre').value='';document.getElementById('mColor').value='';document.getElementById('mNotas').value='';
+  saveMelLocal();
+  updateMatSelect();
   toast(`✓ "${m.nombre}" registrado en la biblioteca`);
 }
-function delMel(id){melaminicos=melaminicos.filter(m=>m.id!==id);renderMelList();updateMatSelect();}
+function delMel(id){melaminicos=melaminicos.filter(m=>m.id!==id);saveMelLocal();renderMelList();updateMatSelect();}
 function renderMelList(){
   const list=document.getElementById('melList');
   document.getElementById('melCount').textContent=`${melaminicos.length} material${melaminicos.length!==1?'es':''} registrado${melaminicos.length!==1?'s':''}`;
@@ -1198,7 +1208,7 @@ function v3rebuild(){
 }
 
 function v3render(){
-  const canvas=document.getElementById('c3d');if(!canvas||!gl3)return;
+  var canvas=document.getElementById('c3d');if(!canvas||!gl3)return;
   const cw=canvas.parentElement;canvas.width=cw.clientWidth;canvas.height=cw.clientHeight;
   gl3.viewport(0,0,canvas.width,canvas.height);gl3.clear(gl3.COLOR_BUFFER_BIT|gl3.DEPTH_BUFFER_BIT);
   const asp=canvas.width/canvas.height,proj=v3persp(Math.PI/3.2,asp,.1,200);
@@ -1227,8 +1237,8 @@ window.v3setView=function(m,btn){
   v3render();
 };
 window.v3resetCam=function(){v3theta=Math.PI/5;v3phi=Math.PI/4;v3dist=12;v3tx=v3ty=v3tz=0;v3render();};
-window.v3toggleWalls=function(){v3showW=!v3showW;const b=document.getElementById('v3btnW');b.textContent='Muros '+(v3showW?'ON':'OFF');b.className='v3d-btn'+(v3showW?' on':'');v3render();};
-window.v3toggleCeil=function(){v3showC=!v3showC;const b=document.getElementById('v3btnC');b.textContent='Techo '+(v3showC?'ON':'OFF');b.className='v3d-btn'+(v3showC?' on':'');v3render();};
+window.v3toggleWalls=function(){v3showW=!v3showW;var b=document.getElementById('v3btnW');if(b){b.textContent='Muros '+(v3showW?'ON':'OFF');b.className='v3d-btn'+(v3showW?' on':'');}v3render();};
+window.v3toggleCeil=function(){v3showC=!v3showC;var b=document.getElementById('v3btnC');if(b){b.textContent='Techo '+(v3showC?'ON':'OFF');b.className='v3d-btn'+(v3showC?' on':'');}v3render();};
 function v3updList(){
   const el=document.getElementById('v3rList');if(!el)return;
   el.innerHTML=v3rooms.map((r,i)=>`<div class="v3d-ritem"><span><span class="cbadge" style="background:${RCOLS[i%RCOLS.length]}"></span>${r.name} <span style="font-size:10px;opacity:.6">${r.w}×${r.h}m</span></span><button onclick="v3rooms.splice(${i},1);v3rebuild();v3updList()" style="border:none;background:none;cursor:pointer;color:#A32D2D;font-size:13px">×</button></div>`).join('');
@@ -1294,6 +1304,8 @@ function dbRestore(snap) {
   pFurn          = snap.pFurn          || [];
   tapacantosInv  = snap.tapacantosInv  || [];
   renderTcList();
+  saveMelLocal();
+  saveTcLocal();
   renderTbl(); renderCuts(); updateMatSelect();
   updRList(); pRender(); recalc(); recalcDis();
 }
@@ -1489,8 +1501,15 @@ window.goTab = function(id, btn){
     }
   }
 };
-const DB_KEY = 'linaro_projects_v1';
+const DB_KEY      = 'linaro_projects_v1';
 const AUTOSAVE_KEY = 'linaro_autosave_v1';
+const MEL_KEY     = 'linaro_mel_v1';
+const TC_KEY      = 'linaro_tc_v1';
+
+function saveMelLocal(){ try{ localStorage.setItem(MEL_KEY, JSON.stringify(melaminicos)); }catch(e){} }
+function saveTcLocal(){  try{ localStorage.setItem(TC_KEY,  JSON.stringify(tapacantosInv)); }catch(e){} }
+function loadMelLocal(){ try{ return JSON.parse(localStorage.getItem(MEL_KEY)||'[]'); }catch(e){ return []; } }
+function loadTcLocal(){  try{ return JSON.parse(localStorage.getItem(TC_KEY)||'[]');  }catch(e){ return []; } }
 
 function dbGetAll(){
   try { return JSON.parse(localStorage.getItem(DB_KEY)||'[]'); }
@@ -1788,6 +1807,14 @@ window.addEventListener('load',()=>{
   };
 
   document.addEventListener('DOMContentLoaded',function(){
+    // ── Restore persistent libraries ──
+    var savedMel = loadMelLocal();
+    if(savedMel.length){ melaminicos = savedMel; renderMelList(); updateMatSelect(); }
+
+    var savedTc = loadTcLocal();
+    if(savedTc.length){ tapacantosInv = savedTc; renderTcList(); }
+
+    // ── Login check ──
     var logged=false;
     try{ logged=sessionStorage.getItem(SK)==='1'; }catch(e){}
     var ov=document.getElementById('loginOverlay');
@@ -1808,7 +1835,7 @@ window.addEventListener('load',()=>{
 let tapacantosInv = [];
 
 function switchInvTab(tab, btn){
-  document.querySelectorAll('[id^=invTab]').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.inv-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   document.getElementById('invTableros').style.display  = tab==='tableros'  ? 'block' : 'none';
   document.getElementById('invTapacanto').style.display = tab==='tapacanto' ? 'block' : 'none';
@@ -1839,11 +1866,13 @@ function addTc(){
   document.getElementById('tcProv').value='';
   document.getElementById('tcNotas').value='';
   document.getElementById('tcPrecio').value='0';
+  saveTcLocal();
   toast(`✓ "${t.nombre}" registrado en la biblioteca`);
 }
 
 function delTc(id){
   tapacantosInv = tapacantosInv.filter(t=>t.id!==id);
+  saveTcLocal();
   renderTcList();
 }
 
