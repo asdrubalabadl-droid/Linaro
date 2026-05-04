@@ -2451,6 +2451,218 @@ function renderPgList(){
     </div>`;
   }).join('');
 }
+
+/* ===== PLANO DE CORTE ===== */
+
+// Colors per piece type
+const CP_COLORS = [
+  '#B8D4E8','#B8E8C8','#E8D4B8','#D4B8E8','#E8E8B8',
+  '#B8E8E8','#E8B8D4','#C8D4B8','#D4C8B8','#B8C8E8',
+  '#E8C8B8','#C8E8D4','#D8B8B8','#B8D8C8','#C8C8E8',
+];
+
+function genCutPlan(pid){
+  const piece = pieces.find(p=>p.id===pid);
+  if(!piece){ toast('Módulo no encontrado'); return; }
+
+  // Get sheet dimensions from selected melaminico
+  const matObj = piece.matObj;
+  const sheetW = matObj ? matObj.ancho : 2440; // mm
+  const sheetH = matObj ? matObj.alto  : 1220; // mm
+  const matName = matObj ? matObj.nombre : 'MDF estándar';
+
+  // Determine if grain (beta maderado) - check material name
+  const hasGrain = matObj && /nogal|roble|cerezo|wengué|teka|pino|caoba|cedro|beta|mader|wood|grain|veta|natural/i.test(matObj.nombre + ' ' + (matObj.color||''));
+
+  // Build flat list of pieces to cut (only thick >= 15mm ones for main sheet)
+  let cutList = [];
+  piece.cuts.filter(c => c.thick >= 15).forEach((c, ci) => {
+    const [w, h] = c.dims.split(' × ').map(Number);
+    for(let q = 0; q < c.qty; q++){
+      cutList.push({
+        label: c.n,
+        w: w,    // width in mm
+        h: h,    // height in mm
+        colorIdx: ci % CP_COLORS.length,
+        idx: cutList.length,
+      });
+    }
+  });
+
+  if(!cutList.length){ toast('No hay piezas de tablero para distribuir'); return; }
+
+  // Grain direction: orient piece so longest dimension is horizontal (along sheet width)
+  const KERF = 4; // saw blade kerf in mm
+  const PAD  = 10; // edge padding
+
+  // Orient each piece for grain or max fit
+  cutList = cutList.map(p => {
+    let pw = p.w, ph = p.h;
+    if(hasGrain){
+      // Grain runs horizontally (along sheet width)
+      // Longest side of piece must be horizontal
+      if(ph > pw){ // piece is taller than wide → rotate so long side is horizontal
+        [pw, ph] = [ph, pw];
+      }
+    }
+    return {...p, pw, ph, rotated: pw !== p.w};
+  });
+
+  // Pack using guillotine strip algorithm
+  // Sort by height descending for better packing
+  const sorted = [...cutList].sort((a,b) => b.ph - a.ph || b.pw - a.pw);
+
+  const sheets = [];
+  let placed = [];
+
+  function newSheet(){ return { items:[], usedArea:0, freeRects:[{x:PAD,y:PAD,w:sheetW-PAD*2,h:sheetH-PAD*2}] }; }
+
+  function tryPlace(sheet, pw, ph){
+    // Find best fit (smallest area that fits)
+    let best = null, bestArea = Infinity;
+    for(let r of sheet.freeRects){
+      if(r.w >= pw && r.h >= ph){
+        const area = r.w * r.h;
+        if(area < bestArea){ bestArea = area; best = r; }
+      }
+    }
+    if(!best) return null;
+    // Place here
+    const x = best.x, y = best.y;
+    // Split remaining free space (guillotine cut — maximize rightward)
+    sheet.freeRects = sheet.freeRects.filter(r => r !== best);
+    // Right strip
+    if(best.w - pw - KERF > 20){
+      sheet.freeRects.push({x: x+pw+KERF, y: best.y, w: best.w-pw-KERF, h: best.h});
+    }
+    // Bottom strip of placed piece area
+    if(best.h - ph - KERF > 20){
+      sheet.freeRects.push({x: best.x, y: y+ph+KERF, w: pw, h: best.h-ph-KERF});
+    }
+    sheet.usedArea += pw * ph;
+    return {x, y, pw, ph};
+  }
+
+  let currentSheet = newSheet();
+  for(let item of sorted){
+    const pos = tryPlace(currentSheet, item.pw+KERF, item.ph+KERF);
+    if(pos){
+      currentSheet.items.push({...item, x:pos.x, y:pos.y, pw:item.pw, ph:item.ph});
+    } else {
+      // Try current sheet done, start new
+      sheets.push(currentSheet);
+      currentSheet = newSheet();
+      const pos2 = tryPlace(currentSheet, item.pw+KERF, item.ph+KERF);
+      if(pos2){
+        currentSheet.items.push({...item, x:pos2.x, y:pos2.y, pw:item.pw, ph:item.ph});
+      }
+    }
+  }
+  if(currentSheet.items.length) sheets.push(currentSheet);
+
+  // ── Render ──────────────────────────────────────────────────────────────
+  const totalArea = sheetW * sheetH;
+  const SCALE = Math.min(500/sheetW, 260/sheetH); // px per mm
+
+  let html2 = '';
+  sheets.forEach((sheet, si) => {
+    const utilPct = ((sheet.usedArea/totalArea)*100).toFixed(1);
+    const waste   = (100 - parseFloat(utilPct)).toFixed(1);
+    const svgW    = Math.round(sheetW*SCALE);
+    const svgH    = Math.round(sheetH*SCALE);
+
+    html2 += `
+    <div style="margin-bottom:28px;page-break-inside:avoid">
+      <div class="flexb mb8 wrap gap8">
+        <div>
+          <span style="font-size:14px;font-weight:600">Lámina ${si+1} de ${sheets.length}</span>
+          <span class="tag" style="margin-left:8px">${sheetW} × ${sheetH} mm</span>
+          <span class="tag" style="margin-left:4px">${matName}</span>
+          ${hasGrain?'<span class="badge bbl" style="margin-left:4px">⟷ Beta horizontal</span>':'<span style="margin-left:4px;font-size:11px;color:var(--text2)">Sólido — libre rotación</span>'}
+        </div>
+        <div class="flex gap12">
+          <div class="metric" style="padding:6px 12px"><div class="mlabel">Aprovechamiento</div><div style="font-size:16px;font-weight:600;font-family:monospace;color:${parseFloat(utilPct)>75?'#27500A':parseFloat(utilPct)>50?'#BA7517':'#A32D2D'}">${utilPct}%</div></div>
+          <div class="metric" style="padding:6px 12px"><div class="mlabel">Desperdicio</div><div style="font-size:16px;font-weight:600;font-family:monospace;color:var(--text2)">${waste}%</div></div>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <svg width="${svgW}" height="${svgH}" style="border:2px solid #888;border-radius:4px;background:#F5F0E8;display:block">
+          <!-- sheet boundary -->
+          <rect x="0" y="0" width="${svgW}" height="${svgH}" fill="#F5F0E8"/>
+          <!-- grain lines if applicable -->
+          ${hasGrain ? Array.from({length:Math.floor(svgH/8)},(_,i)=>`<line x1="0" y1="${i*8+4}" x2="${svgW}" y2="${i*8+4}" stroke="#C8B898" stroke-width="0.4" opacity="0.5"/>`).join('') : ''}
+          <!-- pieces -->
+          ${sheet.items.map(item=>{
+            const px=Math.round(item.x*SCALE), py=Math.round(item.y*SCALE);
+            const pw=Math.round(item.pw*SCALE), ph=Math.round(item.ph*SCALE);
+            const col = CP_COLORS[item.colorIdx];
+            const fontSize = Math.max(7, Math.min(11, pw/item.label.length*1.4));
+            // Grain direction arrow on piece
+            const arrow = hasGrain ? `<line x1="${px+6}" y1="${py+ph/2}" x2="${px+pw-6}" y2="${py+ph/2}" stroke="#555" stroke-width="1" marker-end="url(#arr)"/>` : '';
+            const rotTag = item.rotated ? `<text x="${px+pw-4}" y="${py+10}" font-size="7" fill="#888" text-anchor="end" font-family="monospace">↻</text>` : '';
+            return `<g>
+              <rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="${col}" stroke="#555" stroke-width="1" rx="1"/>
+              ${arrow}
+              <text x="${px+pw/2}" y="${py+ph/2-5}" text-anchor="middle" font-size="${fontSize}" font-weight="600" fill="#1a1a1a" font-family="sans-serif">${item.label}</text>
+              <text x="${px+pw/2}" y="${py+ph/2+8}" text-anchor="middle" font-size="7" fill="#444" font-family="monospace">${item.pw}×${item.ph}</text>
+              ${rotTag}
+            </g>`;
+          }).join('')}
+          <!-- edge padding markers -->
+          <rect x="0" y="0" width="${svgW}" height="${svgH}" fill="none" stroke="#BA7517" stroke-width="1.5" stroke-dasharray="4,4"/>
+          <!-- defs for arrow -->
+          <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><polygon points="0 1,6 3,0 5" fill="#555"/></marker></defs>
+        </svg>
+      </div>
+      <!-- Piece legend -->
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+        ${sheet.items.map(item=>`<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:4px;background:${CP_COLORS[item.colorIdx]};color:#1a1a1a;border:.5px solid #999">
+          <span style="font-weight:600">${item.label}</span>
+          <span style="font-family:monospace">${item.pw}×${item.ph}mm${item.rotated?' ↻':''}</span>
+        </span>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  // Summary
+  const totalUsed = sheets.reduce((s,sh)=>s+sh.usedArea,0);
+  const totalSheetArea = sheets.length * totalArea;
+  const globalPct = ((totalUsed/totalSheetArea)*100).toFixed(1);
+
+  html2 += `<div class="card" style="background:var(--green-l);border-color:var(--green-b)">
+    <div class="flex gap12 wrap">
+      <div><div class="mlabel">Total láminas</div><div style="font-size:18px;font-weight:600">${sheets.length}</div></div>
+      <div><div class="mlabel">Piezas distribuidas</div><div style="font-size:18px;font-weight:600">${cutList.length}</div></div>
+      <div><div class="mlabel">Aprovechamiento global</div><div style="font-size:18px;font-weight:600;color:var(--green)">${globalPct}%</div></div>
+      <div><div class="mlabel">Material</div><div style="font-size:14px;font-weight:500">${matName}</div></div>
+      ${hasGrain?'<div><div class="mlabel">Dirección de beta</div><div style="font-size:13px">⟷ Horizontal (a lo largo)</div></div>':''}
+    </div>
+  </div>`;
+
+  // Show modal
+  document.getElementById('cpTitle').textContent = `Plano de corte — ${piece.name}`;
+  document.getElementById('cpSubtitle').textContent = `${sheets.length} lámina(s) de ${sheetW}×${sheetH}mm · ${matName}${hasGrain?' · Beta maderado':''}`;
+  document.getElementById('cpContent').innerHTML = html2;
+  document.getElementById('cutPlanModal').style.display = 'block';
+}
 </script>
+
+<!-- CUT PLAN MODAL -->
+<div id="cutPlanModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9998;overflow:auto;padding:24px">
+  <div style="background:var(--bg2);border-radius:var(--rl);max-width:1100px;margin:0 auto;overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:.5px solid var(--border);background:var(--bg3)">
+      <div>
+        <div style="font-size:16px;font-weight:600" id="cpTitle">Plano de corte</div>
+        <div style="font-size:12px;color:var(--text2)" id="cpSubtitle"></div>
+      </div>
+      <div class="flex gap8">
+        <button class="btn btn-green" onclick="window.print()">🖨 Imprimir</button>
+        <button class="btn" onclick="document.getElementById('cutPlanModal').style.display='none'">✕ Cerrar</button>
+      </div>
+    </div>
+    <div style="padding:20px" id="cpContent"></div>
+  </div>
+</div>
+
 </body>
 </html>
