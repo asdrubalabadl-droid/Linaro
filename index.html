@@ -571,6 +571,160 @@ footer span{color:var(--gold);font-weight:500}
     </div>
   </div>
 
+  <!-- ── ADHESIVOS ── -->
+  <div id="invAdhesivos" style="display:none">
+    <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start" class="two-col">
+      <div class="card">
+        <div class="sl">Registrar adhesivo</div>
+        <div class="field"><label>Tipo de adhesivo</label>
+          <select id="adTipo" onchange="adTipoChange()">
+            <option value="pega_amarilla">Pega amarilla (contacto)</option>
+            <option value="pega_blanca">Pega blanca (PVA)</option>
+            <option value="silicon">Silicón</option>
+            <option value="otro">Otro adhesivo</option>
+          </select>
+        </div>
+        <div class="field"><label>Marca / referencia</label>
+          <input type="text" id="adMarca" placeholder="Ej: Pega amarilla 3M, Titebond…">
+        </div>
+        <div class="field"><label>Descripción</label>
+          <input type="text" id="adDesc" placeholder="Uso, características especiales…">
+        </div>
+        <div class="g2">
+          <div class="field"><label>Presentación</label>
+            <select id="adPres">
+              <option value="litro">Litro</option>
+              <option value="galon">Galón</option>
+              <option value="kg">Kilogramo</option>
+              <option value="unidad">Unidad</option>
+            </select>
+          </div>
+          <div class="field"><label>Cantidad por envase</label>
+            <input type="number" id="adCant" value="1" step="0.1" min="0.1">
+          </div>
+          <div class="field"><label>Precio por envase</label>
+            <input type="number" id="adPrecio" value="0" step="0.01">
+          </div>
+          <div class="field"><label>Moneda</label>
+            <select id="adMoneda"><option>USD</option><option>Bs</option><option>COP</option></select>
+          </div>
+          <div class="field"><label>Rendimiento (m² / litro)</label>
+            <input type="number" id="adRend" value="0" step="0.1" placeholder="0 = no aplica">
+          </div>
+          <div class="field"><label>Stock</label>
+            <select id="adStock"><option value="1">En stock</option><option value="0">Sin stock</option></select>
+          </div>
+        </div>
+        <div class="field"><label>Proveedor</label>
+          <input type="text" id="adProv" placeholder="Nombre del proveedor">
+        </div>
+        <div class="field"><label>Notas de uso</label>
+          <input type="text" id="adNotas" placeholder="Ej: para tapacanto PVC, tiempo de secado…">
+        </div>
+        <button class="btn btn-gold" onclick="addAd()" style="width:100%">+ Registrar adhesivo</button>
+      </div>
+      <div>
+        <div class="flexb mb12">
+          <div style="font-size:14px;font-weight:600">Biblioteca de adhesivos</div>
+          <span class="muted" style="font-size:12px" id="adCount">0 referencias registradas</span>
+        </div>
+        <!-- Quick add buttons -->
+        <div class="flex gap8 wrap mb12">
+          <button class="btn btn-sm" onclick="quickAddAd('pega_amarilla')">+ Pega amarilla</button>
+          <button class="btn btn-sm" onclick="quickAddAd('pega_blanca')">+ Pega blanca</button>
+          <button class="btn btn-sm" onclick="quickAddAd('silicon')">+ Silicón</button>
+        </div>
+        <div id="adList">
+          <div class="empty card">
+            <div class="empty-icon">🧴</div>
+            <p>Registra tus adhesivos</p>
+            <p style="font-size:12px;margin-top:6px;color:var(--text3)">Pega amarilla · Pega blanca · Silicón — con precio y rendimiento por m²</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PEGAMENTOS ── -->
+  <div id="invPegamento" style="display:none">
+    <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start" class="two-col">
+      <div class="card">
+        <div class="sl">Registrar pegamento</div>
+        <div class="field"><label>Tipo de pega</label>
+          <select id="pgTipo" onchange="pgTipoChange()">
+            <option value="amarilla">Pega amarilla (contacto)</option>
+            <option value="blanca">Pega blanca (PVA)</option>
+            <option value="otro">Otro adhesivo</option>
+          </select>
+        </div>
+        <div class="field"><label>Marca / referencia</label>
+          <input type="text" id="pgNombre" placeholder="Ej: Pega amarilla Quilosa 1L">
+        </div>
+        <div class="field"><label>Descripción / uso</label>
+          <input type="text" id="pgDesc" placeholder="Para tapacanto, laminado…">
+        </div>
+        <div class="field"><label>Presentación</label>
+          <select id="pgPres">
+            <option value="250ml">250 ml</option>
+            <option value="500ml">500 ml</option>
+            <option value="1L" selected>1 Litro</option>
+            <option value="4L">4 Litros (galón)</option>
+            <option value="20L">20 Litros (cubeta)</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="g2">
+          <div class="field"><label>Rendimiento (m²/L)</label>
+            <input type="number" id="pgRend" value="8" step="0.5" min="0">
+          </div>
+          <div class="field"><label>Precio por unidad</label>
+            <input type="number" id="pgPrecio" value="0" step="0.01">
+          </div>
+          <div class="field"><label>Moneda</label>
+            <select id="pgMoneda"><option>USD</option><option>Bs</option><option>COP</option></select>
+          </div>
+          <div class="field"><label>Stock (unidades)</label>
+            <input type="number" id="pgStock" value="0" min="0" step="1">
+          </div>
+        </div>
+        <div class="field"><label>Proveedor</label>
+          <input type="text" id="pgProv" placeholder="Nombre del proveedor">
+        </div>
+        <div class="field"><label>Notas</label>
+          <input type="text" id="pgNotas" placeholder="Observaciones…">
+        </div>
+        <button class="btn btn-gold" onclick="addPg()" style="width:100%">+ Registrar pegamento</button>
+      </div>
+      <div>
+        <div class="flexb mb12">
+          <div style="font-size:14px;font-weight:600">Inventario de pegamentos</div>
+          <span class="muted" style="font-size:12px" id="pgCount">0 productos registrados</span>
+        </div>
+        <!-- quick add cards -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+          <div class="card" style="padding:12px 14px;cursor:pointer;border-color:#E8C44A;background:#FFFBEA" onclick="quickPg('amarilla')">
+            <div style="font-size:22px;margin-bottom:4px">🟡</div>
+            <div style="font-size:13px;font-weight:600;color:#A07800">Pega amarilla</div>
+            <div style="font-size:11px;color:#C09000">Contacto · tapacanto · laminado</div>
+          </div>
+          <div class="card" style="padding:12px 14px;cursor:pointer;border-color:#B0C8E8;background:#F0F6FF" onclick="quickPg('blanca')">
+            <div style="font-size:22px;margin-bottom:4px">⚪</div>
+            <div style="font-size:13px;font-weight:600;color:#2060A0">Pega blanca</div>
+            <div style="font-size:11px;color:#3070B0">PVA · madera · enchape</div>
+          </div>
+        </div>
+        <div id="pgList">
+          <div class="empty card">
+            <div class="empty-icon">🪣</div>
+            <p>Registra tus pegamentos</p>
+            <p style="font-size:12px;margin-top:6px;color:var(--text3)">Pega amarilla · Pega blanca · Adhesivos · con precio y rendimiento</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 </div>
 
 <!-- ========= PLANOS ========= -->
@@ -1282,6 +1436,9 @@ function dbSnapshot() {
     pRooms:      JSON.parse(JSON.stringify(pRooms)),
     pFurn:       JSON.parse(JSON.stringify(pFurn)),
     tapacantosInv: JSON.parse(JSON.stringify(tapacantosInv)),
+    pegamentosInv:  JSON.parse(JSON.stringify(pegamentosInv)),
+    pegamentosInv:  JSON.parse(JSON.stringify(pegamentosInv)),
+    adhesivosInv:  JSON.parse(JSON.stringify(adhesivosInv)),
   };
 }
 
@@ -1304,8 +1461,17 @@ function dbRestore(snap) {
   pFurn          = snap.pFurn          || [];
   tapacantosInv  = snap.tapacantosInv  || [];
   renderTcList();
+  adhesivosInv  = snap.adhesivosInv  || [];
+  renderAdList();
+  saveAdLocal();
+  pegamentosInv  = snap.pegamentosInv  || [];
+  renderPgList();
+  pegamentosInv  = snap.pegamentosInv  || [];
+  renderPgList();
+  savePgLocal();
   saveMelLocal();
   saveTcLocal();
+  savePgLocal();
   renderTbl(); renderCuts(); updateMatSelect();
   updRList(); pRender(); recalc(); recalcDis();
 }
@@ -1814,6 +1980,15 @@ window.addEventListener('load',()=>{
     var savedTc = loadTcLocal();
     if(savedTc.length){ tapacantosInv = savedTc; renderTcList(); }
 
+    var savedPg = loadPgLocal();
+    if(savedPg.length){ pegamentosInv = savedPg; renderPgList(); }
+
+    var savedPg = loadPgLocal();
+    if(savedPg.length){ pegamentosInv = savedPg; renderPgList(); }
+
+    var savedAd = loadAdLocal();
+    if(savedAd.length){ adhesivosInv = savedAd; renderAdList(); }
+
     // ── Login check ──
     var logged=false;
     try{ logged=sessionStorage.getItem(SK)==='1'; }catch(e){}
@@ -1836,9 +2011,10 @@ let tapacantosInv = [];
 
 function switchInvTab(tab, btn){
   document.querySelectorAll('.inv-tab').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
+  if(btn) btn.classList.add('on');
   document.getElementById('invTableros').style.display  = tab==='tableros'  ? 'block' : 'none';
   document.getElementById('invTapacanto').style.display = tab==='tapacanto' ? 'block' : 'none';
+  document.getElementById('invAdhesivos').style.display = tab==='adhesivos' ? 'block' : 'none';
 }
 
 function addTc(){
@@ -1917,6 +2093,358 @@ function renderTcList(){
             <div class="mlabel">Proveedor</div>
             <div style="font-size:13px">${esc(t.proveedor)||'—'}</div>
             ${t.notas?`<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">${esc(t.notas)}</div>`:''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ===== INVENTARIO ADHESIVOS ===== */
+let adhesivosInv = [];
+const AD_KEY = 'linaro_ad_v1';
+function saveAdLocal(){ try{ localStorage.setItem(AD_KEY, JSON.stringify(adhesivosInv)); }catch(e){} }
+function loadAdLocal(){ try{ return JSON.parse(localStorage.getItem(AD_KEY)||'[]'); }catch(e){ return []; } }
+
+const AD_LABELS = {
+  pega_amarilla: '🟡 Pega amarilla',
+  pega_blanca:   '⬜ Pega blanca',
+  silicon:       '🔵 Silicón',
+  otro:          '🧴 Adhesivo'
+};
+const AD_COLORS = {
+  pega_amarilla: '#FFF8DC',
+  pega_blanca:   '#F0F4FF',
+  silicon:       '#E8F0FF',
+  otro:          '#F5F5F5'
+};
+const AD_BORDER = {
+  pega_amarilla: '#D4A017',
+  pega_blanca:   '#4A7CC7',
+  silicon:       '#5B6FA8',
+  otro:          '#999'
+};
+
+function adTipoChange(){
+  const tipo = document.getElementById('adTipo').value;
+  const marca = document.getElementById('adMarca');
+  const desc  = document.getElementById('adDesc');
+  if(tipo==='pega_amarilla'){ marca.placeholder='Ej: 3M, Loctite, genérica…'; desc.placeholder='Para tapacanto, laminado, enchape…'; }
+  else if(tipo==='pega_blanca'){ marca.placeholder='Ej: Titebond, Cemento Cola…'; desc.placeholder='Para madera, MDF, uniones estructurales…'; }
+  else if(tipo==='silicon'){ marca.placeholder='Ej: GE, Dow, genérico…'; desc.placeholder='Para sellado, juntas, vidrio…'; }
+}
+
+function addAd(){
+  const marca = document.getElementById('adMarca').value;
+  if(!marca){ toast('Escribe la marca o referencia del adhesivo'); return; }
+  const a = {
+    id:      uid(),
+    tipo:    document.getElementById('adTipo').value,
+    marca,
+    desc:    document.getElementById('adDesc').value,
+    pres:    document.getElementById('adPres').value,
+    cant:    parseFloat(document.getElementById('adCant').value)||1,
+    precio:  parseFloat(document.getElementById('adPrecio').value)||0,
+    moneda:  document.getElementById('adMoneda').value,
+    rend:    parseFloat(document.getElementById('adRend').value)||0,
+    stock:   parseInt(document.getElementById('adStock').value),
+    prov:    document.getElementById('adProv').value,
+    notas:   document.getElementById('adNotas').value,
+  };
+  adhesivosInv.push(a);
+  saveAdLocal();
+  renderAdList();
+  // clear
+  ['adMarca','adDesc','adProv','adNotas'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('adPrecio').value='0';
+  document.getElementById('adRend').value='0';
+  toast('✓ "'+a.marca+'" registrado');
+}
+
+function quickAddAd(tipo){
+  document.getElementById('adTipo').value = tipo;
+  adTipoChange();
+  document.getElementById('adMarca').focus();
+  switchInvTab('adhesivos', document.getElementById('invTab3'));
+}
+
+function delAd(id){
+  adhesivosInv = adhesivosInv.filter(a=>a.id!==id);
+  saveAdLocal();
+  renderAdList();
+}
+
+function renderAdList(){
+  const list  = document.getElementById('adList');
+  const count = document.getElementById('adCount');
+  if(!list) return;
+  if(count) count.textContent = adhesivosInv.length+' referencia'+(adhesivosInv.length!==1?'s':'')+' registrada'+(adhesivosInv.length!==1?'s':'');
+  if(!adhesivosInv.length){
+    list.innerHTML='<div class="empty card"><div class="empty-icon">🧴</div><p>Registra tus adhesivos</p><p style="font-size:12px;margin-top:6px;color:var(--text3)">Pega amarilla · Pega blanca · Silicón</p></div>';
+    return;
+  }
+  const PRES={litro:'L',galon:'gal',kg:'kg',unidad:'und'};
+  list.innerHTML = adhesivosInv.map(a=>{
+    const label  = AD_LABELS[a.tipo]||'🧴 Adhesivo';
+    const bgCol  = AD_COLORS[a.tipo]||'#F5F5F5';
+    const bdCol  = AD_BORDER[a.tipo]||'#999';
+    const ppu    = a.precio>0&&a.cant>0?(a.precio/a.cant).toFixed(2):'—';
+    const pm2    = a.precio>0&&a.rend>0?(a.precio/(a.rend*a.cant)).toFixed(3):'—';
+    return '<div class="mel-card" style="border-color:'+bdCol+'">'
+      +'<div class="mel-head" style="background:'+bgCol+'">'
+        +'<div class="flex gap8 wrap" style="align-items:center">'
+          +'<span style="font-size:14px;font-weight:600">'+label+'</span>'
+          +'<span style="font-size:14px;font-weight:600;color:var(--text)">'+esc(a.marca)+'</span>'
+          +(a.desc?'<span class="tag">'+esc(a.desc)+'</span>':'')
+          +'<span class="stock-badge '+(a.stock?'in-stock':'no-stock')+'">'+(a.stock?'En stock':'Sin stock')+'</span>'
+        +'</div>'
+        +'<button class="btn btn-sm btn-del" onclick="delAd(''+a.id+'')">Eliminar</button>'
+      +'</div>'
+      +'<div class="mel-body">'
+        +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">'
+          +'<div><div class="mlabel">Presentación</div>'
+            +'<div style="font-size:15px;font-weight:600;font-family:monospace">'+a.cant+' '+(PRES[a.pres]||a.pres)+'</div>'
+          +'</div>'
+          +'<div><div class="mlabel">Precio por envase</div>'
+            +'<div class="mel-price">'+a.moneda+' '+fmt(a.precio)+'</div>'
+          +'</div>'
+          +'<div><div class="mlabel">'+(a.rend>0?'Precio por m²':'Precio por '+( PRES[a.pres]||a.pres))+'</div>'
+            +'<div style="font-size:15px;font-weight:600;font-family:monospace;color:var(--blue)">'
+              +(pm2!=='—'?a.moneda+' '+pm2:(ppu!=='—'?a.moneda+' '+ppu+'/'+(PRES[a.pres]||a.pres):'—'))
+            +'</div>'
+          +'</div>'
+          +'<div><div class="mlabel">Proveedor</div>'
+            +'<div style="font-size:13px">'+esc(a.prov||'—')+'</div>'
+            +(a.notas?'<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">'+esc(a.notas)+'</div>':'')
+          +'</div>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+/* ===== INVENTARIO PEGAMENTOS ===== */
+let pegamentosInv = [];
+const PG_KEY = 'linaro_pg_v1';
+function savePgLocal(){ try{ localStorage.setItem(PG_KEY, JSON.stringify(pegamentosInv)); }catch(e){} }
+function loadPgLocal(){ try{ return JSON.parse(localStorage.getItem(PG_KEY)||'[]'); }catch(e){ return []; } }
+
+const PG_DEFAULTS = {
+  amarilla:{ tipo:'amarilla', nombre:'Pega amarilla contacto', desc:'Tapacanto, laminado de superficies', pres:'1L', rend:8,  col:'#A07800', emoji:'🟡' },
+  blanca:  { tipo:'blanca',   nombre:'Pega blanca PVA',        desc:'Enchape de madera, uniones de MDF', pres:'1L', rend:10, col:'#2060A0', emoji:'⚪' },
+};
+
+function pgTipoChange(){
+  const t = document.getElementById('pgTipo').value;
+  const d = PG_DEFAULTS[t];
+  if(d){
+    document.getElementById('pgNombre').value = d.nombre;
+    document.getElementById('pgDesc').value   = d.desc;
+    document.getElementById('pgRend').value   = d.rend;
+  }
+}
+
+function quickPg(tipo){
+  const d = PG_DEFAULTS[tipo];
+  if(!d) return;
+  document.getElementById('pgTipo').value   = tipo;
+  document.getElementById('pgNombre').value = d.nombre;
+  document.getElementById('pgDesc').value   = d.desc;
+  document.getElementById('pgRend').value   = d.rend;
+  document.getElementById('pgPrecio').value = '0';
+  document.getElementById('pgPres').value   = '1L';
+  // switch to that tab if not already
+  var btn = document.getElementById('invTab3');
+  switchInvTab('pegamento', btn);
+  document.getElementById('pgPrecio').focus();
+}
+
+function addPg(){
+  const nombre = document.getElementById('pgNombre').value;
+  if(!nombre){ toast('Escribe el nombre del pegamento'); return; }
+  const pg = {
+    id:       uid(),
+    tipo:     document.getElementById('pgTipo').value,
+    nombre,
+    desc:     document.getElementById('pgDesc').value,
+    pres:     document.getElementById('pgPres').value,
+    rend:     parseFloat(document.getElementById('pgRend').value)||8,
+    precio:   parseFloat(document.getElementById('pgPrecio').value)||0,
+    moneda:   document.getElementById('pgMoneda').value,
+    stock:    parseInt(document.getElementById('pgStock').value)||0,
+    proveedor:document.getElementById('pgProv').value,
+    notas:    document.getElementById('pgNotas').value,
+  };
+  pegamentosInv.push(pg);
+  savePgLocal();
+  renderPgList();
+  document.getElementById('pgNombre').value='';
+  document.getElementById('pgDesc').value='';
+  document.getElementById('pgPrecio').value='0';
+  document.getElementById('pgStock').value='0';
+  document.getElementById('pgProv').value='';
+  document.getElementById('pgNotas').value='';
+  toast(`✓ "${pg.nombre}" registrado`);
+}
+
+function delPg(id){
+  pegamentosInv = pegamentosInv.filter(p=>p.id!==id);
+  savePgLocal(); renderPgList();
+}
+
+function renderPgList(){
+  const list  = document.getElementById('pgList');
+  const count = document.getElementById('pgCount');
+  if(!list) return;
+  if(count) count.textContent = `${pegamentosInv.length} producto${pegamentosInv.length!==1?'s':''} registrado${pegamentosInv.length!==1?'s':''}`;
+  if(!pegamentosInv.length){
+    list.innerHTML='<div class="empty card"><div class="empty-icon">🪣</div><p>Registra tus pegamentos</p></div>';
+    return;
+  }
+  const colorMap={ amarilla:{ bg:'#FFFBEA', border:'#E8C44A', txt:'#A07800', emoji:'🟡' }, blanca:{ bg:'#F0F6FF', border:'#B0C8E8', txt:'#2060A0', emoji:'⚪' }, otro:{ bg:'var(--bg3)', border:'var(--border)', txt:'var(--text)', emoji:'🪣' } };
+  list.innerHTML = pegamentosInv.map(pg=>{
+    const c = colorMap[pg.tipo]||colorMap.otro;
+    const ppm2 = pg.precio>0&&pg.rend>0 ? (pg.precio/pg.rend).toFixed(3) : '—';
+    return `<div class="mel-card" style="border-color:${c.border}">
+      <div class="mel-head" style="background:${c.bg}">
+        <div class="flex gap8 wrap" style="align-items:center">
+          <span style="font-size:18px">${c.emoji}</span>
+          <span style="font-size:14px;font-weight:600;color:${c.txt}">${esc(pg.nombre)}</span>
+          <span class="tag">${pg.pres}</span>
+          <span class="tag">${pg.tipo==='amarilla'?'Contacto':pg.tipo==='blanca'?'PVA':'Adhesivo'}</span>
+          <span class="stock-badge ${pg.stock>0?'in-stock':'no-stock'}">${pg.stock>0?pg.stock+' und':'Sin stock'}</span>
+        </div>
+        <button class="btn btn-sm btn-del" onclick="delPg('${pg.id}')">Eliminar</button>
+      </div>
+      <div class="mel-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+          <div>
+            <div class="mlabel">Uso / descripción</div>
+            <div style="font-size:13px;font-weight:500">${esc(pg.desc)||'—'}</div>
+            <div style="font-size:12px;color:var(--text2)">Presentación: ${pg.pres}</div>
+          </div>
+          <div>
+            <div class="mlabel">Precio por unidad</div>
+            <div class="mel-price">${pg.moneda} ${fmt(pg.precio)}</div>
+          </div>
+          <div>
+            <div class="mlabel">Rendimiento / Costo m²</div>
+            <div style="font-size:14px;font-weight:600;font-family:monospace">${pg.rend} m²/L</div>
+            <div style="font-size:13px;font-weight:600;font-family:monospace;color:var(--blue)">${ppm2!=='—'?pg.moneda+' '+ppm2+'/m²':'—'}</div>
+          </div>
+          <div>
+            <div class="mlabel">Proveedor</div>
+            <div style="font-size:13px">${esc(pg.proveedor)||'—'}</div>
+            ${pg.notas?`<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">${esc(pg.notas)}</div>`:''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ===== INVENTARIO PEGAMENTOS ===== */
+let pegamentosInv = [];
+const PG_KEY = 'linaro_pg_v1';
+
+function savePgLocal(){ try{ localStorage.setItem(PG_KEY, JSON.stringify(pegamentosInv)); }catch(e){} }
+function loadPgLocal(){ try{ return JSON.parse(localStorage.getItem(PG_KEY)||'[]'); }catch(e){ return []; } }
+
+const PG_INFO = {
+  amarilla: '<strong>Pega amarilla (contacto):</strong> Se aplica en ambas superficies, se deja secar y se presiona. Ideal para tapacanto, formica y chapillas. Rendimiento aprox. 6–10 m²/L.',
+  blanca:   '<strong>Pega blanca (PVA):</strong> Cola vinílica para madera, MDF y aglomerado. Se aplica en una superficie y se prensa. Rendimiento aprox. 8–12 m²/L. Secado 30–60 min.',
+  silicon:  '<strong>Silicón:</strong> Sellante y adhesivo flexible. Ideal para uniones mixtas, marcos y elementos decorativos. Rendimiento según aplicación.',
+  otro:     '<strong>Otro pegamento:</strong> Especifica el uso y rendimiento según el fabricante.',
+};
+
+function pgTipoChange(){
+  const t = document.getElementById('pgTipo').value;
+  const info = document.getElementById('pgInfo');
+  if(info) info.innerHTML = PG_INFO[t] || '';
+  // auto fill rendimiento
+  const rend = document.getElementById('pgRend');
+  if(rend){ if(t==='amarilla') rend.value=8; else if(t==='blanca') rend.value=10; else if(t==='silicon') rend.value=4; }
+}
+
+function addPg(){
+  const nombre = document.getElementById('pgNombre').value;
+  if(!nombre){ toast('Escribe el nombre del pegamento'); return; }
+  const p = {
+    id:       uid(),
+    tipo:     document.getElementById('pgTipo').value,
+    nombre,
+    desc:     document.getElementById('pgDesc').value,
+    pres:     document.getElementById('pgPres').value,
+    rend:     parseFloat(document.getElementById('pgRend').value)||8,
+    precio:   parseFloat(document.getElementById('pgPrecio').value)||0,
+    moneda:   document.getElementById('pgMoneda').value,
+    proveedor:document.getElementById('pgProv').value,
+    stock:    parseInt(document.getElementById('pgStock').value),
+    notas:    document.getElementById('pgNotas').value,
+  };
+  pegamentosInv.push(p);
+  savePgLocal();
+  renderPgList();
+  // clear
+  ['pgNombre','pgDesc','pgProv','pgNotas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('pgPrecio').value='0';
+  toast(`✓ "${p.nombre}" registrado`);
+}
+
+function delPg(id){
+  pegamentosInv = pegamentosInv.filter(p=>p.id!==id);
+  savePgLocal();
+  renderPgList();
+}
+
+const PG_EMOJI = {amarilla:'🟡',blanca:'⚪',silicon:'🔵',otro:'🪣'};
+const PG_LABEL = {amarilla:'Pega amarilla',blanca:'Pega blanca (PVA)',silicon:'Silicón',otro:'Otro'};
+
+function renderPgList(){
+  const list = document.getElementById('pgList');
+  const count = document.getElementById('pgCount');
+  if(!list) return;
+  if(count) count.textContent = `${pegamentosInv.length} producto${pegamentosInv.length!==1?'s':''} registrado${pegamentosInv.length!==1?'s':''}`;
+  if(!pegamentosInv.length){
+    list.innerHTML=`<div class="empty card"><div class="empty-icon">🪣</div><p>Registra tus pegamentos con precio y rendimiento</p></div>`;
+    return;
+  }
+  list.innerHTML = pegamentosInv.map(p=>{
+    const ppm2 = p.precio>0&&p.rend>0 ? (p.precio/p.rend).toFixed(3) : '—';
+    const color = p.tipo==='amarilla'?'#FFF3CD':p.tipo==='blanca'?'#F8F9FA':p.tipo==='silicon'?'#E6F1FB':'#F1EFE8';
+    const border= p.tipo==='amarilla'?'#D4A000':p.tipo==='blanca'?'#CCC':p.tipo==='silicon'?'#185FA5':'#999';
+    return `<div class="mel-card" style="border-color:${border}">
+      <div class="mel-head" style="background:${color}">
+        <div class="flex gap8 wrap" style="align-items:center">
+          <span style="font-size:18px">${PG_EMOJI[p.tipo]||'🪣'}</span>
+          <div>
+            <div style="font-size:14px;font-weight:600">${esc(p.nombre)}</div>
+            <div style="font-size:11px;color:var(--text2)">${PG_LABEL[p.tipo]||p.tipo} · ${p.pres}</div>
+          </div>
+          ${p.desc?`<span class="tag">${esc(p.desc)}</span>`:''}
+          <span class="stock-badge ${p.stock?'in-stock':'no-stock'}">${p.stock?'En stock':'Sin stock'}</span>
+        </div>
+        <button class="btn btn-sm btn-del" onclick="delPg('${p.id}')">Eliminar</button>
+      </div>
+      <div class="mel-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+          <div>
+            <div class="mlabel">Presentación</div>
+            <div style="font-size:15px;font-weight:600;font-family:monospace">${p.pres}</div>
+            <div style="font-size:12px;color:var(--text2)">Rend. ${p.rend} m²/unid.</div>
+          </div>
+          <div>
+            <div class="mlabel">Precio por unidad</div>
+            <div class="mel-price">${p.moneda} ${fmt(p.precio)}</div>
+          </div>
+          <div>
+            <div class="mlabel">Costo por m²</div>
+            <div style="font-size:15px;font-weight:600;font-family:monospace;color:var(--blue)">${ppm2!=='—'?p.moneda+' '+ppm2:'—'}</div>
+          </div>
+          <div>
+            <div class="mlabel">Proveedor</div>
+            <div style="font-size:13px">${esc(p.proveedor)||'—'}</div>
+            ${p.notas?`<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">${esc(p.notas)}</div>`:''}
           </div>
         </div>
       </div>
