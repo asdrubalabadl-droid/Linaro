@@ -860,37 +860,37 @@ function upd(id,f,v){const it=items.find(x=>x.id===id);if(it){it[f]=v;recalc();}
 
 function recalcDis(){
   const m2=parseFloat(document.getElementById('disM2').value)||0,tar=parseFloat(document.getElementById('disTarifa').value)||6,iva=parseFloat(document.getElementById('iva').value)||0,cur=document.getElementById('cur').value,sub=m2*tar;
-  document.getElementById('disSubtotal').textContent=`${cur} ${fmt(sub)}`;
-  document.getElementById('disConIva').textContent=`${cur} ${fmt(sub*(1+iva/100))}`;
+  document.getElementById('disSubtotal').textContent=''+(cur)+' ${fmt(sub)}\';
+  document.getElementById(\\'disConIva\\').textContent=\'${cur} ${fmt(sub*(1+iva/100))}';
   recalc();
 }
 function addDiseno(){
   const m2=parseFloat(document.getElementById('disM2').value)||0,tar=parseFloat(document.getElementById('disTarifa').value)||6,desc=document.getElementById('disDesc').value||'Honorarios de diseño';
   if(m2<=0){toast('Indica los m² a diseñar primero');return;}
-  items.push({id:uid(),d:`${desc} ($${tar}/m²)`,u:'m²',q:m2,p:tar});
-  renderTbl();toast(`✓ Diseño (${m2} m² × $${tar}) agregado al presupuesto`);
+  items.push({id:uid(),d:''+(desc)+' ($${tar}/m²)',u:'m²',q:m2,p:tar});
+  renderTbl();toast('✓ Diseño ('+(m2)+' m² × $${tar}) agregado al presupuesto');
 }
 function renderTbl(){
   const tb=document.getElementById('tbody');
   if(!items.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><p>Carga una plantilla, agrega ítems o importa desde Despiece</p></div></td></tr>';recalc();return;}
   const cur=document.getElementById('cur').value;
   tb.innerHTML=items.map((it,i)=>{
-    const tot=(parseFloat(it.q)||0)*(parseFloat(it.p)||0),uopts=UNITS.map(u=>`<option${u===it.u?' selected':''}>${u}</option>`).join('');
-    return`<tr><td class="mono muted" style="font-size:11px">${i+1}</td><td><input value="${esc(it.d)}" onchange="upd('${it.id}','d',this.value)" placeholder="Descripción…" style="min-width:180px"></td><td><select onchange="upd('${it.id}','u',this.value)" style="font-size:12px">${uopts}</select></td><td class="tr"><input type="number" value="${it.q}" onchange="upd('${it.id}','q',this.value)" style="width:68px;text-align:right" step="0.01"></td><td class="tr"><input type="number" value="${it.p}" onchange="upd('${it.id}','p',this.value)" style="width:95px;text-align:right" step="0.01"></td><td class="tr mono" style="font-size:13px;color:${tot>0?'#BA7517':'#999'}">${fmt(tot)}</td><td><button class="btn btn-sm btn-del" onclick="delRow('${it.id}')">×</button></td></tr>`;
+    const tot=(parseFloat(it.q)||0)*(parseFloat(it.p)||0),uopts=UNITS.map(u=>'<option'+(u===it.u?' selected':'')+'>${u}</option>\').join(\\'\\');
+    return\'<tr><td class="mono muted" style="font-size:11px">${i+1}</td><td><input value="${esc(it.d)}" onchange="upd(\'${it.id}\',\'d\',this.value)" placeholder="Descripción…" style="min-width:180px"></td><td><select onchange="upd(\'${it.id}\',\'u\',this.value)" style="font-size:12px">${uopts}</select></td><td class="tr"><input type="number" value="${it.q}" onchange="upd(\'${it.id}\',\'q\',this.value)" style="width:68px;text-align:right" step="0.01"></td><td class="tr"><input type="number" value="${it.p}" onchange="upd(\'${it.id}\',\'p\',this.value)" style="width:95px;text-align:right" step="0.01"></td><td class="tr mono" style="font-size:13px;color:${tot>0?\'#BA7517\':\'#999\'}">${fmt(tot)}</td><td><button class="btn btn-sm btn-del" onclick="delRow(\'${it.id}\')">×</button></td></tr>';
   }).join('');
   recalc();
 }
 function recalc(){
   const cur=document.getElementById('cur').value,ivaR=parseFloat(document.getElementById('iva').value)||0,utR=parseFloat(document.getElementById('util').value)||0,m2=parseFloat(document.getElementById('disM2').value)||0,tar=parseFloat(document.getElementById('disTarifa').value)||6;
   const sub=items.reduce((s,it)=>s+(parseFloat(it.q)||0)*(parseFloat(it.p)||0),0),dis=m2*tar,utA=(sub+dis)*(utR/100),base=sub+dis+utA,ivaA=base*(ivaR/100),tot=base+ivaA;
-  document.getElementById('subs').textContent=`${cur} ${fmt(sub)}`;
-  document.getElementById('disLbl').textContent=`Diseño (${m2} m² × $${tar})`;
-  document.getElementById('sDis').textContent=m2>0?`${cur} ${fmt(dis)}`:'—';
-  document.getElementById('ulbl').textContent=`Utilidad (${utR}%)`;
-  document.getElementById('sutil').textContent=`${cur} ${fmt(utA)}`;
-  document.getElementById('ilbl').textContent=`IVA (${ivaR}%)`;
-  document.getElementById('siva').textContent=`${cur} ${fmt(ivaA)}`;
-  document.getElementById('stot').textContent=`${cur} ${fmt(tot)}`;
+  document.getElementById('subs').textContent=''+(cur)+' ${fmt(sub)}\';
+  document.getElementById(\\'disLbl\\').textContent=\'Diseño (${m2} m² × $${tar})\';
+  document.getElementById(\\'sDis\\').textContent=m2>0?\'${cur} ${fmt(dis)}\':\\'—\\';
+  document.getElementById(\\'ulbl\\').textContent=\'Utilidad (${utR}%)\';
+  document.getElementById(\\'sutil\\').textContent=\'${cur} ${fmt(utA)}\';
+  document.getElementById(\\'ilbl\\').textContent=\'IVA (${ivaR}%)\';
+  document.getElementById(\\'siva\\').textContent=\'${cur} ${fmt(ivaA)}\';
+  document.getElementById(\\'stot\\').textContent=\'${cur} ${fmt(tot)}';
 }
 
 /* ===== MELAMÍNICOS ===== */
@@ -901,197 +901,197 @@ function addMel(){
   document.getElementById('mNombre').value='';document.getElementById('mColor').value='';document.getElementById('mNotas').value='';
   saveMelLocal();
   updateMatSelect();
-  toast(`✓ "${m.nombre}" registrado en la biblioteca`);
+  toast('✓ "'+(m.nombre)+'" registrado en la biblioteca');
 }
 function delMel(id){melaminicos=melaminicos.filter(m=>m.id!==id);saveMelLocal();renderMelList();updateMatSelect();}
 function renderMelList(){
   const list=document.getElementById('melList');
-  document.getElementById('melCount').textContent=`${melaminicos.length} material${melaminicos.length!==1?'es':''} registrado${melaminicos.length!==1?'s':''}`;
+  document.getElementById('melCount').textContent=''+(melaminicos.length)+' material${melaminicos.length!==1?\'es\':\'\'} registrado${melaminicos.length!==1?\'s\':\'\'}';
   if(!melaminicos.length){list.innerHTML='<div class="empty card"><div class="empty-icon">🗂️</div><p>Registra tus melamínicos para usarlos en el despiece</p></div>';return;}
   list.innerHTML=melaminicos.map(m=>{
     const al=(m.ancho*m.alto/1e6).toFixed(3),pm2=m.precio>0?(m.precio/(m.ancho*m.alto/1e6)).toFixed(2):'—';
-    return`<div class="mel-card"><div class="mel-head"><div class="flex gap8 wrap" style="align-items:center"><span style="font-size:14px;font-weight:600">${esc(m.nombre)}</span>${m.color?`<span class="tag">${esc(m.color)}</span>`:''}<span class="stock-badge ${m.stock?'in-stock':'no-stock'}">${m.stock?'En stock':'Sin stock'}</span></div><button class="btn btn-sm btn-del" onclick="delMel('${m.id}')">Eliminar</button></div><div class="mel-body"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px"><div><div class="mlabel">Dimensiones lámina</div><div style="font-size:14px;font-weight:600;font-family:monospace">${m.ancho}×${m.alto}mm</div><div style="font-size:12px;color:var(--text2)">${m.espesor}mm · ${al} m²/lám</div></div><div><div class="mlabel">Precio / lámina</div><div class="mel-price">${m.moneda} ${fmt(m.precio)}</div></div><div><div class="mlabel">Precio / m²</div><div style="font-size:15px;font-weight:600;font-family:monospace;color:var(--blue)">${pm2!=='—'?m.moneda+' '+pm2:'—'}</div></div><div><div class="mlabel">Proveedor</div><div style="font-size:13px">${esc(m.proveedor)||'—'}</div>${m.notas?`<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">${esc(m.notas)}</div>`:''}</div></div></div></div>`;
-  }).join('');
+    return'<div class="mel-card"><div class="mel-head"><div class="flex gap8 wrap" style="align-items:center"><span style="font-size:14px;font-weight:600">'+(esc(m.nombre))+'</span>${m.color?'<span class="tag">${esc(m.color)}</span>':\'\'}<span class="stock-badge '+(m.stock?'in-stock':'no-stock')+'">${m.stock?\'En stock\':\'Sin stock\'}</span></div><button class="btn btn-sm btn-del" onclick="delMel(\'${m.id}\')">Eliminar</button></div><div class="mel-body"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px"><div><div class="mlabel">Dimensiones lámina</div><div style="font-size:14px;font-weight:600;font-family:monospace">${m.ancho}×${m.alto}mm</div><div style="font-size:12px;color:var(--text2)">${m.espesor}mm · ${al} m²/lám</div></div><div><div class="mlabel">Precio / lámina</div><div class="mel-price">${m.moneda} ${fmt(m.precio)}</div></div><div><div class="mlabel">Precio / m²</div><div style="font-size:15px;font-weight:600;font-family:monospace;color:var(--blue)">${pm2!==\'—\'?m.moneda+\' \'+pm2:\'—\'}</div></div><div><div class="mlabel">Proveedor</div><div style="font-size:13px">${esc(m.proveedor)||\'—\'}</div>${m.notas?'<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">${esc(m.notas)}</div>':\'\'}</div></div></div></div>\';
+  }).join(\\'\\');
 }
 function updateMatSelect(){
-  const sel=document.getElementById('pMat');
-  sel.innerHTML='<option value="">— Seleccionar de la biblioteca —</option>';
-  melaminicos.forEach(m=>{sel.innerHTML+=`<option value="${m.id}">${esc(m.nombre)}${m.color?' — '+m.color:''} (${m.espesor}mm)</option>`;});
-  if(!melaminicos.length)sel.innerHTML='<option value="">— Registra materiales en la pestaña Melamínicos —</option>';
+  const sel=document.getElementById(\\'pMat\\');
+  sel.innerHTML=\\'<option value="">— Seleccionar de la biblioteca —</option>\\';
+  melaminicos.forEach(m=>{sel.innerHTML+=\\'<option value="\\'+(m.id)+\\'">\'+(esc(m.nombre))+\''+(m.color?\\' — \\'+m.color:\\'\\')+' (${m.espesor}mm)</option>\\';});
+  if(!melaminicos.length)sel.innerHTML=\\'<option value="">— Registra materiales en la pestaña Melamínicos —</option>\\';
 }
 
 /* ===== DESPIECE ===== */
-const GOLA_INFO={L:'Gola tipo L — perfil horizontal en el canto SUPERIOR. Se mide en ml según el ancho de cada puerta.',C:'Gola tipo C — perfil vertical en el canto LATERAL (lado de apertura). Se mide en ml según el alto.',LC:'Gola L + C — perfil superior + lateral formando marco. Se calculan ambos perfiles.'};
-function showGolaInfo(){const v=document.getElementById('pGolaB').value,b=document.getElementById('golaInfo');if(v==='none'){b.style.display='none';return;}b.textContent=GOLA_INFO[v]||'';b.style.display='block';}
-function bisLabel(t){return{cazoleta_std:'Bisagra cazoleta 35mm estándar',cazoleta_freno:'Bisagra cazoleta 35mm con freno (soft-close)',sobrepuesta:'Bisagra sobrepuesta estándar',sobrepuesta_freno:'Bisagra sobrepuesta con freno',piano:'Bisagra piano / continua'}[t]||t;}
-function corLabel(t){return{telescopica:'Corredera telescópica 45kg',telescopica_freno:'Corredera telescópica con freno (soft-close)',ball:'Corredera ball bearing 40kg',invisible_freno:'Guía invisible con freno (undermount)'}[t]||t;}
+const GOLA_INFO={L:\\'Gola tipo L — perfil horizontal en el canto SUPERIOR. Se mide en ml según el ancho de cada puerta.\\',C:\\'Gola tipo C — perfil vertical en el canto LATERAL (lado de apertura). Se mide en ml según el alto.\\',LC:\\'Gola L + C — perfil superior + lateral formando marco. Se calculan ambos perfiles.\\'};
+function showGolaInfo(){const v=document.getElementById(\\'pGolaB\\').value,b=document.getElementById(\\'golaInfo\\');if(v===\\'none\\'){b.style.display=\\'none\\';return;}b.textContent=GOLA_INFO[v]||\\'\\';b.style.display=\\'block\\';}
+function bisLabel(t){return{cazoleta_std:\\'Bisagra cazoleta 35mm estándar\\',cazoleta_freno:\\'Bisagra cazoleta 35mm con freno (soft-close)\\',sobrepuesta:\\'Bisagra sobrepuesta estándar\\',sobrepuesta_freno:\\'Bisagra sobrepuesta con freno\\',piano:\\'Bisagra piano / continua\\'}[t]||t;}
+function corLabel(t){return{telescopica:\\'Corredera telescópica 45kg\\',telescopica_freno:\\'Corredera telescópica con freno (soft-close)\\',ball:\\'Corredera ball bearing 40kg\\',invisible_freno:\\'Guía invisible con freno (undermount)\\'}[t]||t;}
 function calcHerrajes(W,H,dr,slide,caj,bisType,corType,golaB,golaS){
   const h=[];
-  if(dr>0){const nb=H>=1500?4:H>=900?3:2;h.push({n:bisLabel(bisType),qty:nb*dr,unit:'und',note:`${nb} c/puerta × ${dr} puertas`});if(bisType==='piano')h.push({n:'Bisagra piano continua',qty:Math.ceil(H/1000)*dr,unit:'m',note:`${Math.ceil(H/1000)}ml c/puerta`});if(golaB==='none'||!golaB)h.push({n:'Jalador / tirador ext. puerta batiente',qty:dr,unit:'und',note:'1 por puerta'});}
-  if(slide>0){h.push({n:'Perfil aluminio corredera sup+inf',qty:slide,unit:'par',note:'1 par por juego corredizo'});if(golaS==='none'||!golaS)h.push({n:'Jalador / tirador ext. puerta corrediza',qty:slide,unit:'und',note:'1 por hoja'});}
-  if(caj>0){h.push({n:corLabel(corType),qty:caj,unit:'par',note:`1 par × ${caj} cajones`});h.push({n:'Jalador / tirador cajón',qty:caj,unit:'und',note:'1 por cajón'});}
-  if(dr>0||slide>0||caj>0)h.push({n:'Tornillos para herrajes (surtido)',qty:1,unit:'gbl',note:'Montaje general'});
+  if(dr>0){const nb=H>=1500?4:H>=900?3:2;h.push({n:bisLabel(bisType),qty:nb*dr,unit:\\'und\\',note:\\'\\'+(nb)+\\' c/puerta × ${dr} puertas\\'});if(bisType===\\'piano\\')h.push({n:\\'Bisagra piano continua\\',qty:Math.ceil(H/1000)*dr,unit:\\'m\\',note:\\'\\'+(Math.ceil(H/1000))+\\'ml c/puerta\\'});if(golaB===\\'none\\'||!golaB)h.push({n:\\'Jalador / tirador ext. puerta batiente\\',qty:dr,unit:\\'und\\',note:\\'1 por puerta\\'});}
+  if(slide>0){h.push({n:\\'Perfil aluminio corredera sup+inf\\',qty:slide,unit:\\'par\\',note:\\'1 par por juego corredizo\\'});if(golaS===\\'none\\'||!golaS)h.push({n:\\'Jalador / tirador ext. puerta corrediza\\',qty:slide,unit:\\'und\\',note:\\'1 por hoja\\'});}
+  if(caj>0){h.push({n:corLabel(corType),qty:caj,unit:\\'par\\',note:\\'1 par × \\'+(caj)+\\' cajones\\'});h.push({n:\\'Jalador / tirador cajón\\',qty:caj,unit:\\'und\\',note:\\'1 por cajón\\'});}
+  if(dr>0||slide>0||caj>0)h.push({n:\\'Tornillos para herrajes (surtido)\\',qty:1,unit:\\'gbl\\',note:\\'Montaje general\\'});
   return h;
 }
 function calcGola(W,H,dr,slide,golaB,golaS){
   const g=[];
-  function addG(type,wm,hm,qty,o){const wl=(wm/1000).toFixed(3),hl=(hm/1000).toFixed(3);if(type==='L'||type==='LC')g.push({n:`Perfil gola tipo L — ${o}`,calc:`${wl}ml × ${qty} = ${(wm/1000*qty).toFixed(3)}ml`,total:parseFloat((wm/1000*qty).toFixed(3))});if(type==='C'||type==='LC')g.push({n:`Perfil gola tipo C — ${o}`,calc:`${hl}ml × ${qty} = ${(hm/1000*qty).toFixed(3)}ml`,total:parseFloat((hm/1000*qty).toFixed(3))});}
-  if(dr>0&&golaB&&golaB!=='none')addG(golaB,Math.round(W/dr),H,dr,'puerta batiente');
-  if(slide>0&&golaS&&golaS!=='none')addG(golaS,Math.round((W/2)+20),H-10,slide*2,'puerta corrediza');
+  function addG(type,wm,hm,qty,o){const wl=(wm/1000).toFixed(3),hl=(hm/1000).toFixed(3);if(type===\\'L\\'||type===\\'LC\\')g.push({n:\\'Perfil gola tipo L — \\'+(o)+\\'\\\',calc:\\\'${wl}ml × ${qty} = ${(wm/1000*qty).toFixed(3)}ml\\',total:parseFloat((wm/1000*qty).toFixed(3))});if(type===\\'C\\'||type===\\'LC\\')g.push({n:\\'Perfil gola tipo C — \\'+(o)+\\'\\\',calc:\\\'${hl}ml × ${qty} = ${(hm/1000*qty).toFixed(3)}ml\\',total:parseFloat((hm/1000*qty).toFixed(3))});}
+  if(dr>0&&golaB&&golaB!==\\'none\\')addG(golaB,Math.round(W/dr),H,dr,\\'puerta batiente\\');
+  if(slide>0&&golaS&&golaS!==\\'none\\')addG(golaS,Math.round((W/2)+20),H-10,slide*2,\\'puerta corrediza\\');
   return g;
 }
 function calcTapacanto(cuts,tcType){
-  const tc=[];cuts.forEach(c=>{const[w,h]=c.dims.split(' × ').map(Number);let mpu=0;
+  const tc=[];cuts.forEach(c=>{const[w,h]=c.dims.split(\\' × \\').map(Number);let mpu=0;
   const n=c.n;
-  if(n==='Costado izquierdo'||n==='Costado derecho')mpu=(h*2)/1000;
-  else if(n==='Tapa'||n==='Base'||n==='Sólido horizontal'||n==='Sólido vertical'||n==='Sólido (doble fondo)')mpu=w/1000;
-  else if(n.startsWith('Panel (puerta'))mpu=(w*2+h*2)/1000;
-  else if(n==='Panel (cajón)')mpu=(w*2+h*2)/1000;
-  else if(n==='Costado cajón izquierdo'||n==='Costado cajón derecho')mpu=(h*2)/1000;
+  if(n===\\'Costado izquierdo\\'||n===\\'Costado derecho\\')mpu=(h*2)/1000;
+  else if(n===\\'Tapa\\'||n===\\'Base\\'||n===\\'Sólido horizontal\\'||n===\\'Sólido vertical\\'||n===\\'Sólido (doble fondo)\\')mpu=w/1000;
+  else if(n.startsWith(\\'Panel (puerta\\'))mpu=(w*2+h*2)/1000;
+  else if(n===\\'Panel (cajón)\\')mpu=(w*2+h*2)/1000;
+  else if(n===\\'Costado cajón izquierdo\\'||n===\\'Costado cajón derecho\\')mpu=(h*2)/1000;
   if(mpu>0){const total=parseFloat((mpu*c.qty).toFixed(3));tc.push({pieza:c.n,mpu:parseFloat(mpu.toFixed(3)),qty:c.qty,total,tcType});}});return tc;
 }
 function calcCuts(){
-  const name=document.getElementById('pN').value||'Módulo';
-  const W=parseFloat(document.getElementById('pW').value)||600;
-  const H=parseFloat(document.getElementById('pH').value)||720;
-  const D=parseFloat(document.getElementById('pD').value)||550;
-  const T=parseFloat(document.getElementById('pT').value)||18;
-  const sh=parseInt(document.getElementById('pS').value)||0;
-  const vd=parseInt(document.getElementById('pVD').value)||0;
-  const caj=parseInt(document.getElementById('pCaj').value)||0;
-  const dr=parseInt(document.getElementById('pDr').value)||0;
-  const slide=parseInt(document.getElementById('pSlide').value)||0;
-  const df=document.getElementById('pDF').checked;
-  const bisType=document.getElementById('pBisType').value;
-  const corType=document.getElementById('pCorType').value;
-  const golaB=document.getElementById('pGolaB').value;
-  const golaS=document.getElementById('pGolaS').value;
-  const tcType=document.getElementById('pTcType').value;
-  const traseraT=parseInt(document.getElementById('pTrasera').value)||6;
-  const matId=document.getElementById('pMat').value;
+  const name=document.getElementById(\\'pN\\').value||\\'Módulo\\';
+  const W=parseFloat(document.getElementById(\\'pW\\').value)||600;
+  const H=parseFloat(document.getElementById(\\'pH\\').value)||720;
+  const D=parseFloat(document.getElementById(\\'pD\\').value)||550;
+  const T=parseFloat(document.getElementById(\\'pT\\').value)||18;
+  const sh=parseInt(document.getElementById(\\'pS\\').value)||0;
+  const vd=parseInt(document.getElementById(\\'pVD\\').value)||0;
+  const caj=parseInt(document.getElementById(\\'pCaj\\').value)||0;
+  const dr=parseInt(document.getElementById(\\'pDr\\').value)||0;
+  const slide=parseInt(document.getElementById(\\'pSlide\\').value)||0;
+  const df=document.getElementById(\\'pDF\\').checked;
+  const bisType=document.getElementById(\\'pBisType\\').value;
+  const corType=document.getElementById(\\'pCorType\\').value;
+  const golaB=document.getElementById(\\'pGolaB\\').value;
+  const golaS=document.getElementById(\\'pGolaS\\').value;
+  const tcType=document.getElementById(\\'pTcType\\').value;
+  const traseraT=parseInt(document.getElementById(\\'pTrasera\\').value)||6;
+  const matId=document.getElementById(\\'pMat\\').value;
   const matObj=melaminicos.find(m=>m.id===matId)||null;
-  const ml=matObj?`${matObj.nombre} ${matObj.espesor}mm`:`MDF ${T}mm`;
-  const mat3=`MDF 3mm`, mat5=`MDF 5mm`, mat15=`MDF 15mm`;
+  const ml=matObj?\\'\\'+(matObj.nombre)+\\' ${matObj.espesor}mm\\\':\\\'MDF ${T}mm\\\';
+  const mat3=\\\'MDF 3mm\\\', mat5=\\\'MDF 5mm\\\', mat15=\\\'MDF 15mm\\';
 
   // Estructura principal — cada costado separado con su nombre
   const cuts=[
-    {n:'Costado izquierdo', dims:`${D} × ${H}`,      qty:1, mat:ml,   thick:T},
-    {n:'Costado derecho',   dims:`${D} × ${H}`,      qty:1, mat:ml,   thick:T},
-    {n:'Tapa',              dims:`${W-2*T} × ${D}`,  qty:1, mat:ml,   thick:T},
-    {n:'Base',              dims:`${W-2*T} × ${D}`,  qty:1, mat:ml,   thick:T},
-    {n:'Trasera',           dims:`${W-2*T} × ${H-T}`,qty:1, mat:mat3, thick:3},
+    {n:\\'Costado izquierdo\\', dims:\\'\\'+(D)+\\' × ${H}\\',      qty:1, mat:ml,   thick:T},
+    {n:\\'Costado derecho\\',   dims:\\'\\'+(D)+\\' × ${H}\\',      qty:1, mat:ml,   thick:T},
+    {n:\\'Tapa\\',              dims:\\'\\'+(W-2*T)+\\' × ${D}\\',  qty:1, mat:ml,   thick:T},
+    {n:\\'Base\\',              dims:\\'\\'+(W-2*T)+\\' × ${D}\\',  qty:1, mat:ml,   thick:T},
+    {n:\\'Trasera\\',           dims:\\'\\'+(W-2*T)+\\' × ${H-T}\\',qty:1, mat:mat3, thick:3},
   ];
 
   // Sólidos horizontales (entrepaños)
-  if(sh>0) cuts.push({n:'Sólido horizontal (entrepaño)', dims:`${W-2*T-2} × ${D-50}`, qty:sh, mat:ml, thick:T});
+  if(sh>0) cuts.push({n:\\'Sólido horizontal (entrepaño)\\', dims:\\'\\'+(W-2*T-2)+\\' × ${D-50}\\', qty:sh, mat:ml, thick:T});
 
   // Sólidos verticales (divisores)
-  if(vd>0) cuts.push({n:'Sólido vertical (divisor)',     dims:`${H-2*T} × ${D-50}`,   qty:vd, mat:ml, thick:T});
+  if(vd>0) cuts.push({n:\\'Sólido vertical (divisor)\\',     dims:\\'\\'+(H-2*T)+\\' × ${D-50}\\',   qty:vd, mat:ml, thick:T});
 
   // Doble fondo
-  if(df)   cuts.push({n:'Sólido (doble fondo)',           dims:`${W-2*T-2} × ${D-150}`,qty:1,  mat:ml, thick:T});
+  if(df)   cuts.push({n:\\'Sólido (doble fondo)\\',           dims:\\'\\'+(W-2*T-2)+\\' × ${D-150}\\',qty:1,  mat:ml, thick:T});
 
   // Cajones — costados individuales
   if(caj>0){
     const ch=Math.floor((H*0.4)/caj);
-    cuts.push({n:'Panel (cajón)',               dims:`${W-2*T} × ${ch-4}`,     qty:caj,   mat:ml,   thick:T});
-    cuts.push({n:'Costado cajón izquierdo',     dims:`${D-100} × ${ch-30}`,    qty:caj,   mat:mat15,thick:15});
-    cuts.push({n:'Costado cajón derecho',       dims:`${D-100} × ${ch-30}`,    qty:caj,   mat:mat15,thick:15});
-    cuts.push({n:'Base cajón',                  dims:`${W-2*T-50} × ${D-100}`, qty:caj,   mat:mat5, thick:5});
+    cuts.push({n:\\'Panel (cajón)\\',               dims:\\'\\'+(W-2*T)+\\' × ${ch-4}\\',     qty:caj,   mat:ml,   thick:T});
+    cuts.push({n:\\'Costado cajón izquierdo\\',     dims:\\'\\'+(D-100)+\\' × ${ch-30}\\',    qty:caj,   mat:mat15,thick:15});
+    cuts.push({n:\\'Costado cajón derecho\\',       dims:\\'\\'+(D-100)+\\' × ${ch-30}\\',    qty:caj,   mat:mat15,thick:15});
+    cuts.push({n:\\'Base cajón\\',                  dims:\\'\\'+(W-2*T-50)+\\' × ${D-100}\\', qty:caj,   mat:mat5, thick:5});
   }
 
   // Puertas
-  if(dr>0)    cuts.push({n:'Panel (puerta batiente)',   dims:`${Math.round(W/dr)} × ${H}`,     qty:dr,      mat:ml, thick:T});
-  if(slide>0) cuts.push({n:'Panel (puerta corrediza)', dims:`${Math.round((W/2)+20)} × ${H-10}`,qty:slide*2, mat:ml, thick:T});
+  if(dr>0)    cuts.push({n:\\'Panel (puerta batiente)\\',   dims:\\'\\'+(Math.round(W/dr))+\\' × ${H}\\',     qty:dr,      mat:ml, thick:T});
+  if(slide>0) cuts.push({n:\\'Panel (puerta corrediza)\\', dims:\\'\\'+(Math.round((W/2)+20))+\\' × ${H-10}\\',qty:slide*2, mat:ml, thick:T});
 
   const herrajes=calcHerrajes(W,H,dr,slide,caj,bisType,corType,golaB,golaS);
   const gola=calcGola(W,H,dr,slide,golaB,golaS);
   const tapacanto=calcTapacanto(cuts,tcType);
   pieces.push({id:uid(),name,W,H,D,T,cuts,herrajes,gola,tapacanto,tcType,bisType,corType,golaB,golaS,matObj,vd,df});
-  renderCuts();document.getElementById('matCard').style.display='block';updMat();
+  renderCuts();document.getElementById(\\'matCard\\').style.display=\\'block\\';updMat();
 }
-function delPiece(id){pieces=pieces.filter(p=>p.id!==id);renderCuts();if(!pieces.length)document.getElementById('matCard').style.display='none';}
+function delPiece(id){pieces=pieces.filter(p=>p.id!==id);renderCuts();if(!pieces.length)document.getElementById(\\'matCard\\').style.display=\\'none\\';}
 function addToPresupuesto(pid){
   const p=pieces.find(x=>x.id===pid);if(!p)return;
-  items.push({id:uid(),d:`[Tableros] ${p.name} — ${p.matObj?p.matObj.nombre:'MDF'} ${p.T}mm`,u:'gbl',q:1,p:p.matObj?.precio||0});
-  if(p.tapacanto.length){const tt=parseFloat(p.tapacanto.reduce((s,t)=>s+t.total,0).toFixed(3));items.push({id:uid(),d:`[Tapacanto] ${p.tcType} — ${p.name}`,u:'ml',q:tt,p:0});}
-  p.herrajes.forEach(h=>items.push({id:uid(),d:`[Herraje] ${h.n} — ${p.name}`,u:h.unit,q:h.qty,p:0}));
-  p.gola.forEach(g=>items.push({id:uid(),d:`[Gola] ${g.n}`,u:'ml',q:g.total,p:0}));
-  renderTbl();toast(`✓ "${p.name}" agregado con tableros, tapacanto, herrajes y gola`);
+  items.push({id:uid(),d:\\'[Tableros] \\'+(p.name)+\\' — ${p.matObj?p.matObj.nombre:\\\'MDF\\\'} ${p.T}mm\\',u:\\'gbl\\',q:1,p:p.matObj?.precio||0});
+  if(p.tapacanto.length){const tt=parseFloat(p.tapacanto.reduce((s,t)=>s+t.total,0).toFixed(3));items.push({id:uid(),d:\\'[Tapacanto] \\'+(p.tcType)+\\' — ${p.name}\\',u:\\'ml\\',q:tt,p:0});}
+  p.herrajes.forEach(h=>items.push({id:uid(),d:\\'[Herraje] \\'+(h.n)+\\' — ${p.name}\\',u:h.unit,q:h.qty,p:0}));
+  p.gola.forEach(g=>items.push({id:uid(),d:\\'[Gola] \\'+(g.n)+\\'\\',u:\\'ml\\',q:g.total,p:0}));
+  renderTbl();toast(\\'✓ "\\'+(p.name)+\\'" agregado con tableros, tapacanto, herrajes y gola\\');
 }
 function renderCuts(){
-  const box=document.getElementById('cutBox');
-  if(!pieces.length){box.innerHTML='<div class="empty card"><div class="empty-icon">🪵</div><p>Agrega un módulo para generar el despiece</p></div>';return;}
+  const box=document.getElementById(\\'cutBox\\');
+  if(!pieces.length){box.innerHTML=\\'<div class="empty card"><div class="empty-icon">🪵</div><p>Agrega un módulo para generar el despiece</p></div>\\';return;}
   box.innerHTML=pieces.map((p,i)=>{
     const tt=p.tapacanto.reduce((s,t)=>s+t.total,0).toFixed(3);
-    return`<div class="card mb12"><div class="flexb mb12 wrap gap8"><div class="flex gap8 wrap" style="align-items:center"><span class="badge bg">#${i+1}</span><span style="font-size:14px;font-weight:600">${esc(p.name)}</span><span class="tag">${p.W}×${p.H}×${p.D}mm</span><span class="tag">e:${p.T}mm</span>${p.matObj?`<span class="badge bbl">${esc(p.matObj.nombre)}</span>`:''}</div><div class="flex gap8"><button class="btn btn-green btn-sm" onclick="addToPresupuesto('${p.id}')">→ Al presupuesto</button><button class="btn btn-sm btn-del" onclick="delPiece('${p.id}')">Eliminar</button></div></div>
-    <div class="sl">Tableros y paneles</div><div style="overflow-x:auto;margin-bottom:12px"><table><thead><tr><th>Pieza</th><th>Dimensiones (mm)</th><th class="tr">Cant.</th><th>Material</th><th class="tr">m²</th></tr></thead><tbody>${p.cuts.map(c=>{const[w,h]=c.dims.split(' × ').map(Number),ar=((w*h*c.qty)/1e6).toFixed(3);return`<tr><td>${c.n}</td><td><span class="tag">${c.dims}</span></td><td class="tr mono">${c.qty}</td><td class="muted" style="font-size:12px">${c.mat}</td><td class="tr mono muted" style="font-size:12px">${ar}</td></tr>`;}).join('')}</tbody></table></div>
-    ${p.tapacanto.length?`<div class="tc-box"><div class="tc-head"><span class="badge bpu">TAPACANTO</span>${p.tcType} — <span style="font-family:monospace;font-weight:600">Total: ${tt} ml</span></div>${p.tapacanto.map(t=>`<div class="tc-row"><div><span>${t.pieza}</span><span class="muted" style="font-size:11px;margin-left:6px">${t.mpu} ml/und × ${t.qty} = ${t.total} ml</span></div><span style="font-family:monospace;font-weight:600;color:var(--purple);min-width:60px;text-align:right">${t.total} ml</span></div>`).join('')}</div>`:''}
-    ${p.herrajes.length?`<div class="hw"><div class="hhead"><span class="badge bgr">HERRAJES</span>${bisLabel(p.bisType)} · ${corLabel(p.corType)}</div>${p.herrajes.map(h=>`<div class="hrow"><div><span>${h.n}</span><span class="muted" style="font-size:11px;margin-left:6px">${h.note}</span></div><span class="hqty">${h.qty} ${h.unit}</span></div>`).join('')}</div>`:''}
-    ${p.gola.length?`<div class="gola-box"><div class="gola-head"><span class="badge bbl">PERFILES GOLA</span></div>${p.gola.map(g=>`<div class="gola-row"><div><span>${g.n}</span><span class="muted" style="font-size:11px;margin-left:6px">${g.calc}</span></div><span style="font-family:monospace;font-weight:600;color:var(--blue);min-width:60px;text-align:right">${g.total} ml</span></div>`).join('')}</div>`:''}
-    ${p.matObj?`<div style="margin-top:10px;padding:10px 13px;background:var(--bg3);border-radius:var(--r);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><span style="font-size:13px;font-weight:600">${esc(p.matObj.nombre)}</span><div class="flex gap12"><span class="mono tgold" style="font-size:13px">${p.matObj.moneda} ${fmt(p.matObj.precio)} / lám</span></div></div>`:''}</div>`;
-  }).join('');
+    return\\'<div class="card mb12"><div class="flexb mb12 wrap gap8"><div class="flex gap8 wrap" style="align-items:center"><span class="badge bg">#\\'+(i+1)+\\'</span><span style="font-size:14px;font-weight:600">${esc(p.name)}</span><span class="tag">${p.W}×${p.H}×${p.D}mm</span><span class="tag">e:${p.T}mm</span>${p.matObj?\\'<span class="badge bbl">${esc(p.matObj.nombre)}</span>\\':\\\'\\\'}</div><div class="flex gap8"><button class="btn btn-green btn-sm" onclick="addToPresupuesto(\\\'\\'+(p.id)+\\'\\\')">→ Al presupuesto</button><button class="btn btn-sm btn-del" onclick="delPiece(\\\'${p.id}\\\')">Eliminar</button></div></div>
+    <div class="sl">Tableros y paneles</div><div style="overflow-x:auto;margin-bottom:12px"><table><thead><tr><th>Pieza</th><th>Dimensiones (mm)</th><th class="tr">Cant.</th><th>Material</th><th class="tr">m²</th></tr></thead><tbody>${p.cuts.map(c=>{const[w,h]=c.dims.split(\\\' × \\\').map(Number),ar=((w*h*c.qty)/1e6).toFixed(3);return\\'<tr><td>${c.n}</td><td><span class="tag">${c.dims}</span></td><td class="tr mono">${c.qty}</td><td class="muted" style="font-size:12px">${c.mat}</td><td class="tr mono muted" style="font-size:12px">${ar}</td></tr>\\';}).join(\\\'\\\')}</tbody></table></div>
+    \\'+(p.tapacanto.length?\'<div class="tc-box"><div class="tc-head"><span class="badge bpu">TAPACANTO</span>${p.tcType)+\' — <span style="font-family:monospace;font-weight:600">Total: ${tt} ml</span></div>${p.tapacanto.map(t=>\'<div class="tc-row"><div><span>${t.pieza}</span><span class="muted" style="font-size:11px;margin-left:6px">${t.mpu} ml/und × ${t.qty} = ${t.total} ml</span></div><span style="font-family:monospace;font-weight:600;color:var(--purple);min-width:60px;text-align:right">${t.total} ml</span></div>').join('')}</div>':\'\'}
+    '+(p.herrajes.length?'<div class="hw"><div class="hhead"><span class="badge bgr">HERRAJES</span>'+(bisLabel(p.bisType))+' · ${corLabel(p.corType))+'</div>${p.herrajes.map(h=>\'<div class="hrow"><div><span>${h.n}</span><span class="muted" style="font-size:11px;margin-left:6px">${h.note}</span></div><span class="hqty">${h.qty} ${h.unit}</span></div>').join('')}</div>':\'\'}
+    '+(p.gola.length?'<div class="gola-box"><div class="gola-head"><span class="badge bbl">PERFILES GOLA</span></div>'+(p.gola.map(g=>'<div class="gola-row"><div><span>'+(g.n)+'</span><span class="muted" style="font-size:11px;margin-left:6px">${g.calc)+'</span></div><span style="font-family:monospace;font-weight:600;color:var(--blue);min-width:60px;text-align:right">${g.total)+' ml</span></div>\\').join(\\'\\')}</div>\\':\\\'\\\'}
+    \\'+(p.matObj?\'<div style="margin-top:10px;padding:10px 13px;background:var(--bg3);border-radius:var(--r);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><span style="font-size:13px;font-weight:600">${esc(p.matObj.nombre))+\'</span><div class="flex gap12"><span class="mono tgold" style="font-size:13px">${p.matObj.moneda} ${fmt(p.matObj.precio)} / lám</span></div></div>\':\'\'}</div>\';
+  }).join(\\'\\');
 }
 function updMat(){
   const last=pieces[pieces.length-1],mo=last?.matObj||null;
-  const area=pieces.reduce((s,p)=>s+p.cuts.filter(c=>c.thick>=15).reduce((a,c)=>{const[w,h]=c.dims.split(' × ').map(Number);return a+(w*h*c.qty)/1e6;},0),0);
-  document.getElementById('mArea').textContent=area.toFixed(2)+' m²';
-  if(mo&&mo.precio>0){const la=mo.ancho*mo.alto/1e6,sh=Math.ceil(area/la),co=sh*mo.precio;document.getElementById('mSheets').textContent=`${sh} lámina${sh!==1?'s':''} de ${mo.ancho}×${mo.alto}mm`;document.getElementById('mCost').textContent=`${mo.moneda} ${fmt(co)}`;}
-  else{document.getElementById('mSheets').textContent='Registra un melamínico con precio';document.getElementById('mCost').textContent='—';}
+  const area=pieces.reduce((s,p)=>s+p.cuts.filter(c=>c.thick>=15).reduce((a,c)=>{const[w,h]=c.dims.split(\\' × \\').map(Number);return a+(w*h*c.qty)/1e6;},0),0);
+  document.getElementById(\\'mArea\\').textContent=area.toFixed(2)+\\' m²\\';
+  if(mo&&mo.precio>0){const la=mo.ancho*mo.alto/1e6,sh=Math.ceil(area/la),co=sh*mo.precio;document.getElementById(\\'mSheets\\').textContent=\\'\\'+(sh)+\\' lámina\'+(sh!==1?\\'s\\':\\'\\')+\' de ${mo.ancho}×${mo.alto}mm\\\';document.getElementById(\\\\'mCost\\\\').textContent=\\\'${mo.moneda} ${fmt(co)}\\';}
+  else{document.getElementById(\\'mSheets\\').textContent=\\'Registra un melamínico con precio\\';document.getElementById(\\'mCost\\').textContent=\\'—\\';}
 }
 
 /* ===== PDF ===== */
 function exportPDF(){
-  if(!window.jspdf){toast('Cargando librería PDF, intenta de nuevo…');return;}
-  const{jsPDF}=window.jspdf,doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'}),W=doc.internal.pageSize.getWidth();
-  const cur=document.getElementById('cur').value,ivaR=parseFloat(document.getElementById('iva').value)||0,utR=parseFloat(document.getElementById('util').value)||0,pName=document.getElementById('pName').value||'Sin nombre',pClient=document.getElementById('pClient').value||'—',pLoc=document.getElementById('pLoc').value||'—',pDate=document.getElementById('pDate').value||new Date().toISOString().slice(0,10),m2=parseFloat(document.getElementById('disM2').value)||0,tar=parseFloat(document.getElementById('disTarifa').value)||6;
-  doc.setFillColor(250,238,218);doc.rect(0,0,W,28,'F');doc.setFontSize(20);doc.setFont('helvetica','bold');doc.setTextColor(186,117,23);doc.text('Linaro',14,13);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(120,90,20);doc.text('Presupuestación arquitectónica',14,20);doc.setFontSize(10);doc.setTextColor(50,50,50);doc.text(`Proyecto: ${pName}`,14,35);doc.text(`Cliente: ${pClient}`,14,41);doc.text(`Ubicación: ${pLoc}`,14,47);doc.text(`Fecha: ${pDate}`,W-60,35);doc.text(`Moneda: ${cur}`,W-60,41);doc.setDrawColor(220,180,100);doc.setLineWidth(0.3);doc.line(14,52,W-14,52);
-  const rows=items.map((it,i)=>{const tot=(parseFloat(it.q)||0)*(parseFloat(it.p)||0);return[String(i+1),it.d,it.u,fmt(it.q),`${cur} ${fmt(it.p)}`,`${cur} ${fmt(tot)}`];});
-  doc.autoTable({startY:55,head:[['#','Descripción','Unidad','Cantidad','Precio unit.','Total']],body:rows.length?rows:[['—','Sin ítems','','','','']],styles:{fontSize:9,cellPadding:3},headStyles:{fillColor:[186,117,23],textColor:255,fontStyle:'bold'},alternateRowStyles:{fillColor:[252,247,236]},columnStyles:{0:{cellWidth:8,halign:'center'},2:{cellWidth:18,halign:'center'},3:{cellWidth:20,halign:'right'},4:{cellWidth:32,halign:'right'},5:{cellWidth:32,halign:'right'}},margin:{left:14,right:14}});
+  if(!window.jspdf){toast(\\'Cargando librería PDF, intenta de nuevo…\\');return;}
+  const{jsPDF}=window.jspdf,doc=new jsPDF({orientation:\\'portrait\\',unit:\\'mm\\',format:\\'a4\\'}),W=doc.internal.pageSize.getWidth();
+  const cur=document.getElementById(\\'cur\\').value,ivaR=parseFloat(document.getElementById(\\'iva\\').value)||0,utR=parseFloat(document.getElementById(\\'util\\').value)||0,pName=document.getElementById(\\'pName\\').value||\\'Sin nombre\\',pClient=document.getElementById(\\'pClient\\').value||\\'—\\',pLoc=document.getElementById(\\'pLoc\\').value||\\'—\\',pDate=document.getElementById(\\'pDate\\').value||new Date().toISOString().slice(0,10),m2=parseFloat(document.getElementById(\\'disM2\\').value)||0,tar=parseFloat(document.getElementById(\\'disTarifa\\').value)||6;
+  doc.setFillColor(250,238,218);doc.rect(0,0,W,28,\\'F\\');doc.setFontSize(20);doc.setFont(\\'helvetica\\',\\'bold\\');doc.setTextColor(186,117,23);doc.text(\\'Linaro\\',14,13);doc.setFontSize(9);doc.setFont(\\'helvetica\\',\\'normal\\');doc.setTextColor(120,90,20);doc.text(\\'Presupuestación arquitectónica\\',14,20);doc.setFontSize(10);doc.setTextColor(50,50,50);doc.text(\\'Proyecto: \\'+(pName)+\\'\\\',14,35);doc.text(\\\'Cliente: ${pClient}\\\',14,41);doc.text(\\\'Ubicación: ${pLoc}\\\',14,47);doc.text(\\\'Fecha: ${pDate}\\\',W-60,35);doc.text(\\\'Moneda: ${cur}\\',W-60,41);doc.setDrawColor(220,180,100);doc.setLineWidth(0.3);doc.line(14,52,W-14,52);
+  const rows=items.map((it,i)=>{const tot=(parseFloat(it.q)||0)*(parseFloat(it.p)||0);return[String(i+1),it.d,it.u,fmt(it.q),\\'\\'+(cur)+\\' ${fmt(it.p)}\\\',\\\'${cur} ${fmt(tot)}\\'];});
+  doc.autoTable({startY:55,head:[[\\'#\\',\\'Descripción\\',\\'Unidad\\',\\'Cantidad\\',\\'Precio unit.\\',\\'Total\\']],body:rows.length?rows:[[\\'—\\',\\'Sin ítems\\',\\'\\',\\'\\',\\'\\',\\'\\']],styles:{fontSize:9,cellPadding:3},headStyles:{fillColor:[186,117,23],textColor:255,fontStyle:\\'bold\\'},alternateRowStyles:{fillColor:[252,247,236]},columnStyles:{0:{cellWidth:8,halign:\\'center\\'},2:{cellWidth:18,halign:\\'center\\'},3:{cellWidth:20,halign:\\'right\\'},4:{cellWidth:32,halign:\\'right\\'},5:{cellWidth:32,halign:\\'right\\'}},margin:{left:14,right:14}});
   const sub=items.reduce((s,it)=>s+(parseFloat(it.q)||0)*(parseFloat(it.p)||0),0),dis=m2*tar,utA=(sub+dis)*(utR/100),base=sub+dis+utA,ivaA=base*(ivaR/100),tot=base+ivaA,fy=(doc.lastAutoTable?doc.lastAutoTable.finalY:60)+8;
-  doc.autoTable({startY:fy,body:[['','','','','Subtotal obra/carpintería',`${cur} ${fmt(sub)}`],['','','','',`Honorarios diseño (${m2}m² × $${tar})`,`${cur} ${fmt(dis)}`],['','','','',`Utilidad (${utR}%)`,`${cur} ${fmt(utA)}`],['','','','',`IVA (${ivaR}%)`,`${cur} ${fmt(ivaA)}`],['','','','','TOTAL',`${cur} ${fmt(tot)}`]],styles:{fontSize:9},columnStyles:{4:{fontStyle:'bold',halign:'right'},5:{halign:'right',cellWidth:32}},didParseCell:d=>{if(d.row.index===4){d.cell.styles.fontStyle='bold';d.cell.styles.textColor=[186,117,23];}},margin:{left:14,right:14}});
-  doc.setFontSize(7);doc.setTextColor(160,140,120);doc.text('Presupuesto generado con Linaro — Valores estimados, sujetos a condiciones del mercado.',14,doc.lastAutoTable.finalY+10);
-  doc.save(`linaro_${pName.replace(/\s+/g,'_')}.pdf`);toast('PDF exportado correctamente');
+  doc.autoTable({startY:fy,body:[[\\'\\',\\'\\',\\'\\',\\'\\',\\'Subtotal obra/carpintería\\',\\'\\'+(cur)+\\' ${fmt(sub)}\\\'],[\\\\'\\\\',\\\\'\\\\',\\\\'\\\\',\\\\'\\\\',\\\'Honorarios diseño (${m2}m² × $${tar})\\\',\\\'${cur} ${fmt(dis)}\\\'],[\\\\'\\\\',\\\\'\\\\',\\\\'\\\\',\\\\'\\\\',\\\'Utilidad (${utR}%)\\\',\\\'${cur} ${fmt(utA)}\\\'],[\\\\'\\\\',\\\\'\\\\',\\\\'\\\\',\\\\'\\\\',\\\'IVA (${ivaR}%)\\\',\\\'${cur} ${fmt(ivaA)}\\\'],[\\\\'\\\\',\\\\'\\\\',\\\\'\\\\',\\\\'\\\\',\\\\'TOTAL\\\\',\\\'${cur} ${fmt(tot)}\\']],styles:{fontSize:9},columnStyles:{4:{fontStyle:\\'bold\\',halign:\\'right\\'},5:{halign:\\'right\\',cellWidth:32}},didParseCell:d=>{if(d.row.index===4){d.cell.styles.fontStyle=\\'bold\\';d.cell.styles.textColor=[186,117,23];}},margin:{left:14,right:14}});
+  doc.setFontSize(7);doc.setTextColor(160,140,120);doc.text(\\'Presupuesto generado con Linaro — Valores estimados, sujetos a condiciones del mercado.\\',14,doc.lastAutoTable.finalY+10);
+  doc.save(\\'linaro_\\'+(pName.replace(/\s+/g,\\'_\\'))+\\'.pdf\\');toast(\\'PDF exportado correctamente\\');
 }
 
 /* ===== PLANOS ===== */
-const RSTYLE={room:{fill:'#F5F2EB',stroke:'#8B7355',txt:'#5C4A2A'},kitchen:{fill:'#EEF5E8',stroke:'#3B6D11',txt:'#27500A'},closet:{fill:'#EFEEFD',stroke:'#534AB7',txt:'#3C3489'},bath:{fill:'#E8F5F0',stroke:'#0F6E56',txt:'#085041'},bed:{fill:'#F5EEF4',stroke:'#8B3565',txt:'#6A2050'}};
+const RSTYLE={room:{fill:\\'#F5F2EB\\',stroke:\\'#8B7355\\',txt:\\'#5C4A2A\\'},kitchen:{fill:\\'#EEF5E8\\',stroke:\\'#3B6D11\\',txt:\\'#27500A\\'},closet:{fill:\\'#EFEEFD\\',stroke:\\'#534AB7\\',txt:\\'#3C3489\\'},bath:{fill:\\'#E8F5F0\\',stroke:\\'#0F6E56\\',txt:\\'#085041\\'},bed:{fill:\\'#F5EEF4\\',stroke:\\'#8B3565\\',txt:\\'#6A2050\\'}};
 const FCAT={
-  mb:{n:'Mueble bajo',wm:600,dm:550,fill:'#D4C5A9',type:'cab'},ma:{n:'Mueble alto',wm:600,dm:300,fill:'#E5DDD0',type:'upper',dash:true},
-  isla:{n:'Isla cocina',wm:1200,dm:900,fill:'#C8B89A',type:'island'},freg:{n:'Fregadero',wm:800,dm:550,fill:'#C0C8C0',type:'sink'},
-  estufa:{n:'Estufa',wm:600,dm:600,fill:'#C8C0BC',type:'stove'},refri:{n:'Refrigerador',wm:700,dm:700,fill:'#D0D8DC',type:'fridge'},
-  closet:{n:'Closet recto',wm:1200,dm:600,fill:'#C0D4C8',type:'closet'},cajmod:{n:'Módulo cajones',wm:500,dm:550,fill:'#C0D4C8',type:'cab'},
-  camas:{n:'Cama sencilla',wm:1000,dm:2000,fill:'#B8CAD8',type:'bed'},camad:{n:'Cama doble',wm:1400,dm:2000,fill:'#B8CAD8',type:'bed'},
-  camaq:{n:'Cama queen',wm:1600,dm:2000,fill:'#B8CAD8',type:'bed'},velador:{n:'Velador',wm:500,dm:500,fill:'#C4D0D8',type:'side'},
-  sofa2:{n:'Sofá 2p',wm:1600,dm:900,fill:'#C8B8D4',type:'sofa'},sofa3:{n:'Sofá 3p',wm:2100,dm:900,fill:'#C8B8D4',type:'sofa'},
-  mesa4:{n:'Mesa 4p',wm:1200,dm:800,fill:'#D4C8B8',type:'table'},mesa6:{n:'Mesa 6p',wm:1800,dm:900,fill:'#D4C8B8',type:'table'},
-  mesac:{n:'Mesa centro',wm:1200,dm:600,fill:'#D4C8B8',type:'table'},tvstand:{n:'Mueble TV',wm:1500,dm:450,fill:'#C8BCAC',type:'cab'},
-  inodoro:{n:'Inodoro',wm:380,dm:650,fill:'#C8E4E4',type:'toilet'},lavamanos:{n:'Lavamanos',wm:500,dm:450,fill:'#C8E4E4',type:'sink_b'},
-  ducha:{n:'Ducha',wm:900,dm:900,fill:'#D4F0F0',type:'shower'},tina:{n:'Bañera',wm:700,dm:1600,fill:'#D4F0F0',type:'tub'}
+  mb:{n:\\'Mueble bajo\\',wm:600,dm:550,fill:\\'#D4C5A9\\',type:\\'cab\\'},ma:{n:\\'Mueble alto\\',wm:600,dm:300,fill:\\'#E5DDD0\\',type:\\'upper\\',dash:true},
+  isla:{n:\\'Isla cocina\\',wm:1200,dm:900,fill:\\'#C8B89A\\',type:\\'island\\'},freg:{n:\\'Fregadero\\',wm:800,dm:550,fill:\\'#C0C8C0\\',type:\\'sink\\'},
+  estufa:{n:\\'Estufa\\',wm:600,dm:600,fill:\\'#C8C0BC\\',type:\\'stove\\'},refri:{n:\\'Refrigerador\\',wm:700,dm:700,fill:\\'#D0D8DC\\',type:\\'fridge\\'},
+  closet:{n:\\'Closet recto\\',wm:1200,dm:600,fill:\\'#C0D4C8\\',type:\\'closet\\'},cajmod:{n:\\'Módulo cajones\\',wm:500,dm:550,fill:\\'#C0D4C8\\',type:\\'cab\\'},
+  camas:{n:\\'Cama sencilla\\',wm:1000,dm:2000,fill:\\'#B8CAD8\\',type:\\'bed\\'},camad:{n:\\'Cama doble\\',wm:1400,dm:2000,fill:\\'#B8CAD8\\',type:\\'bed\\'},
+  camaq:{n:\\'Cama queen\\',wm:1600,dm:2000,fill:\\'#B8CAD8\\',type:\\'bed\\'},velador:{n:\\'Velador\\',wm:500,dm:500,fill:\\'#C4D0D8\\',type:\\'side\\'},
+  sofa2:{n:\\'Sofá 2p\\',wm:1600,dm:900,fill:\\'#C8B8D4\\',type:\\'sofa\\'},sofa3:{n:\\'Sofá 3p\\',wm:2100,dm:900,fill:\\'#C8B8D4\\',type:\\'sofa\\'},
+  mesa4:{n:\\'Mesa 4p\\',wm:1200,dm:800,fill:\\'#D4C8B8\\',type:\\'table\\'},mesa6:{n:\\'Mesa 6p\\',wm:1800,dm:900,fill:\\'#D4C8B8\\',type:\\'table\\'},
+  mesac:{n:\\'Mesa centro\\',wm:1200,dm:600,fill:\\'#D4C8B8\\',type:\\'table\\'},tvstand:{n:\\'Mueble TV\\',wm:1500,dm:450,fill:\\'#C8BCAC\\',type:\\'cab\\'},
+  inodoro:{n:\\'Inodoro\\',wm:380,dm:650,fill:\\'#C8E4E4\\',type:\\'toilet\\'},lavamanos:{n:\\'Lavamanos\\',wm:500,dm:450,fill:\\'#C8E4E4\\',type:\\'sink_b\\'},
+  ducha:{n:\\'Ducha\\',wm:900,dm:900,fill:\\'#D4F0F0\\',type:\\'shower\\'},tina:{n:\\'Bañera\\',wm:700,dm:1600,fill:\\'#D4F0F0\\',type:\\'tub\\'}
 };
 
 function fW(f){return f.rot?f.dm/1000:f.wm/1000}
 function fD(f){return f.rot?f.wm/1000:f.dm/1000}
-function fWlbl(f){return f.rot?f.dm+'mm':f.wm+'mm'}
-function fDlbl(f){return f.rot?f.wm+'mm':f.dm+'mm'}
+function fWlbl(f){return f.rot?f.dm+\\'mm\\':f.wm+\\'mm\\'}
+function fDlbl(f){return f.rot?f.wm+\\'mm\\':f.dm+\\'mm\\'}
 const m2p=m=>m*pSc,mm2p=mm=>mm/1000*pSc,p2m=p=>p/pSc,snp=v=>Math.round(v/0.05)*0.05;
 const PAD=55;
 
 function setSTab(id,btn){
-  document.querySelectorAll('.sc').forEach(e=>e.classList.remove('on'));
-  document.querySelectorAll('.stab').forEach(e=>e.classList.remove('on'));
-  document.getElementById('sc-'+id).classList.add('on');btn.classList.add('on');
+  document.querySelectorAll(\\'.sc\\').forEach(e=>e.classList.remove(\\'on\\'));
+  document.querySelectorAll(\\'.stab\\').forEach(e=>e.classList.remove(\\'on\\'));
+  document.getElementById(\\'sc-\\'+id).classList.add(\\'on\\');btn.classList.add(\\'on\\');
 }
 
 function addPRoom(){
-  const name=document.getElementById('rName').value||'Ambiente',w=parseFloat(document.getElementById('rW').value)||3,h=parseFloat(document.getElementById('rH').value)||4,type=document.getElementById('rType').value,last=pRooms[pRooms.length-1],x=last?last.x+last.w+0.3:0.5;
+  const name=document.getElementById(\\'rName\\').value||\\'Ambiente\\',w=parseFloat(document.getElementById(\\'rW\\').value)||3,h=parseFloat(document.getElementById(\\'rH\\').value)||4,type=document.getElementById(\\'rType\\').value,last=pRooms[pRooms.length-1],x=last?last.x+last.w+0.3:0.5;
   pRooms.push({id:uid(),name,w,h,type,x,y:0.5});pRender();updRList();
 }
 function delPRoom(id){pRooms=pRooms.filter(r=>r.id!==id);pRender();updRList();}
 function updRList(){
-  const el=document.getElementById('rList');
-  if(!pRooms.length){el.innerHTML='<div style="font-size:12px;color:var(--text2);text-align:center;padding:12px">Sin ambientes</div>';return;}
-  el.innerHTML=pRooms.map(r=>{const s=RSTYLE[r.type]||RSTYLE.room;return`<div class="ritem" style="background:${s.fill};border:.5px solid ${s.stroke}"><span style="color:${s.txt};font-weight:500;font-size:12px">${r.name} <span style="font-weight:400;color:${s.stroke}">${r.w}×${r.h}m</span></span><button style="border:none;background:none;cursor:pointer;font-size:14px;color:#A32D2D;padding:0 2px" onclick="delPRoom('${r.id}')">×</button></div>`;}).join('');
+  const el=document.getElementById(\\'rList\\');
+  if(!pRooms.length){el.innerHTML=\\'<div style="font-size:12px;color:var(--text2);text-align:center;padding:12px">Sin ambientes</div>\\';return;}
+  el.innerHTML=pRooms.map(r=>{const s=RSTYLE[r.type]||RSTYLE.room;return\\'<div class="ritem" style="background:\\'+(s.fill)+\\';border:.5px solid ${s.stroke}"><span style="color:${s.txt};font-weight:500;font-size:12px">${r.name} <span style="font-weight:400;color:${s.stroke}">${r.w}×${r.h}m</span></span><button style="border:none;background:none;cursor:pointer;font-size:14px;color:#A32D2D;padding:0 2px" onclick="delPRoom(\\\'${r.id}\\\')">×</button></div>\\';}).join(\\'\\');
 }
 
 function addF(key){
@@ -1099,216 +1099,216 @@ function addF(key){
   let x=1,y=1;if(pRooms.length){const r=pRooms[0];x=r.x+r.w/2-cat.wm/2000;y=r.y+r.h/2-cat.dm/2000;x=Math.max(r.x,x);y=Math.max(r.y,y);}
   const f={id:uid(),key,n:cat.n,wm:cat.wm,dm:cat.dm,fill:cat.fill,type:cat.type,dash:cat.dash||false,x:snp(x),y:snp(y),rot:false};
   pFurn.push(f);pSel=f.id;pRender();updPSel();
-  setSTab('psel',document.querySelectorAll('.stab')[2]);
+  setSTab(\\'psel\\',document.querySelectorAll(\\'.stab\\')[2]);
 }
 function delSel(){if(!pSel)return;pFurn=pFurn.filter(f=>f.id!==pSel);pSel=null;pRender();updPSel();}
 function rotSel(){const f=pFurn.find(x=>x.id===pSel);if(f){f.rot=!f.rot;pRender();updPSel();}}
-function adjSc(factor){pSc=Math.max(25,Math.min(200,pSc*factor));document.getElementById('scBadge').textContent=`1:${Math.round(1000/(pSc*0.265))}`;pRender();}
+function adjSc(factor){pSc=Math.max(25,Math.min(200,pSc*factor));document.getElementById(\\'scBadge\\').textContent=\\'1:\\'+(Math.round(1000/(pSc*0.265)))+\\'\\';pRender();}
 
 function updPSel(){
-  const bar=document.getElementById('selBar'),panel=document.getElementById('selPanel');
-  if(!pSel){bar.style.display='none';panel.innerHTML='<div style="color:var(--text2);font-size:12px;text-align:center;padding:24px 8px">Haz clic en un mueble para editar</div>';return;}
-  const f=pFurn.find(x=>x.id===pSel);if(!f){bar.style.display='none';return;}
-  bar.style.display='flex';document.getElementById('selName').textContent=f.n;
-  panel.innerHTML=`<div class="psl">Mueble seleccionado</div>
-    <div class="pfield"><label>Nombre</label><input type="text" value="${f.n}" onchange="updFP('${f.id}','n',this.value)"></div>
+  const bar=document.getElementById(\\'selBar\\'),panel=document.getElementById(\\'selPanel\\');
+  if(!pSel){bar.style.display=\\'none\\';panel.innerHTML=\\'<div style="color:var(--text2);font-size:12px;text-align:center;padding:24px 8px">Haz clic en un mueble para editar</div>\\';return;}
+  const f=pFurn.find(x=>x.id===pSel);if(!f){bar.style.display=\\'none\\';return;}
+  bar.style.display=\\'flex\\';document.getElementById(\\'selName\\').textContent=f.n;
+  panel.innerHTML=\\'<div class="psl">Mueble seleccionado</div>
+    <div class="pfield"><label>Nombre</label><input type="text" value="\\'+(f.n)+\\'" onchange="updFP(\\\'${f.id}\\\',\\\'n\\\',this.value)"></div>
     <div class="pg2">
-      <div class="pfield"><label>Ancho (mm)</label><input type="number" value="${f.wm}" min="50" onchange="updFP('${f.id}','wm',+this.value)"></div>
-      <div class="pfield"><label>Profund. (mm)</label><input type="number" value="${f.dm}" min="50" onchange="updFP('${f.id}','dm',+this.value)"></div>
-      <div class="pfield"><label>Pos. X (m)</label><input type="number" value="${f.x.toFixed(2)}" step="0.05" onchange="updFP('${f.id}','x',+this.value)"></div>
-      <div class="pfield"><label>Pos. Y (m)</label><input type="number" value="${f.y.toFixed(2)}" step="0.05" onchange="updFP('${f.id}','y',+this.value)"></div>
+      <div class="pfield"><label>Ancho (mm)</label><input type="number" value="${f.wm}" min="50" onchange="updFP(\\\'${f.id}\\\',\\\'wm\\\',+this.value)"></div>
+      <div class="pfield"><label>Profund. (mm)</label><input type="number" value="${f.dm}" min="50" onchange="updFP(\\\'${f.id}\\\',\\\'dm\\\',+this.value)"></div>
+      <div class="pfield"><label>Pos. X (m)</label><input type="number" value="${f.x.toFixed(2)}" step="0.05" onchange="updFP(\\\'${f.id}\\\',\\\'x\\\',+this.value)"></div>
+      <div class="pfield"><label>Pos. Y (m)</label><input type="number" value="${f.y.toFixed(2)}" step="0.05" onchange="updFP(\\\'${f.id}\\\',\\\'y\\\',+this.value)"></div>
     </div>
     <div style="display:flex;gap:6px;margin-top:6px">
       <button class="tbtn tbtn-gold" onclick="rotSel()" style="flex:1">↻ rotar 90°</button>
       <button class="tbtn tbtn-del" onclick="delSel()">× eliminar</button>
-    </div>`;
+    </div>\\';
 }
 function updFP(id,prop,val){const f=pFurn.find(x=>x.id===id);if(f){f[prop]=val;pRender();updPSel();}}
 
 function furnDetail(f,fx,fy,fw,fd){
-  let s='',t=f.type;
+  let s=\\'\\',t=f.type;
 
   // Mueble bajo — puertas batientes con arco de apertura y jalador
-  if(t==='cab'){
+  if(t===\\'cab\\'){
     // Profundidad del mueble (banda trasera)
     const bk=Math.min(fd*.1,5);
-    s+=`<rect x="${fx}" y="${fy}" width="${fw}" height="${bk}" fill="#7A6040" opacity="0.25"/>`;
+    s+=\\'<rect x="\\'+(fx)+\\'" y="${fy}" width="${fw}" height="${bk}" fill="#7A6040" opacity="0.25"/>\\\';
     // Tablero de encimera/tapa (borde frontal)
     const ft=Math.min(fd*.08,5);
-    s+=`<rect x="${fx}" y="${fy+fd-ft}" width="${fw}" height="${ft}" fill="#907060" opacity="0.4"/>`;
+    s+=\\\'<rect x="${fx}" y="${fy+fd-ft}" width="${fw}" height="${ft}" fill="#907060" opacity="0.4"/>\\';
     // Dividir en puertas según ancho: 1 puerta ≤450px, 2 puertas si más
     const nd=fw>m2p(.45)?2:1;
     const pw=fw/nd;
     for(let i=0;i<nd;i++){
       const pdx=fx+i*pw;
       // Marco de puerta
-      s+=`<rect x="${pdx+1.5}" y="${fy+bk+1.5}" width="${pw-3}" height="${fd-ft-bk-3}" fill="none" stroke="#6B5030" stroke-width="1.2" opacity="0.6"/>`;
+      s+=\\'<rect x="\\'+(pdx+1.5)+\\'" y="${fy+bk+1.5}" width="${pw-3}" height="${fd-ft-bk-3}" fill="none" stroke="#6B5030" stroke-width="1.2" opacity="0.6"/>\\\';
       // Arco de apertura (cuarto de círculo desde esquina frontal)
       const ar=Math.min(pw-4,fd-ft-bk-4);
       const hinge_side= i===0 ? pdx+2 : pdx+pw-2;
       const arc_dx = i===0 ? pw-3 : -(pw-3);
-      s+=`<path d="M ${hinge_side} ${fy+fd-ft-1.5} A ${ar} ${ar} 0 0 ${i===0?0:1} ${hinge_side+arc_dx} ${fy+fd-ft-1.5-ar}" fill="none" stroke="#BA7517" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.5"/>`;
+      s+=\\\'<path d="M ${hinge_side} ${fy+fd-ft-1.5} A ${ar} ${ar} 0 0 ${i===0?0:1} ${hinge_side+arc_dx} ${fy+fd-ft-1.5-ar}" fill="none" stroke="#BA7517" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.5"/>\\\';
       // Jalador centrado
       const jx=pdx+pw/2;
       const jy=fy+fd-ft-8;
-      s+=`<line x1="${jx-5}" y1="${jy}" x2="${jx+5}" y2="${jy}" stroke="#555" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>`;
+      s+=\\\'<line x1="${jx-5}" y1="${jy}" x2="${jx+5}" y2="${jy}" stroke="#555" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>\\';
     }
   }
 
   // Mueble alto — puertas con apertura vertical (colgante) y jalador
-  if(t==='upper'){
+  if(t===\\'upper\\'){
     const bk=Math.min(fd*.12,4);
-    s+=`<rect x="${fx}" y="${fy}" width="${fw}" height="${bk}" fill="#7A6040" opacity="0.2"/>`;
+    s+=\\'<rect x="\\'+(fx)+\\'" y="${fy}" width="${fw}" height="${bk}" fill="#7A6040" opacity="0.2"/>\\';
     const nd=fw>m2p(.45)?2:1;
     const pw=fw/nd;
     for(let i=0;i<nd;i++){
       const pdx=fx+i*pw;
-      s+=`<rect x="${pdx+1.5}" y="${fy+bk+1.5}" width="${pw-3}" height="${fd-bk-3}" fill="none" stroke="#6B5030" stroke-width="1" stroke-dasharray="4,2" opacity="0.55"/>`;
+      s+=\\'<rect x="\\'+(pdx+1.5)+\\'" y="${fy+bk+1.5}" width="${pw-3}" height="${fd-bk-3}" fill="none" stroke="#6B5030" stroke-width="1" stroke-dasharray="4,2" opacity="0.55"/>\\\';
       // Jalador horizontal en la parte inferior de la puerta
       const jx=pdx+pw/2,jy=fy+fd-5;
-      s+=`<line x1="${jx-5}" y1="${jy}" x2="${jx+5}" y2="${jy}" stroke="#555" stroke-width="2" stroke-linecap="round" opacity="0.6"/>`;
+      s+=\\\'<line x1="${jx-5}" y1="${jy}" x2="${jx+5}" y2="${jy}" stroke="#555" stroke-width="2" stroke-linecap="round" opacity="0.6"/>\\';
     }
   }
-  if(t==='closet'){const ry=fy+fd*.5;s+=`<line x1="${fx+8}" y1="${ry}" x2="${fx+fw-8}" y2="${ry}" stroke="#5A4A3A" stroke-width="2" opacity="0.45"/>`;for(let hx=fx+16;hx<fx+fw-16;hx+=Math.max(14,fw/6)){s+=`<line x1="${hx}" y1="${ry}" x2="${hx-5}" y2="${ry+8}" stroke="#5A4A3A" stroke-width="1" opacity="0.4"/><line x1="${hx}" y1="${ry}" x2="${hx+5}" y2="${ry+8}" stroke="#5A4A3A" stroke-width="1" opacity="0.4"/>`}}
-  if(t==='bed'){const ph=Math.min(fd*.18,18),pw=fw*.82;s+=`<rect x="${fx+fw/2-pw/2}" y="${fy+5}" width="${pw}" height="${ph}" fill="#D8D0E8" stroke="#9080A8" stroke-width="1" rx="4" opacity="0.65"/>`;s+=`<line x1="${fx+4}" y1="${fy+fd-6}" x2="${fx+fw-4}" y2="${fy+fd-6}" stroke="#9080A8" stroke-width="1" opacity="0.4"/>`;}
-  if(t==='sofa'){const bh=fd*.28;s+=`<rect x="${fx+2}" y="${fy+2}" width="${fw-4}" height="${bh}" fill="#A898B4" opacity="0.35" rx="2"/>`;const ns=Math.round(fw/42);for(let i=1;i<ns;i++){const sx=fx+fw/ns*i;s+=`<line x1="${sx}" y1="${fy+bh}" x2="${sx}" y2="${fy+fd-5}" stroke="#9080A8" stroke-width="1" opacity="0.35"/>`;}}
-  if(t==='table'){s+=`<ellipse cx="${fx+fw/2}" cy="${fy+fd/2}" rx="${fw*.38}" ry="${fd*.38}" fill="none" stroke="#7A6A5A" stroke-width="1" opacity="0.3"/>`;}
-  if(t==='island'){
+  if(t===\\'closet\\'){const ry=fy+fd*.5;s+=\\'<line x1="\\'+(fx+8)+\\'" y1="${ry}" x2="${fx+fw-8}" y2="${ry}" stroke="#5A4A3A" stroke-width="2" opacity="0.45"/>\\';for(let hx=fx+16;hx<fx+fw-16;hx+=Math.max(14,fw/6)){s+=\\'<line x1="\\'+(hx)+\\'" y1="${ry}" x2="${hx-5}" y2="${ry+8}" stroke="#5A4A3A" stroke-width="1" opacity="0.4"/><line x1="${hx}" y1="${ry}" x2="${hx+5}" y2="${ry+8}" stroke="#5A4A3A" stroke-width="1" opacity="0.4"/>\\'}}
+  if(t===\\'bed\\'){const ph=Math.min(fd*.18,18),pw=fw*.82;s+=\\'<rect x="\\'+(fx+fw/2-pw/2)+\\'" y="${fy+5}" width="${pw}" height="${ph}" fill="#D8D0E8" stroke="#9080A8" stroke-width="1" rx="4" opacity="0.65"/>\\\';s+=\\\'<line x1="${fx+4}" y1="${fy+fd-6}" x2="${fx+fw-4}" y2="${fy+fd-6}" stroke="#9080A8" stroke-width="1" opacity="0.4"/>\\';}
+  if(t===\\'sofa\\'){const bh=fd*.28;s+=\\'<rect x="\\'+(fx+2)+\\'" y="${fy+2}" width="${fw-4}" height="${bh}" fill="#A898B4" opacity="0.35" rx="2"/>\\';const ns=Math.round(fw/42);for(let i=1;i<ns;i++){const sx=fx+fw/ns*i;s+=\\'<line x1="\\'+(sx)+\\'" y1="${fy+bh}" x2="${sx}" y2="${fy+fd-5}" stroke="#9080A8" stroke-width="1" opacity="0.35"/>\\';}}
+  if(t===\\'table\\'){s+=\\'<ellipse cx="\\'+(fx+fw/2)+\\'" cy="${fy+fd/2}" rx="${fw*.38}" ry="${fd*.38}" fill="none" stroke="#7A6A5A" stroke-width="1" opacity="0.3"/>\\';}
+  if(t===\\'island\\'){
     // Encimera isla con borde y zona de trabajo
-    s+=`<rect x="${fx+3}" y="${fy+3}" width="${fw-6}" height="${fd-6}" fill="none" stroke="#7A6A5A" stroke-width="1.5" opacity="0.4" rx="3"/>`;
+    s+=\\'<rect x="\\'+(fx+3)+\\'" y="${fy+3}" width="${fw-6}" height="${fd-6}" fill="none" stroke="#7A6A5A" stroke-width="1.5" opacity="0.4" rx="3"/>\\';
     // Línea de puertas alrededor
     const nd=Math.max(2,Math.round(fw/m2p(.45)));
-    for(let i=1;i<nd;i++){const lx=fx+fw/nd*i;s+=`<line x1="${lx}" y1="${fy+4}" x2="${lx}" y2="${fy+fd-4}" stroke="#8B7355" stroke-width="0.8" opacity="0.35"/>`;}
+    for(let i=1;i<nd;i++){const lx=fx+fw/nd*i;s+=\\'<line x1="\\'+(lx)+\\'" y1="${fy+4}" x2="${lx}" y2="${fy+fd-4}" stroke="#8B7355" stroke-width="0.8" opacity="0.35"/>\\';}
     // Jaladores frontales
-    for(let i=0;i<nd;i++){const cx=fx+fw/nd*(i+.5);s+=`<line x1="${cx-6}" y1="${fy+fd-5}" x2="${cx+6}" y2="${fy+fd-5}" stroke="#555" stroke-width="2" stroke-linecap="round" opacity="0.6"/>`;}
+    for(let i=0;i<nd;i++){const cx=fx+fw/nd*(i+.5);s+=\\'<line x1="\\'+(cx-6)+\\'" y1="${fy+fd-5}" x2="${cx+6}" y2="${fy+fd-5}" stroke="#555" stroke-width="2" stroke-linecap="round" opacity="0.6"/>\\';}
   }
-  if(t==='sink'){
+  if(t===\\'sink\\'){
     // Zona del mueble bajo (detrás del fregadero)
     const sz=fd*.35;
-    s+=`<rect x="${fx}" y="${fy}" width="${fw}" height="${sz}" fill="#B8C4B8" opacity="0.3"/>`;
+    s+=\\'<rect x="\\'+(fx)+\\'" y="${fy}" width="${fw}" height="${sz}" fill="#B8C4B8" opacity="0.3"/>\\\';
     // Cuba del fregadero
     const sx=fx+fw*.1,sy=fy+sz+2,sw=fw*.8,sdp=fd*.55;
-    s+=`<rect x="${sx}" y="${sy}" width="${sw}" height="${sdp}" fill="#A0C8C0" stroke="#5A8888" stroke-width="1.5" rx="4" opacity="0.75"/>`;
+    s+=\\\'<rect x="${sx}" y="${sy}" width="${sw}" height="${sdp}" fill="#A0C8C0" stroke="#5A8888" stroke-width="1.5" rx="4" opacity="0.75"/>\\\';
     // Desagüe
-    s+=`<circle cx="${fx+fw/2}" cy="${sy+sdp/2}" r="4" fill="#5A8888" opacity="0.6"/>`;
-    s+=`<circle cx="${fx+fw/2}" cy="${sy+sdp/2}" r="2" fill="#3A6868" opacity="0.8"/>`;
+    s+=\\\'<circle cx="${fx+fw/2}" cy="${sy+sdp/2}" r="4" fill="#5A8888" opacity="0.6"/>\\\';
+    s+=\\\'<circle cx="${fx+fw/2}" cy="${sy+sdp/2}" r="2" fill="#3A6868" opacity="0.8"/>\\\';
     // Grifo
-    s+=`<line x1="${fx+fw*.5}" y1="${sy+4}" x2="${fx+fw*.5}" y2="${sy-6}" stroke="#7A7A7A" stroke-width="2" stroke-linecap="round"/>`;
-    s+=`<line x1="${fx+fw*.42}" y1="${sy-6}" x2="${fx+fw*.58}" y2="${sy-6}" stroke="#7A7A7A" stroke-width="2" stroke-linecap="round"/>`;
+    s+=\\\'<line x1="${fx+fw*.5}" y1="${sy+4}" x2="${fx+fw*.5}" y2="${sy-6}" stroke="#7A7A7A" stroke-width="2" stroke-linecap="round"/>\\\';
+    s+=\\\'<line x1="${fx+fw*.42}" y1="${sy-6}" x2="${fx+fw*.58}" y2="${sy-6}" stroke="#7A7A7A" stroke-width="2" stroke-linecap="round"/>\\';
   }
-  if(t==='stove'){[[.28,.28],[.72,.28],[.28,.72],[.72,.72]].forEach(([bx,by])=>{s+=`<circle cx="${fx+fw*bx}" cy="${fy+fd*by}" r="${Math.min(fw,fd)*.1}" fill="#888" stroke="#555" stroke-width="1" opacity="0.55"/>`;});}
-  if(t==='fridge'){s+=`<line x1="${fx+fw*.8}" y1="${fy+fd*.22}" x2="${fx+fw*.8}" y2="${fy+fd*.55}" stroke="#999" stroke-width="3" opacity="0.5"/>`;s+=`<line x1="${fx+6}" y1="${fy+fd*.45}" x2="${fx+fw-6}" y2="${fy+fd*.45}" stroke="#999" stroke-width="0.8" opacity="0.3"/>`;}
-  if(t==='toilet'){s+=`<rect x="${fx+3}" y="${fy+2}" width="${fw-6}" height="${fd*.38}" fill="#A8D0D0" stroke="#5A9898" stroke-width="1" rx="3" opacity="0.7"/>`;s+=`<ellipse cx="${fx+fw/2}" cy="${fy+fd*.72}" rx="${fw*.4}" ry="${fd*.26}" fill="#A8D0D0" stroke="#5A9898" stroke-width="1" opacity="0.7"/>`;}
-  if(t==='sink_b'){s+=`<ellipse cx="${fx+fw/2}" cy="${fy+fd/2}" rx="${fw*.38}" ry="${fd*.38}" fill="#A8D0D0" stroke="#5A9898" stroke-width="1.5" opacity="0.7"/>`;s+=`<circle cx="${fx+fw/2}" cy="${fy+fd/2}" r="3" fill="#5A9898" opacity="0.6"/>`;}
-  if(t==='shower'){for(let i=-2;i<=10;i++){const o=i*Math.min(fw,fd)*.11;s+=`<line x1="${fx+o}" y1="${fy}" x2="${fx+o+fd}" y2="${fy+fd}" stroke="#5A9898" stroke-width="0.8" opacity="0.2"/>`;}s+=`<rect x="${fx+1}" y="${fy+1}" width="${fw-2}" height="${fd-2}" fill="none" stroke="#5A9898" stroke-width="1.5" rx="2"/>`;}
-  if(t==='tub'){s+=`<rect x="${fx+8}" y="${fy+8}" width="${fw-16}" height="${fd-16}" fill="#B8E8E8" stroke="#4A8888" stroke-width="1" rx="${Math.min(fw,fd)*.12}" opacity="0.7"/>`;s+=`<circle cx="${fx+fw/2}" cy="${fy+fd*.88}" r="5" fill="#4A8888" opacity="0.5"/>`;}
+  if(t===\\'stove\\'){[[.28,.28],[.72,.28],[.28,.72],[.72,.72]].forEach(([bx,by])=>{s+=\\'<circle cx="\\'+(fx+fw*bx)+\\'" cy="${fy+fd*by}" r="${Math.min(fw,fd)*.1}" fill="#888" stroke="#555" stroke-width="1" opacity="0.55"/>\\';});}
+  if(t===\\'fridge\\'){s+=\\'<line x1="\\'+(fx+fw*.8)+\\'" y1="${fy+fd*.22}" x2="${fx+fw*.8}" y2="${fy+fd*.55}" stroke="#999" stroke-width="3" opacity="0.5"/>\\\';s+=\\\'<line x1="${fx+6}" y1="${fy+fd*.45}" x2="${fx+fw-6}" y2="${fy+fd*.45}" stroke="#999" stroke-width="0.8" opacity="0.3"/>\\';}
+  if(t===\\'toilet\\'){s+=\\'<rect x="\\'+(fx+3)+\\'" y="${fy+2}" width="${fw-6}" height="${fd*.38}" fill="#A8D0D0" stroke="#5A9898" stroke-width="1" rx="3" opacity="0.7"/>\\\';s+=\\\'<ellipse cx="${fx+fw/2}" cy="${fy+fd*.72}" rx="${fw*.4}" ry="${fd*.26}" fill="#A8D0D0" stroke="#5A9898" stroke-width="1" opacity="0.7"/>\\';}
+  if(t===\\'sink_b\\'){s+=\\'<ellipse cx="\\'+(fx+fw/2)+\\'" cy="${fy+fd/2}" rx="${fw*.38}" ry="${fd*.38}" fill="#A8D0D0" stroke="#5A9898" stroke-width="1.5" opacity="0.7"/>\\\';s+=\\\'<circle cx="${fx+fw/2}" cy="${fy+fd/2}" r="3" fill="#5A9898" opacity="0.6"/>\\';}
+  if(t===\\'shower\\'){for(let i=-2;i<=10;i++){const o=i*Math.min(fw,fd)*.11;s+=\\'<line x1="\\'+(fx+o)+\\'" y1="${fy}" x2="${fx+o+fd}" y2="${fy+fd}" stroke="#5A9898" stroke-width="0.8" opacity="0.2"/>\\';}s+=\\'<rect x="\\'+(fx+1)+\\'" y="${fy+1}" width="${fw-2}" height="${fd-2}" fill="none" stroke="#5A9898" stroke-width="1.5" rx="2"/>\\';}
+  if(t===\\'tub\\'){s+=\\'<rect x="\\'+(fx+8)+\\'" y="${fy+8}" width="${fw-16}" height="${fd-16}" fill="#B8E8E8" stroke="#4A8888" stroke-width="1" rx="${Math.min(fw,fd)*.12}" opacity="0.7"/>\\\';s+=\\\'<circle cx="${fx+fw/2}" cy="${fy+fd*.88}" r="5" fill="#4A8888" opacity="0.5"/>\\';}
   return s;
 }
 
 function dimH(x1,y1,x2,y2,lbl,ey){
-  const ec='#888',dc='#222',lw=lbl.length*6+10,cx=(x1+x2)/2;
-  return`<line x1="${x1}" y1="${ey-3}" x2="${x1}" y2="${y1+3}" stroke="${ec}" stroke-width="0.7"/>
+  const ec=\\'#888\\',dc=\\'#222\\',lw=lbl.length*6+10,cx=(x1+x2)/2;
+  return\\'<line x1="\\'+(x1)+\\'" y1="${ey-3}" x2="${x1}" y2="${y1+3}" stroke="${ec}" stroke-width="0.7"/>
 <line x1="${x2}" y1="${ey-3}" x2="${x2}" y2="${y1+3}" stroke="${ec}" stroke-width="0.7"/>
 <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y1}" stroke="${dc}" stroke-width="1.2" marker-start="url(#aR)" marker-end="url(#aF)"/>
 <rect x="${cx-lw/2}" y="${y1-8}" width="${lw}" height="12" fill="rgba(236,234,228,0.92)" rx="2"/>
-<text x="${cx}" y="${y1+1.5}" text-anchor="middle" font-size="10" fill="${dc}" font-family="monospace" font-weight="600">${lbl}</text>`;
+<text x="${cx}" y="${y1+1.5}" text-anchor="middle" font-size="10" fill="${dc}" font-family="monospace" font-weight="600">${lbl}</text>\\';
 }
 function dimV(x1,y1,x2,y2,lbl,ex){
-  const ec='#888',dc='#222',lw=lbl.length*6+10,cy=(y1+y2)/2;
-  return`<line x1="${ex+3}" y1="${y1}" x2="${x1-3}" y2="${y1}" stroke="${ec}" stroke-width="0.7"/>
+  const ec=\\'#888\\',dc=\\'#222\\',lw=lbl.length*6+10,cy=(y1+y2)/2;
+  return\\'<line x1="\\'+(ex+3)+\\'" y1="${y1}" x2="${x1-3}" y2="${y1}" stroke="${ec}" stroke-width="0.7"/>
 <line x1="${ex+3}" y1="${y2}" x2="${x1-3}" y2="${y2}" stroke="${ec}" stroke-width="0.7"/>
 <line x1="${x1}" y1="${y1}" x2="${x1}" y2="${y2}" stroke="${dc}" stroke-width="1.2" marker-start="url(#aR)" marker-end="url(#aF)"/>
 <rect x="${x1+3}" y="${cy-7}" width="${lw}" height="12" fill="rgba(236,234,228,0.92)" rx="2"/>
-<text x="${x1+5}" y="${cy+2.5}" text-anchor="start" font-size="10" fill="${dc}" font-family="monospace" font-weight="600">${lbl}</text>`;
+<text x="${x1+5}" y="${cy+2.5}" text-anchor="start" font-size="10" fill="${dc}" font-family="monospace" font-weight="600">${lbl}</text>\\';
 }
 
 function pRender(){
-  const svg=document.getElementById('planSvg');
+  const svg=document.getElementById(\\'planSvg\\');
   if(!svg)return;
   let maxX=5,maxY=5;
   pRooms.forEach(r=>{maxX=Math.max(maxX,r.x+r.w+1.5);maxY=Math.max(maxY,r.y+r.h+1.5);});
   pFurn.forEach(f=>{maxX=Math.max(maxX,f.x+fW(f)+1.5);maxY=Math.max(maxY,f.y+fD(f)+1.5);});
   const W=m2p(maxX)+PAD*2,H=m2p(maxY)+PAD*2;
-  svg.setAttribute('width',W);svg.setAttribute('height',H);
+  svg.setAttribute(\\'width\\',W);svg.setAttribute(\\'height\\',H);
 
-  let o=`<defs>
+  let o=\\'<defs>
     <marker id="aF" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#333"/></marker>
     <marker id="aR" markerWidth="8" markerHeight="6" refX="1" refY="3" orient="auto"><polygon points="8 0,0 3,8 6" fill="#333"/></marker>
-  </defs>`;
-  o+=`<rect width="${W}" height="${H}" fill="#ECEAE4"/>`;
+  </defs>\\';
+  o+=\\'<rect width="\\'+(W)+\\'" height="${H}" fill="#ECEAE4"/>\\\';
 
-  o+=`<g opacity="0.18">`;
-  for(let gx=0;gx<maxX+0.5;gx+=0.1){const px=m2p(gx)+PAD,mj=Math.abs(gx-Math.round(gx))<0.005;o+=`<line x1="${px}" y1="0" x2="${px}" y2="${H}" stroke="#7B6E5E" stroke-width="${mj?1:0.3}"/>`;}
-  for(let gy=0;gy<maxY+0.5;gy+=0.1){const py=m2p(gy)+PAD,mj=Math.abs(gy-Math.round(gy))<0.005;o+=`<line x1="0" y1="${py}" x2="${W}" y2="${py}" stroke="#7B6E5E" stroke-width="${mj?1:0.3}"/>`;}
-  o+=`</g>`;
+  o+=\\\'<g opacity="0.18">\\';
+  for(let gx=0;gx<maxX+0.5;gx+=0.1){const px=m2p(gx)+PAD,mj=Math.abs(gx-Math.round(gx))<0.005;o+=\\'<line x1="\\'+(px)+\\'" y1="0" x2="${px}" y2="${H}" stroke="#7B6E5E" stroke-width="${mj?1:0.3}"/>\\';}
+  for(let gy=0;gy<maxY+0.5;gy+=0.1){const py=m2p(gy)+PAD,mj=Math.abs(gy-Math.round(gy))<0.005;o+=\\'<line x1="0" y1="\\'+(py)+\\'" x2="${W}" y2="${py}" stroke="#7B6E5E" stroke-width="${mj?1:0.3}"/>\\';}
+  o+=\\'</g>\\';
 
   pRooms.forEach(r=>{
     const s=RSTYLE[r.type]||RSTYLE.room,rx=m2p(r.x)+PAD,ry=m2p(r.y)+PAD,rw=m2p(r.w),rh=m2p(r.h);
-    o+=`<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="3" data-rid="${r.id}"/>`;
+    o+=\\'<rect x="\\'+(rx)+\\'" y="${ry}" width="${rw}" height="${rh}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="3" data-rid="${r.id}"/>\\\';
     const fs=Math.max(10,Math.min(15,rw/r.name.length*0.85));
-    o+=`<text x="${rx+rw/2}" y="${ry+rh/2-6}" text-anchor="middle" font-size="${fs}" font-weight="600" fill="${s.txt}" font-family="sans-serif">${r.name}</text>`;
-    o+=`<text x="${rx+rw/2}" y="${ry+rh/2+10}" text-anchor="middle" font-size="${Math.max(9,fs-2)}" fill="${s.stroke}" font-family="monospace">${r.w}×${r.h}m · ${(r.w*r.h).toFixed(1)}m²</text>`;
-    o+=dimH(rx,ry-30,rx+rw,ry-30,`${Math.round(r.w*1000)}mm`,ry);
-    o+=dimV(rx+rw+32,ry,rx+rw+32,ry+rh,`${Math.round(r.h*1000)}mm`,rx+rw);
+    o+=\\\'<text x="${rx+rw/2}" y="${ry+rh/2-6}" text-anchor="middle" font-size="${fs}" font-weight="600" fill="${s.txt}" font-family="sans-serif">${r.name}</text>\\\';
+    o+=\\\'<text x="${rx+rw/2}" y="${ry+rh/2+10}" text-anchor="middle" font-size="${Math.max(9,fs-2)}" fill="${s.stroke}" font-family="monospace">${r.w}×${r.h}m · ${(r.w*r.h).toFixed(1)}m²</text>\\\';
+    o+=dimH(rx,ry-30,rx+rw,ry-30,\\\'${Math.round(r.w*1000)}mm\\\',ry);
+    o+=dimV(rx+rw+32,ry,rx+rw+32,ry+rh,\\\'${Math.round(r.h*1000)}mm\\',rx+rw);
   });
 
   pFurn.forEach(f=>{
     const fw=fW(f),fd=fD(f),fx=m2p(f.x)+PAD,fy=m2p(f.y)+PAD,fwp=m2p(fw),fdp=m2p(fd),isSel=f.id===pSel;
-    o+=`<g data-fid="${f.id}" style="cursor:move">`;
-    o+=`<rect x="${fx}" y="${fy}" width="${fwp}" height="${fdp}" fill="${f.fill}" stroke="${isSel?'#BA7517':'#6B5B45'}" stroke-width="${isSel?2.5:1.5}" stroke-dasharray="${f.dash?'5,3':'none'}" rx="2"/>`;
+    o+=\\'<g data-fid="\\'+(f.id)+\\'" style="cursor:move">\\\';
+    o+=\\\'<rect x="${fx}" y="${fy}" width="${fwp}" height="${fdp}" fill="${f.fill}" stroke="${isSel?\\\'#BA7517\\\':\\\'#6B5B45\\\'}" stroke-width="${isSel?2.5:1.5}" stroke-dasharray="${f.dash?\\\'5,3\\\':\\\'none\\\'}" rx="2"/>\\\';
     o+=furnDetail(f,fx,fy,fwp,fdp);
     const lfs=Math.max(8,Math.min(12,fwp/(f.n.length+1)*1.5));
-    o+=`<text x="${fx+fwp/2}" y="${fy+fdp/2+4}" text-anchor="middle" font-size="${lfs}" fill="#2E1F0A" font-family="sans-serif" font-weight="500">${f.n}</text>`;
+    o+=\\\'<text x="${fx+fwp/2}" y="${fy+fdp/2+4}" text-anchor="middle" font-size="${lfs}" fill="#2E1F0A" font-family="sans-serif" font-weight="500">${f.n}</text>\\\';
     o+=dimH(fx,fy-22,fx+fwp,fy-22,fWlbl(f),fy);
     o+=dimV(fx+fwp+22,fy,fx+fwp+22,fy+fdp,fDlbl(f),fx+fwp);
-    o+=`</g>`;
+    o+=\\\'</g>\\';
   });
 
   const sbX=PAD,sbY=H-22,sbL=m2p(1);
-  o+=`<g><rect x="${sbX}" y="${sbY-4}" width="${sbL}" height="6" fill="none" stroke="#666" stroke-width="1"/><rect x="${sbX}" y="${sbY-4}" width="${sbL/2}" height="6" fill="#888"/><text x="${sbX}" y="${sbY+10}" font-size="9" fill="#666" font-family="monospace">0</text><text x="${sbX+sbL/2}" y="${sbY+10}" font-size="9" fill="#666" font-family="monospace" text-anchor="middle">0.5m</text><text x="${sbX+sbL}" y="${sbY+10}" font-size="9" fill="#666" font-family="monospace" text-anchor="end">1m</text></g>`;
+  o+=\\'<g><rect x="\\'+(sbX)+\\'" y="${sbY-4}" width="${sbL}" height="6" fill="none" stroke="#666" stroke-width="1"/><rect x="${sbX}" y="${sbY-4}" width="${sbL/2}" height="6" fill="#888"/><text x="${sbX}" y="${sbY+10}" font-size="9" fill="#666" font-family="monospace">0</text><text x="${sbX+sbL/2}" y="${sbY+10}" font-size="9" fill="#666" font-family="monospace" text-anchor="middle">0.5m</text><text x="${sbX+sbL}" y="${sbY+10}" font-size="9" fill="#666" font-family="monospace" text-anchor="end">1m</text></g>\\';
   svg.innerHTML=o;
 }
 
-const planSvg=document.getElementById('planSvg');
-planSvg.addEventListener('mousedown',e=>{
-  const fg=e.target.closest('[data-fid]');
-  if(fg){e.preventDefault();const fid=fg.dataset.fid;pSel=fid;const f=pFurn.find(x=>x.id===fid);if(!f)return;const pt=svgPt(e);pDrag={id:fid,ox:pt.x-f.x,oy:pt.y-f.y};pRender();updPSel();setSTab('psel',document.querySelectorAll('.stab')[2]);}
-  else if(!e.target.closest('[data-rid]')&&(e.target===planSvg)){pSel=null;pRender();updPSel();}
+const planSvg=document.getElementById(\\'planSvg\\');
+planSvg.addEventListener(\\'mousedown\\',e=>{
+  const fg=e.target.closest(\\'[data-fid]\\');
+  if(fg){e.preventDefault();const fid=fg.dataset.fid;pSel=fid;const f=pFurn.find(x=>x.id===fid);if(!f)return;const pt=svgPt(e);pDrag={id:fid,ox:pt.x-f.x,oy:pt.y-f.y};pRender();updPSel();setSTab(\\'psel\\',document.querySelectorAll(\\'.stab\\')[2]);}
+  else if(!e.target.closest(\\'[data-rid]\\')&&(e.target===planSvg)){pSel=null;pRender();updPSel();}
 });
-planSvg.addEventListener('mousemove',e=>{if(!pDrag)return;const f=pFurn.find(x=>x.id===pDrag.id);if(!f)return;const pt=svgPt(e);f.x=snp(pt.x-pDrag.ox);f.y=snp(pt.y-pDrag.oy);pRender();});
-planSvg.addEventListener('mouseup',()=>{if(pDrag){pDrag=null;updPSel();}});
-planSvg.addEventListener('mouseleave',()=>{pDrag=null;});
+planSvg.addEventListener(\\'mousemove\\',e=>{if(!pDrag)return;const f=pFurn.find(x=>x.id===pDrag.id);if(!f)return;const pt=svgPt(e);f.x=snp(pt.x-pDrag.ox);f.y=snp(pt.y-pDrag.oy);pRender();});
+planSvg.addEventListener(\\'mouseup\\',()=>{if(pDrag){pDrag=null;updPSel();}});
+planSvg.addEventListener(\\'mouseleave\\',()=>{pDrag=null;});
 function svgPt(e){const rect=planSvg.getBoundingClientRect();return{x:p2m(e.clientX-rect.left-PAD),y:p2m(e.clientY-rect.top-PAD)};}
 
-document.getElementById('pDate').value=new Date().toISOString().slice(0,10);
-document.getElementById('scBadge').textContent=`1:${Math.round(1000/(pSc*0.265))}`;
+document.getElementById(\\'pDate\\').value=new Date().toISOString().slice(0,10);
+document.getElementById(\\'scBadge\\').textContent=\\'1:\\'+(Math.round(1000/(pSc*0.265)))+\\'\\';
 updRList();pRender();
 
 /* ===== VISTA 3D ===== */
 (function(){
-const VS=`attribute vec3 aPos;attribute vec3 aNorm;attribute vec3 aCol;uniform mat4 uMVP;uniform mat4 uM;varying vec3 vNorm;varying vec3 vCol;void main(){vNorm=normalize(mat3(uM)*aNorm);vCol=aCol;gl_Position=uMVP*vec4(aPos,1.0);}`;
-const FS=`precision mediump float;varying vec3 vNorm;varying vec3 vCol;void main(){vec3 L=normalize(vec3(1.,2.,1.5));float d=max(dot(vNorm,L),0.);vec3 L2=normalize(vec3(-1.,1.,-1.));float d2=max(dot(vNorm,L2),0.)*.3;gl_FragColor=vec4(vCol*(0.35+d*.65+d2),1.);}`;
+const VS=\'attribute vec3 aPos;attribute vec3 aNorm;attribute vec3 aCol;uniform mat4 uMVP;uniform mat4 uM;varying vec3 vNorm;varying vec3 vCol;void main(){vNorm=normalize(mat3(uM)*aNorm);vCol=aCol;gl_Position=uMVP*vec4(aPos,1.0);}\';
+const FS=\'precision mediump float;varying vec3 vNorm;varying vec3 vCol;void main(){vec3 L=normalize(vec3(1.,2.,1.5));float d=max(dot(vNorm,L),0.);vec3 L2=normalize(vec3(-1.,1.,-1.));float d2=max(dot(vNorm,L2),0.)*.3;gl_FragColor=vec4(vCol*(0.35+d*.65+d2),1.);}\';
 let gl3,prog3,posB3,normB3,colB3,uMVP3,uM3,aPos3,aNorm3,aCol3;
 let v3rooms=[],v3furns=[],v3objs=[],v3showW=true,v3showC=true;
 let v3theta=Math.PI/5,v3phi=Math.PI/4,v3dist=12,v3tx=0,v3ty=0,v3tz=0;
 let v3inited=false,v3furnOff=0;
-const RCOLS=['#BA7517','#185FA5','#27500A','#8B3565','#0F6E56','#993C1D'];
-const V3FOBS={mb:{n:'Mueble bajo',w:.6,hh:.87,d:.55,col:'#C8B49A',top:'#D8C8B0'},ma:{n:'Mueble alto',w:.6,hh:2.1,d:.32,col:'#D8CEC0',top:'#E0D8CC'},isla:{n:'Isla',w:1.2,hh:.9,d:.9,col:'#B8A888',top:'#C8B898'},refri:{n:'Refri',w:.7,hh:1.8,d:.7,col:'#C8D4DC',top:'#D0DCE4'},estufa:{n:'Estufa',w:.6,hh:.87,d:.6,col:'#888',top:'#666'},camad:{n:'Cama doble',w:1.4,hh:.55,d:2.0,col:'#8090A8',top:'#B0BED0'},camaq:{n:'Cama queen',w:1.6,hh:.55,d:2.0,col:'#8090A8',top:'#B0BED0'},closet3d:{n:'Closet',w:1.2,hh:2.2,d:.6,col:'#A89878',top:'#B8A888'},velador:{n:'Velador',w:.5,hh:.6,d:.5,col:'#B0A090',top:'#C0B0A0'},sofa:{n:'Sofá 3p',w:2.1,hh:.85,d:.9,col:'#8878A8',top:'#A898C0'},mesa:{n:'Mesa',w:1.2,hh:.75,d:.8,col:'#A08060',top:'#B09070'},tv:{n:'Mueble TV',w:1.5,hh:.5,d:.45,col:'#505868',top:'#60687A'},inodoro:{n:'Inodoro',w:.38,hh:.45,d:.65,col:'#D0E8E8',top:'#E0F4F4'},ducha:{n:'Ducha',w:.9,hh:.05,d:.9,col:'#B0D4D8',top:'#C0E4E8'},tina:{n:'Bañera',w:.7,hh:.55,d:1.6,col:'#B0D8DC',top:'#C0E8EC'}};
+const RCOLS=[\\'#BA7517\\',\\'#185FA5\\',\\'#27500A\\',\\'#8B3565\\',\\'#0F6E56\\',\\'#993C1D\\'];
+const V3FOBS={mb:{n:\\'Mueble bajo\\',w:.6,hh:.87,d:.55,col:\\'#C8B49A\\',top:\\'#D8C8B0\\'},ma:{n:\\'Mueble alto\\',w:.6,hh:2.1,d:.32,col:\\'#D8CEC0\\',top:\\'#E0D8CC\\'},isla:{n:\\'Isla\\',w:1.2,hh:.9,d:.9,col:\\'#B8A888\\',top:\\'#C8B898\\'},refri:{n:\\'Refri\\',w:.7,hh:1.8,d:.7,col:\\'#C8D4DC\\',top:\\'#D0DCE4\\'},estufa:{n:\\'Estufa\\',w:.6,hh:.87,d:.6,col:\\'#888\\',top:\\'#666\\'},camad:{n:\\'Cama doble\\',w:1.4,hh:.55,d:2.0,col:\\'#8090A8\\',top:\\'#B0BED0\\'},camaq:{n:\\'Cama queen\\',w:1.6,hh:.55,d:2.0,col:\\'#8090A8\\',top:\\'#B0BED0\\'},closet3d:{n:\\'Closet\\',w:1.2,hh:2.2,d:.6,col:\\'#A89878\\',top:\\'#B8A888\\'},velador:{n:\\'Velador\\',w:.5,hh:.6,d:.5,col:\\'#B0A090\\',top:\\'#C0B0A0\\'},sofa:{n:\\'Sofá 3p\\',w:2.1,hh:.85,d:.9,col:\\'#8878A8\\',top:\\'#A898C0\\'},mesa:{n:\\'Mesa\\',w:1.2,hh:.75,d:.8,col:\\'#A08060\\',top:\\'#B09070\\'},tv:{n:\\'Mueble TV\\',w:1.5,hh:.5,d:.45,col:\\'#505868\\',top:\\'#60687A\\'},inodoro:{n:\\'Inodoro\\',w:.38,hh:.45,d:.65,col:\\'#D0E8E8\\',top:\\'#E0F4F4\\'},ducha:{n:\\'Ducha\\',w:.9,hh:.05,d:.9,col:\\'#B0D4D8\\',top:\\'#C0E4E8\\'},tina:{n:\\'Bañera\\',w:.7,hh:.55,d:1.6,col:\\'#B0D8DC\\',top:\\'#C0E8EC\\'}};
 
 function v3init(){
-  const canvas=document.getElementById('c3d');if(!canvas)return false;
-  gl3=canvas.getContext('webgl',{antialias:true})||canvas.getContext('experimental-webgl');if(!gl3)return false;
+  const canvas=document.getElementById(\\'c3d\\');if(!canvas)return false;
+  gl3=canvas.getContext(\\'webgl\\',{antialias:true})||canvas.getContext(\\'experimental-webgl\\');if(!gl3)return false;
   function mkS(t,s){const sh=gl3.createShader(t);gl3.shaderSource(sh,s);gl3.compileShader(sh);return sh;}
   prog3=gl3.createProgram();gl3.attachShader(prog3,mkS(gl3.VERTEX_SHADER,VS));gl3.attachShader(prog3,mkS(gl3.FRAGMENT_SHADER,FS));gl3.linkProgram(prog3);gl3.useProgram(prog3);
-  aPos3=gl3.getAttribLocation(prog3,'aPos');aNorm3=gl3.getAttribLocation(prog3,'aNorm');aCol3=gl3.getAttribLocation(prog3,'aCol');
-  uMVP3=gl3.getUniformLocation(prog3,'uMVP');uM3=gl3.getUniformLocation(prog3,'uM');
+  aPos3=gl3.getAttribLocation(prog3,\\'aPos\\');aNorm3=gl3.getAttribLocation(prog3,\\'aNorm\\');aCol3=gl3.getAttribLocation(prog3,\\'aCol\\');
+  uMVP3=gl3.getUniformLocation(prog3,\\'uMVP\\');uM3=gl3.getUniformLocation(prog3,\\'uM\\');
   posB3=gl3.createBuffer();normB3=gl3.createBuffer();colB3=gl3.createBuffer();
   gl3.enable(gl3.DEPTH_TEST);gl3.enable(gl3.CULL_FACE);gl3.clearColor(.07,.08,.12,1);
   // mouse
-  canvas.addEventListener('mousedown',e=>{v3mouse.down=true;v3mouse.lx=e.clientX;v3mouse.ly=e.clientY;});
-  canvas.addEventListener('mouseup',()=>{v3mouse.down=false;});
-  canvas.addEventListener('mousemove',e=>{if(!v3mouse.down)return;const dx=e.clientX-v3mouse.lx,dy=e.clientY-v3mouse.ly;if(e.shiftKey){v3tx-=dx*.015*v3dist/8;v3ty+=dy*.015*v3dist/8;}else{v3theta-=dx*.008;v3phi=Math.max(.05,Math.min(Math.PI/2-.01,v3phi+dy*.006));}v3mouse.lx=e.clientX;v3mouse.ly=e.clientY;v3render();});
-  canvas.addEventListener('wheel',e=>{v3dist=Math.max(2,Math.min(40,v3dist+e.deltaY*.02));v3render();},{passive:true});
+  canvas.addEventListener(\\'mousedown\\',e=>{v3mouse.down=true;v3mouse.lx=e.clientX;v3mouse.ly=e.clientY;});
+  canvas.addEventListener(\\'mouseup\\',()=>{v3mouse.down=false;});
+  canvas.addEventListener(\\'mousemove\\',e=>{if(!v3mouse.down)return;const dx=e.clientX-v3mouse.lx,dy=e.clientY-v3mouse.ly;if(e.shiftKey){v3tx-=dx*.015*v3dist/8;v3ty+=dy*.015*v3dist/8;}else{v3theta-=dx*.008;v3phi=Math.max(.05,Math.min(Math.PI/2-.01,v3phi+dy*.006));}v3mouse.lx=e.clientX;v3mouse.ly=e.clientY;v3render();});
+  canvas.addEventListener(\\'wheel\\',e=>{v3dist=Math.max(2,Math.min(40,v3dist+e.deltaY*.02));v3render();},{passive:true});
   new ResizeObserver(()=>v3render()).observe(canvas.parentElement);
   return true;
 }
@@ -1322,7 +1322,7 @@ function v3look(ex,ey,ez,tx,ty,tz){let fx=tx-ex,fy=ty-ey,fz=tz-ez;const fl=Math.
 function v3tr(x,y,z){const m=v3id(v3mat4());m[12]=x;m[13]=y;m[14]=z;return m;}
 function v3hex(h){const r=parseInt(h.slice(1,3),16)/255,g=parseInt(h.slice(3,5),16)/255,b=parseInt(h.slice(5,7),16)/255;return[r,g,b];}
 function v3box(w,h,d,col){
-  const[r,g,b]=typeof col==='string'?v3hex(col):col;
+  const[r,g,b]=typeof col===\\'string\\'?v3hex(col):col;
   const hw=w/2,hh=h/2,hd=d/2;
   const faces=[[-hw,-hh,hd,hw,-hh,hd,hw,hh,hd,-hw,hh,hd,0,0,1],[hw,-hh,-hd,-hw,-hh,-hd,-hw,hh,-hd,hw,hh,-hd,0,0,-1],[-hw,-hh,-hd,-hw,-hh,hd,-hw,hh,hd,-hw,hh,-hd,-1,0,0],[hw,-hh,hd,hw,-hh,-hd,hw,hh,-hd,hw,hh,hd,1,0,0],[-hw,hh,hd,hw,hh,hd,hw,hh,-hd,-hw,hh,-hd,0,1,0],[-hw,-hh,-hd,hw,-hh,-hd,hw,-hh,hd,-hw,-hh,hd,0,-1,0]];
   const pos=[],norm=[],color=[];
@@ -1345,24 +1345,24 @@ function v3rebuild(){
   v3objs=[];
   v3rooms.forEach(r=>{
     const wc=v3hex(r.col),flc=[.72,.68,.60],cc=[.9,.9,.9],wt=.12;
-    v3objs.push({geo:v3box(r.w,.02,r.h,flc),tx:r.ox+r.w/2,ty:-.01,tz:r.oz+r.h/2,tag:'floor'});
-    v3objs.push({geo:v3box(r.w,.02,r.h,cc),tx:r.ox+r.w/2,ty:r.alt+.01,tz:r.oz+r.h/2,tag:'ceil'});
-    v3objs.push({geo:v3box(r.w+wt*2,r.alt,wt,wc),tx:r.ox+r.w/2,ty:r.alt/2,tz:r.oz-wt/2,tag:'wall'});
-    v3objs.push({geo:v3box(r.w+wt*2,r.alt,wt,wc),tx:r.ox+r.w/2,ty:r.alt/2,tz:r.oz+r.h+wt/2,tag:'wall'});
-    v3objs.push({geo:v3box(wt,r.alt,r.h,wc),tx:r.ox-wt/2,ty:r.alt/2,tz:r.oz+r.h/2,tag:'wall'});
-    v3objs.push({geo:v3box(wt,r.alt,r.h,wc),tx:r.ox+r.w+wt/2,ty:r.alt/2,tz:r.oz+r.h/2,tag:'wall'});
+    v3objs.push({geo:v3box(r.w,.02,r.h,flc),tx:r.ox+r.w/2,ty:-.01,tz:r.oz+r.h/2,tag:\\'floor\\'});
+    v3objs.push({geo:v3box(r.w,.02,r.h,cc),tx:r.ox+r.w/2,ty:r.alt+.01,tz:r.oz+r.h/2,tag:\\'ceil\\'});
+    v3objs.push({geo:v3box(r.w+wt*2,r.alt,wt,wc),tx:r.ox+r.w/2,ty:r.alt/2,tz:r.oz-wt/2,tag:\\'wall\\'});
+    v3objs.push({geo:v3box(r.w+wt*2,r.alt,wt,wc),tx:r.ox+r.w/2,ty:r.alt/2,tz:r.oz+r.h+wt/2,tag:\\'wall\\'});
+    v3objs.push({geo:v3box(wt,r.alt,r.h,wc),tx:r.ox-wt/2,ty:r.alt/2,tz:r.oz+r.h/2,tag:\\'wall\\'});
+    v3objs.push({geo:v3box(wt,r.alt,r.h,wc),tx:r.ox+r.w+wt/2,ty:r.alt/2,tz:r.oz+r.h/2,tag:\\'wall\\'});
   });
   v3furns.forEach(f=>{
     const body=v3box(f.w,f.hh*.85,f.d,f.col);
     const top=v3box(f.w*.96,f.hh*.15,f.d*.96,f.top);
     for(let i=1;i<top.pos.length;i+=3)top.pos[i]+=f.hh*.85/2+f.hh*.15/2;
-    v3objs.push({geo:v3merge([body,top]),tx:f.ox+f.w/2,ty:f.hh/2,tz:f.oz+f.d/2,tag:'furn'});
+    v3objs.push({geo:v3merge([body,top]),tx:f.ox+f.w/2,ty:f.hh/2,tz:f.oz+f.d/2,tag:\\'furn\\'});
   });
   v3render();
 }
 
 function v3render(){
-  var canvas=document.getElementById('c3d');if(!canvas||!gl3)return;
+  var canvas=document.getElementById(\\'c3d\\');if(!canvas||!gl3)return;
   const cw=canvas.parentElement;canvas.width=cw.clientWidth;canvas.height=cw.clientHeight;
   gl3.viewport(0,0,canvas.width,canvas.height);gl3.clear(gl3.COLOR_BUFFER_BIT|gl3.DEPTH_BUFFER_BIT);
   const asp=canvas.width/canvas.height,proj=v3persp(Math.PI/3.2,asp,.1,200);
@@ -1370,11 +1370,11 @@ function v3render(){
   v3vp=v3mul(proj,v3look(ex,ey,ez,v3tx,v3ty,v3tz));
   // grid
   for(let i=-12;i<=12;i++){const lg=v3box(.008,.001,24,[.28,.26,.22]);v3draw(lg,i,0,0);}
-  v3objs.forEach(o=>{if(o.tag==='wall'&&!v3showW)return;if(o.tag==='ceil'&&!v3showC)return;v3draw(o.geo,o.tx,o.ty,o.tz);});
+  v3objs.forEach(o=>{if(o.tag===\\'wall\\'&&!v3showW)return;if(o.tag===\\'ceil\\'&&!v3showC)return;v3draw(o.geo,o.tx,o.ty,o.tz);});
 }
 
 window.v3addRoom=function(){
-  const name=document.getElementById('v3rName').value||'Ambiente',w=parseFloat(document.getElementById('v3rW').value)||4,h=parseFloat(document.getElementById('v3rH').value)||3,alt=parseFloat(document.getElementById('v3rAlt').value)||2.6,col=document.getElementById('v3rCol').value;
+  const name=document.getElementById(\\'v3rName\\').value||\\'Ambiente\\',w=parseFloat(document.getElementById(\\'v3rW\\').value)||4,h=parseFloat(document.getElementById(\\'v3rH\\').value)||3,alt=parseFloat(document.getElementById(\\'v3rAlt\\').value)||2.6,col=document.getElementById(\\'v3rCol\\').value;
   const last=v3rooms[v3rooms.length-1],ox=last?last.ox+last.w+0.3:0;
   v3rooms.push({name,w,h,alt,col,ox,oz:0});v3rebuild();v3updList();
 };
@@ -1384,18 +1384,18 @@ window.v3addObj=function(key){
   v3furns.push({...def,ox:ox+v3furnOff%2.5,oz:oz+(Math.floor(v3furnOff/2.5))*1.2});v3furnOff+=.6;v3rebuild();
 };
 window.v3setView=function(m,btn){
-  document.querySelectorAll('[id^=v3btn]').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
-  if(m==='persp'){v3theta=Math.PI/5;v3phi=Math.PI/4;v3dist=12;v3tx=v3ty=v3tz=0;}
-  else if(m==='top'){v3phi=Math.PI/2-.01;v3theta=0;v3dist=14;}
-  else if(m==='front'){v3phi=.01;v3theta=0;v3dist=12;}
+  document.querySelectorAll(\\'[id^=v3btn]\\').forEach(b=>b.classList.remove(\\'on\\'));btn.classList.add(\\'on\\');
+  if(m===\\'persp\\'){v3theta=Math.PI/5;v3phi=Math.PI/4;v3dist=12;v3tx=v3ty=v3tz=0;}
+  else if(m===\\'top\\'){v3phi=Math.PI/2-.01;v3theta=0;v3dist=14;}
+  else if(m===\\'front\\'){v3phi=.01;v3theta=0;v3dist=12;}
   v3render();
 };
 window.v3resetCam=function(){v3theta=Math.PI/5;v3phi=Math.PI/4;v3dist=12;v3tx=v3ty=v3tz=0;v3render();};
-window.v3toggleWalls=function(){v3showW=!v3showW;var b=document.getElementById('v3btnW');if(b){b.textContent='Muros '+(v3showW?'ON':'OFF');b.className='v3d-btn'+(v3showW?' on':'');}v3render();};
-window.v3toggleCeil=function(){v3showC=!v3showC;var b=document.getElementById('v3btnC');if(b){b.textContent='Techo '+(v3showC?'ON':'OFF');b.className='v3d-btn'+(v3showC?' on':'');}v3render();};
+window.v3toggleWalls=function(){v3showW=!v3showW;var b=document.getElementById(\\'v3btnW\\');if(b){b.textContent=\\'Muros \\'+(v3showW?\\'ON\\':\\'OFF\\');b.className=\\'v3d-btn\\'+(v3showW?\\' on\\':\\'\\');}v3render();};
+window.v3toggleCeil=function(){v3showC=!v3showC;var b=document.getElementById(\\'v3btnC\\');if(b){b.textContent=\\'Techo \\'+(v3showC?\\'ON\\':\\'OFF\\');b.className=\\'v3d-btn\\'+(v3showC?\\' on\\':\\'\\');}v3render();};
 function v3updList(){
-  const el=document.getElementById('v3rList');if(!el)return;
-  el.innerHTML=v3rooms.map((r,i)=>`<div class="v3d-ritem"><span><span class="cbadge" style="background:${RCOLS[i%RCOLS.length]}"></span>${r.name} <span style="font-size:10px;opacity:.6">${r.w}×${r.h}m</span></span><button onclick="v3rooms.splice(${i},1);v3rebuild();v3updList()" style="border:none;background:none;cursor:pointer;color:#A32D2D;font-size:13px">×</button></div>`).join('');
+  const el=document.getElementById(\\'v3rList\\');if(!el)return;
+  el.innerHTML=v3rooms.map((r,i)=>\\'<div class="v3d-ritem"><span><span class="cbadge" style="background:\\'+(RCOLS[i%RCOLS.length])+\\'"></span>\'+(r.name)+\' <span style="font-size:10px;opacity:.6">${r.w}×${r.h}m</span></span><button onclick="v3rooms.splice(${i},1);v3rebuild();v3updList()" style="border:none;background:none;cursor:pointer;color:#A32D2D;font-size:13px">×</button></div>\\').join(\\'\\');
 }
 
 // 3D init handled by central goTab
@@ -1406,7 +1406,7 @@ function v3updList(){
 
 // ── localStorage helpers ───────────────────────────────────────────────────
 function dbGetAll() {
-  try { return JSON.parse(localStorage.getItem(DB_KEY) || '[]'); }
+  try { return JSON.parse(localStorage.getItem(DB_KEY) || \\'[]\\'); }
   catch(e) { return []; }
 }
 function dbSaveAllLocal(projects) {
@@ -1420,16 +1420,16 @@ function dbSnapshot() {
   return {
     version: 3,
     savedAt: new Date().toISOString(),
-    projectName: document.getElementById('pName').value || 'Sin nombre',
-    client:   document.getElementById('pClient').value  || '',
-    location: document.getElementById('pLoc').value     || '',
-    date:     document.getElementById('pDate').value    || '',
-    currency: document.getElementById('cur').value,
-    iva:      document.getElementById('iva').value,
-    utility:  document.getElementById('util').value,
-    disM2:    document.getElementById('disM2').value,
-    disTarifa:document.getElementById('disTarifa').value,
-    disDesc:  document.getElementById('disDesc').value,
+    projectName: document.getElementById(\\'pName\\').value || \\'Sin nombre\\',
+    client:   document.getElementById(\\'pClient\\').value  || \\'\\',
+    location: document.getElementById(\\'pLoc\\').value     || \\'\\',
+    date:     document.getElementById(\\'pDate\\').value    || \\'\\',
+    currency: document.getElementById(\\'cur\\').value,
+    iva:      document.getElementById(\\'iva\\').value,
+    utility:  document.getElementById(\\'util\\').value,
+    disM2:    document.getElementById(\\'disM2\\').value,
+    disTarifa:document.getElementById(\\'disTarifa\\').value,
+    disDesc:  document.getElementById(\\'disDesc\\').value,
     items:       JSON.parse(JSON.stringify(items)),
     pieces:      JSON.parse(JSON.stringify(pieces)),
     melaminicos: JSON.parse(JSON.stringify(melaminicos)),
@@ -1444,16 +1444,16 @@ function dbSnapshot() {
 
 // ── Restore snapshot ───────────────────────────────────────────────────────
 function dbRestore(snap) {
-  document.getElementById('pName').value     = snap.projectName || '';
-  document.getElementById('pClient').value   = snap.client      || '';
-  document.getElementById('pLoc').value      = snap.location    || '';
-  document.getElementById('pDate').value     = snap.date        || '';
-  document.getElementById('cur').value       = snap.currency    || 'USD';
-  document.getElementById('iva').value       = snap.iva         || '16';
-  document.getElementById('util').value      = snap.utility     || '0';
-  document.getElementById('disM2').value     = snap.disM2       || '0';
-  document.getElementById('disTarifa').value = snap.disTarifa   || '6';
-  document.getElementById('disDesc').value   = snap.disDesc     || 'Honorarios de diseño';
+  document.getElementById(\\'pName\\').value     = snap.projectName || \\'\\';
+  document.getElementById(\\'pClient\\').value   = snap.client      || \\'\\';
+  document.getElementById(\\'pLoc\\').value      = snap.location    || \\'\\';
+  document.getElementById(\\'pDate\\').value     = snap.date        || \\'\\';
+  document.getElementById(\\'cur\\').value       = snap.currency    || \\'USD\\';
+  document.getElementById(\\'iva\\').value       = snap.iva         || \\'16\\';
+  document.getElementById(\\'util\\').value      = snap.utility     || \\'0\\';
+  document.getElementById(\\'disM2\\').value     = snap.disM2       || \\'0\\';
+  document.getElementById(\\'disTarifa\\').value = snap.disTarifa   || \\'6\\';
+  document.getElementById(\\'disDesc\\').value   = snap.disDesc     || \\'Honorarios de diseño\\';
   items       = snap.items       || [];
   pieces      = snap.pieces      || [];
   melaminicos = snap.melaminicos || [];
@@ -1479,13 +1479,13 @@ function dbRestore(snap) {
 // ── Save current project ───────────────────────────────────────────────────
 async function dbSaveCurrent() {
   const snap = dbSnapshot();
-  const customName = (document.getElementById('dbProjName').value || '').trim();
+  const customName = (document.getElementById(\\'dbProjName\\').value || \\'\\').trim();
   if (customName) snap.projectName = customName;
   // local save
   const projects = dbGetAll();
   const idx = projects.findIndex(p => p.projectName === snap.projectName);
   if (idx >= 0) {
-    if (!confirm(`Ya existe "${snap.projectName}". ¿Reemplazar?`)) return;
+    if (!confirm(\\'Ya existe "\\'+(snap.projectName)+\\'". ¿Reemplazar?\\')) return;
     projects[idx] = snap;
   } else {
     projects.unshift(snap);
@@ -1493,8 +1493,8 @@ async function dbSaveCurrent() {
   dbSaveAllLocal(projects);
   const ok = false;
   dbRender();
-  toast(`✓ "${snap.projectName}" guardado`);
-  showAutosave(`"${snap.projectName}" guardado correctamente`);
+  toast(\\'✓ "\\'+(snap.projectName)+\\'" guardado\\\');
+  showAutosave(\\\'"${snap.projectName}" guardado correctamente\\');
 }
 
 // ── Load project ───────────────────────────────────────────────────────────
@@ -1502,35 +1502,35 @@ async function dbLoad(idx) {
   const projects = await dbGetMerged();
   const snap = projects[idx];
   if (!snap) return;
-  if (!confirm(`¿Cargar "${snap.projectName}"? Se reemplazará lo que tengas abierto.`)) return;
+  if (!confirm(\\'¿Cargar "\\'+(snap.projectName)+\\'"? Se reemplazará lo que tengas abierto.\\\')) return;
   dbRestore(snap);
-  toast(`✓ "${snap.projectName}" cargado`);
-  document.querySelectorAll('.nt').forEach(b => b.classList.remove('on'));
-  document.querySelector('.nt').classList.add('on');
-  goTab('budget', document.querySelector('.nt'));
+  toast(\\\'✓ "${snap.projectName}" cargado\\');
+  document.querySelectorAll(\\'.nt\\').forEach(b => b.classList.remove(\\'on\\'));
+  document.querySelector(\\'.nt\\').classList.add(\\'on\\');
+  goTab(\\'budget\\', document.querySelector(\\'.nt\\'));
 }
 
 // ── Delete project ─────────────────────────────────────────────────────────
 async function dbDelete(idx) {
   const projects = await dbGetMerged();
   const snap = projects[idx];
-  if (!snap || !confirm(`¿Eliminar "${snap.projectName}"? No se puede deshacer.`)) return;
+  if (!snap || !confirm(\\'¿Eliminar "\\'+(snap.projectName)+\\'"? No se puede deshacer.\\')) return;
   // local
   const local = dbGetAll().filter(p => p.projectName !== snap.projectName);
   dbSaveAllLocal(local);
-  dbRender(); toast('Proyecto eliminado');
+  dbRender(); toast(\\'Proyecto eliminado\\');
 }
 
 // ── Duplicate ──────────────────────────────────────────────────────────────
 async function dbDuplicate(idx) {
   const projects = await dbGetMerged();
   const snap = JSON.parse(JSON.stringify(projects[idx]));
-  snap.projectName = snap.projectName + ' (copia)';
+  snap.projectName = snap.projectName + \\' (copia)\\';
   snap.savedAt = new Date().toISOString();
   const local = dbGetAll();
   local.unshift(snap);
   dbSaveAllLocal(local);
-  dbRender(); toast(`✓ Copia: "${snap.projectName}"`);
+  dbRender(); toast(\\'✓ Copia: "\\'+(snap.projectName)+\\'"\\');
 }
 
 async function dbGetMerged() {
@@ -1540,25 +1540,25 @@ async function dbGetMerged() {
 // ── Export all ────────────────────────────────────────────────────────────
 async function dbExportAll() {
   const projects = await dbGetMerged();
-  if (!projects.length) { toast('No hay proyectos para exportar'); return; }
-  const blob = new Blob([JSON.stringify(projects,null,2)],{type:'application/json'});
-  const a = document.createElement('a');
+  if (!projects.length) { toast(\\'No hay proyectos para exportar\\'); return; }
+  const blob = new Blob([JSON.stringify(projects,null,2)],{type:\\'application/json\\'});
+  const a = document.createElement(\\'a\\');
   a.href = URL.createObjectURL(blob);
-  a.download = `linaro_proyectos_${new Date().toISOString().slice(0,10)}.json`;
+  a.download = \\'linaro_proyectos_\\'+(new Date().toISOString().slice(0,10))+\\'.json\\\';
   a.click(); URL.revokeObjectURL(a.href);
-  toast(`✓ ${projects.length} proyecto(s) exportado(s)`);
+  toast(\\\'✓ ${projects.length} proyecto(s) exportado(s)\\');
 }
 
 // ── Export one ────────────────────────────────────────────────────────────
 async function dbExportOne(idx) {
   const projects = await dbGetMerged();
   const snap = projects[idx]; if (!snap) return;
-  const blob = new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});
-  const a = document.createElement('a');
+  const blob = new Blob([JSON.stringify(snap,null,2)],{type:\\'application/json\\'});
+  const a = document.createElement(\\'a\\');
   a.href = URL.createObjectURL(blob);
-  a.download = `linaro_${snap.projectName.replace(/\s+/g,'_')}.json`;
+  a.download = \\'linaro_\\'+(snap.projectName.replace(/\s+/g,\\'_\\'))+\\'.json\\\';
   a.click(); URL.revokeObjectURL(a.href);
-  toast(`✓ "${snap.projectName}" exportado`);
+  toast(\\\'✓ "${snap.projectName}" exportado\\');
 }
 
 // ── Import ────────────────────────────────────────────────────────────────
@@ -1578,40 +1578,40 @@ async function dbImport(event) {
           }
       dbSaveAllLocal(local);
       dbRender();
-      toast(`✓ ${added} proyecto(s) importado(s)`);
-    } catch(err) { toast('Error al leer el archivo JSON'); }
+      toast(\\'✓ \\'+(added)+\\' proyecto(s) importado(s)\\');
+    } catch(err) { toast(\\'Error al leer el archivo JSON\\'); }
   };
   reader.readAsText(file);
-  event.target.value = '';
+  event.target.value = \\'\\';
 }
 
 // ── Render project grid ───────────────────────────────────────────────────
 async function dbRender() {
-  const grid = document.getElementById('dbGrid'); if (!grid) return;
-  grid.innerHTML = '<div class="db-empty" style="padding:30px"><div style="font-size:20px">⏳</div><p>Cargando proyectos…</p></div>';
+  const grid = document.getElementById(\\'dbGrid\\'); if (!grid) return;
+  grid.innerHTML = \\'<div class="db-empty" style="padding:30px"><div style="font-size:20px">⏳</div><p>Cargando proyectos…</p></div>\\';
   const projects = await dbGetMerged();
   if (!projects.length) {
-    grid.innerHTML = '<div class="db-empty"><div style="font-size:32px;margin-bottom:10px">📁</div><p style="font-size:14px">No hay proyectos guardados aún.</p><p style="font-size:12px;margin-top:6px">Completa el presupuesto y haz clic en "💾 Guardar".</p></div>';
+    grid.innerHTML = \\'<div class="db-empty"><div style="font-size:32px;margin-bottom:10px">📁</div><p style="font-size:14px">No hay proyectos guardados aún.</p><p style="font-size:12px;margin-top:6px">Completa el presupuesto y haz clic en "💾 Guardar".</p></div>\\';
     return;
   }
   grid.innerHTML = projects.map((p,i) => {
-    const date = p.savedAt ? new Date(p.savedAt).toLocaleDateString('es-VE',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    const date = p.savedAt ? new Date(p.savedAt).toLocaleDateString(\\'es-VE\\',{day:\\'2-digit\\',month:\\'short\\',year:\\'numeric\\'}) : \\'—\\';
     const sub = (p.items||[]).reduce((s,it)=>s+(parseFloat(it.q)||0)*(parseFloat(it.p)||0),0);
-    return `<div class="db-card">
+    return \\'<div class="db-card">
       <div class="db-card-head">
         <div>
-          <div style="font-size:15px;font-weight:600;margin-bottom:4px">${esc(p.projectName||'Sin nombre')}</div>
-          ${p.client   ? `<div style="font-size:12px;color:var(--text2)">👤 ${esc(p.client)}</div>` : ''}
-          ${p.location ? `<div style="font-size:12px;color:var(--text2)">📍 ${esc(p.location)}</div>` : ''}
+          <div style="font-size:15px;font-weight:600;margin-bottom:4px">\\'+(esc(p.projectName||\\'Sin nombre\\'))+\\'</div>
+          ${p.client   ? \\'<div style="font-size:12px;color:var(--text2)">👤 ${esc(p.client)}</div>\\' : \\\'\\\'}
+          \\'+(p.location ? \'<div style="font-size:12px;color:var(--text2)">📍 ${esc(p.location))+\'</div>\' : \'\'}
         </div>
-        <span class="db-badge">${p.currency||'USD'}</span>
+        <span class="db-badge">${p.currency||\'USD\'}</span>
       </div>
       <div class="db-card-body">
         <div class="db-stat">Ítems presupuesto: <span>${(p.items||[]).length}</span></div>
         <div class="db-stat">Módulos despiece: <span>${(p.pieces||[]).length}</span></div>
         <div class="db-stat">Melamínicos: <span>${(p.melaminicos||[]).length}</span></div>
         <div class="db-stat">Ambientes plano: <span>${(p.pRooms||[]).length}</span></div>
-        ${sub>0?`<div class="db-stat" style="margin-top:6px">Total: <span style="color:var(--gold)">${p.currency||'USD'} ${fmt(sub)}</span></div>`:''}
+        ${sub>0?\'<div class="db-stat" style="margin-top:6px">Total: <span style="color:var(--gold)">\'+(p.currency||\'USD\')+\' ${fmt(sub)}</span></div>\':\'\'}
         <div style="font-size:11px;color:var(--text3);margin-top:8px">📅 ${date}</div>
       </div>
       <div class="db-card-foot">
@@ -1620,32 +1620,32 @@ async function dbRender() {
         <button class="btn btn-sm" onclick="dbExportOne(${i})">⬇ JSON</button>
         <button class="btn btn-sm btn-del" onclick="dbDelete(${i})">× Eliminar</button>
       </div>
-    </div>`;
-  }).join('');
+    </div>\';
+  }).join(\\'\\');
 }
 
 // ── Autosave every 90s ────────────────────────────────────────────────────
 function dbAutoSave() {
   if (!items.length && !pieces.length && !melaminicos.length) return;
   const snap = dbSnapshot();
-  snap.projectName = (snap.projectName && snap.projectName !== 'Sin nombre')
-    ? snap.projectName : 'Autoguardado';
+  snap.projectName = (snap.projectName && snap.projectName !== \\'Sin nombre\\')
+    ? snap.projectName : \\'Autoguardado\\';
   localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(snap));
 }
 setInterval(dbAutoSave, 90000);
 
 // ── Show autosave message ─────────────────────────────────────────────────
 function showAutosave(msg) {
-  const bar = document.getElementById('autosaveBar');
-  const txt = document.getElementById('autosaveMsg');
+  const bar = document.getElementById(\\'autosaveBar\\');
+  const txt = document.getElementById(\\'autosaveMsg\\');
   if (!bar || !txt) return;
-  txt.textContent = msg || 'Guardado automáticamente';
-  bar.style.display = 'flex';
-  setTimeout(() => { bar.style.display = 'none'; }, 5000);
+  txt.textContent = msg || \\'Guardado automáticamente\\';
+  bar.style.display = \\'flex\\';
+  setTimeout(() => { bar.style.display = \\'none\\'; }, 5000);
 }
 
 // ── Restore autosave on load ──────────────────────────────────────────────
-window.addEventListener('load', () => {
+window.addEventListener(\\'load\\', () => {
   // restore and render handled by login flow
   setTimeout(dbRender, 1500);
 });
@@ -1655,10 +1655,10 @@ window.addEventListener('load', () => {
 var _baseGoTab = window.goTab;
 window.goTab = function(id, btn){
   _baseGoTab(id, btn);
-  if(id === 'database'){
+  if(id === \\'database\\'){
     dbRender();
   }
-  if(id === 'vista3d'){
+  if(id === \\'vista3d\\'){
     if(!v3inited){
       v3inited = v3init();
       v3rebuild();
@@ -1667,18 +1667,18 @@ window.goTab = function(id, btn){
     }
   }
 };
-const DB_KEY      = 'linaro_projects_v1';
-const AUTOSAVE_KEY = 'linaro_autosave_v1';
-const MEL_KEY     = 'linaro_mel_v1';
-const TC_KEY      = 'linaro_tc_v1';
+const DB_KEY      = \\'linaro_projects_v1\\';
+const AUTOSAVE_KEY = \\'linaro_autosave_v1\\';
+const MEL_KEY     = \\'linaro_mel_v1\\';
+const TC_KEY      = \\'linaro_tc_v1\\';
 
 function saveMelLocal(){ try{ localStorage.setItem(MEL_KEY, JSON.stringify(melaminicos)); }catch(e){} }
 function saveTcLocal(){  try{ localStorage.setItem(TC_KEY,  JSON.stringify(tapacantosInv)); }catch(e){} }
-function loadMelLocal(){ try{ return JSON.parse(localStorage.getItem(MEL_KEY)||'[]'); }catch(e){ return []; } }
-function loadTcLocal(){  try{ return JSON.parse(localStorage.getItem(TC_KEY)||'[]');  }catch(e){ return []; } }
+function loadMelLocal(){ try{ return JSON.parse(localStorage.getItem(MEL_KEY)||\\'[]\\'); }catch(e){ return []; } }
+function loadTcLocal(){  try{ return JSON.parse(localStorage.getItem(TC_KEY)||\\'[]\\');  }catch(e){ return []; } }
 
 function dbGetAll(){
-  try { return JSON.parse(localStorage.getItem(DB_KEY)||'[]'); }
+  try { return JSON.parse(localStorage.getItem(DB_KEY)||\\'[]\\'); }
   catch(e){ return []; }
 }
 function dbSaveAll(projects){
@@ -1689,16 +1689,16 @@ function dbSnapshot(){
   return {
     version: 2,
     savedAt: new Date().toISOString(),
-    projectName: document.getElementById('pName').value||'Sin nombre',
-    client: document.getElementById('pClient').value||'',
-    location: document.getElementById('pLoc').value||'',
-    date: document.getElementById('pDate').value||'',
-    currency: document.getElementById('cur').value,
-    iva: document.getElementById('iva').value,
-    utility: document.getElementById('util').value,
-    disM2: document.getElementById('disM2').value,
-    disTarifa: document.getElementById('disTarifa').value,
-    disDesc: document.getElementById('disDesc').value,
+    projectName: document.getElementById(\\'pName\\').value||\\'Sin nombre\\',
+    client: document.getElementById(\\'pClient\\').value||\\'\\',
+    location: document.getElementById(\\'pLoc\\').value||\\'\\',
+    date: document.getElementById(\\'pDate\\').value||\\'\\',
+    currency: document.getElementById(\\'cur\\').value,
+    iva: document.getElementById(\\'iva\\').value,
+    utility: document.getElementById(\\'util\\').value,
+    disM2: document.getElementById(\\'disM2\\').value,
+    disTarifa: document.getElementById(\\'disTarifa\\').value,
+    disDesc: document.getElementById(\\'disDesc\\').value,
     items: JSON.parse(JSON.stringify(items)),
     pieces: JSON.parse(JSON.stringify(pieces)),
     melaminicos: JSON.parse(JSON.stringify(melaminicos)),
@@ -1709,16 +1709,16 @@ function dbSnapshot(){
 
 function dbRestore(snap){
   // project fields
-  document.getElementById('pName').value    = snap.projectName||'';
-  document.getElementById('pClient').value  = snap.client||'';
-  document.getElementById('pLoc').value     = snap.location||'';
-  document.getElementById('pDate').value    = snap.date||'';
-  document.getElementById('cur').value      = snap.currency||'USD';
-  document.getElementById('iva').value      = snap.iva||'16';
-  document.getElementById('util').value     = snap.utility||'0';
-  document.getElementById('disM2').value    = snap.disM2||'0';
-  document.getElementById('disTarifa').value= snap.disTarifa||'6';
-  document.getElementById('disDesc').value  = snap.disDesc||'Honorarios de diseño';
+  document.getElementById(\\'pName\\').value    = snap.projectName||\\'\\';
+  document.getElementById(\\'pClient\\').value  = snap.client||\\'\\';
+  document.getElementById(\\'pLoc\\').value     = snap.location||\\'\\';
+  document.getElementById(\\'pDate\\').value    = snap.date||\\'\\';
+  document.getElementById(\\'cur\\').value      = snap.currency||\\'USD\\';
+  document.getElementById(\\'iva\\').value      = snap.iva||\\'16\\';
+  document.getElementById(\\'util\\').value     = snap.utility||\\'0\\';
+  document.getElementById(\\'disM2\\').value    = snap.disM2||\\'0\\';
+  document.getElementById(\\'disTarifa\\').value= snap.disTarifa||\\'6\\';
+  document.getElementById(\\'disDesc\\').value  = snap.disDesc||\\'Honorarios de diseño\\';
   // state
   items       = snap.items       || [];
   pieces      = snap.pieces      || [];
@@ -1737,75 +1737,75 @@ function dbRestore(snap){
 
 function dbSaveCurrent(){
   const snap = dbSnapshot();
-  const customName = document.getElementById('dbProjName').value.trim();
+  const customName = document.getElementById(\\'dbProjName\\').value.trim();
   if(customName) snap.projectName = customName;
   const projects = dbGetAll();
   // check if same name exists → update
   const idx = projects.findIndex(p=>p.projectName===snap.projectName);
   if(idx>=0){
-    if(!confirm(`Ya existe un proyecto llamado "${snap.projectName}". ¿Deseas reemplazarlo?`))return;
+    if(!confirm(\\'Ya existe un proyecto llamado "\\'+(snap.projectName)+\\'". ¿Deseas reemplazarlo?\\'))return;
     projects[idx]=snap;
   } else {
     projects.unshift(snap);
   }
   dbSaveAll(projects);
   dbRender();
-  toast(`✓ Proyecto "${snap.projectName}" guardado`);
-  showAutosave(`Proyecto "${snap.projectName}" guardado correctamente`);
+  toast(\\'✓ Proyecto "\\'+(snap.projectName)+\\'" guardado\\\');
+  showAutosave(\\\'Proyecto "\'+(snap.projectName)+\'" guardado correctamente\\');
 }
 
 function dbLoad(idx){
   const projects=dbGetAll();
   const snap=projects[idx];
   if(!snap)return;
-  if(!confirm(`¿Cargar el proyecto "${snap.projectName}"? Se reemplazará lo que tengas abierto ahora.`))return;
+  if(!confirm(\\'¿Cargar el proyecto "\\'+(snap.projectName)+\\'"? Se reemplazará lo que tengas abierto ahora.\\\'))return;
   dbRestore(snap);
-  toast(`✓ "${snap.projectName}" cargado`);
+  toast(\\\'✓ "${snap.projectName}" cargado\\');
   // switch to budget tab
-  goTab('budget', document.querySelector('.nt'));
-  document.querySelectorAll('.nt').forEach(b=>{b.classList.remove('on');});
-  document.querySelector('.nt').classList.add('on');
+  goTab(\\'budget\\', document.querySelector(\\'.nt\\'));
+  document.querySelectorAll(\\'.nt\\').forEach(b=>{b.classList.remove(\\'on\\');});
+  document.querySelector(\\'.nt\\').classList.add(\\'on\\');
 }
 
 function dbDelete(idx){
   const projects=dbGetAll();
-  if(!confirm(`¿Eliminar el proyecto "${projects[idx]?.projectName}"? Esta acción no se puede deshacer.`))return;
+  if(!confirm(\\'¿Eliminar el proyecto "\\'+(projects[idx]?.projectName)+\\'"? Esta acción no se puede deshacer.\\'))return;
   projects.splice(idx,1);
   dbSaveAll(projects);
   dbRender();
-  toast('Proyecto eliminado');
+  toast(\\'Proyecto eliminado\\');
 }
 
 function dbDuplicate(idx){
   const projects=dbGetAll();
   const snap=JSON.parse(JSON.stringify(projects[idx]));
-  snap.projectName=snap.projectName+' (copia)';
+  snap.projectName=snap.projectName+\\' (copia)\\';
   snap.savedAt=new Date().toISOString();
   projects.splice(idx+1,0,snap);
   dbSaveAll(projects);
   dbRender();
-  toast(`✓ Copia creada: "${snap.projectName}"`);
+  toast(\\'✓ Copia creada: "\\'+(snap.projectName)+\\'"\\');
 }
 
 function dbExportAll(){
   const projects=dbGetAll();
-  if(!projects.length){toast('No hay proyectos para exportar');return;}
-  const blob=new Blob([JSON.stringify(projects,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download=`linaro_proyectos_${new Date().toISOString().slice(0,10)}.json`;
+  if(!projects.length){toast(\\'No hay proyectos para exportar\\');return;}
+  const blob=new Blob([JSON.stringify(projects,null,2)],{type:\\'application/json\\'});
+  const a=document.createElement(\\'a\\');a.href=URL.createObjectURL(blob);
+  a.download=\\'linaro_proyectos_\\'+(new Date().toISOString().slice(0,10))+\\'.json\\\';
   a.click();URL.revokeObjectURL(a.href);
-  toast(`✓ ${projects.length} proyecto${projects.length!==1?'s':''} exportado${projects.length!==1?'s':''}`);
+  toast(\\\'✓ ${projects.length} proyecto${projects.length!==1?\\\'s\\\':\\\'\\\'} exportado${projects.length!==1?\\\'s\\\':\\\'\\\'}\\');
 }
 
 function dbExportOne(idx){
   const projects=dbGetAll();
   const snap=projects[idx];
   if(!snap)return;
-  const blob=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download=`linaro_${snap.projectName.replace(/\s+/g,'_')}.json`;
+  const blob=new Blob([JSON.stringify(snap,null,2)],{type:\\'application/json\\'});
+  const a=document.createElement(\\'a\\');a.href=URL.createObjectURL(blob);
+  a.download=\\'linaro_\\'+(snap.projectName.replace(/\s+/g,\\'_\\'))+\\'.json\\\';
   a.click();URL.revokeObjectURL(a.href);
-  toast(`✓ "${snap.projectName}" exportado`);
+  toast(\\\'✓ "${snap.projectName}" exportado\\');
 }
 
 function dbImport(event){
@@ -1825,44 +1825,44 @@ function dbImport(event){
         }
       });
       dbSaveAll(projects);dbRender();
-      toast(`✓ ${added} proyecto${added!==1?'s':''} importado${added!==1?'s':''}`);
-    } catch(err){toast('Error al leer el archivo JSON');}
+      toast(\\'✓ \\'+(added)+\\' proyecto${added!==1?\\\'s\\\':\\\'\\\'} importado${added!==1?\\\'s\\\':\\\'\\\'}\\');
+    } catch(err){toast(\\'Error al leer el archivo JSON\\');}
   };
   reader.readAsText(file);
-  event.target.value='';
+  event.target.value=\\'\\';
 }
 
 function dbRender(){
   const projects=dbGetAll();
-  const grid=document.getElementById('dbGrid');
+  const grid=document.getElementById(\\'dbGrid\\');
   if(!grid)return;
   if(!projects.length){
-    grid.innerHTML='<div class="db-empty"><div style="font-size:32px;margin-bottom:10px">📁</div><p style="font-size:14px">No hay proyectos guardados aún.</p><p style="font-size:12px;margin-top:6px">Completa el presupuesto y haz clic en "Guardar proyecto actual".</p></div>';
+    grid.innerHTML=\\'<div class="db-empty"><div style="font-size:32px;margin-bottom:10px">📁</div><p style="font-size:14px">No hay proyectos guardados aún.</p><p style="font-size:12px;margin-top:6px">Completa el presupuesto y haz clic en "Guardar proyecto actual".</p></div>\\';
     return;
   }
   grid.innerHTML=projects.map((p,i)=>{
-    const date=p.savedAt?new Date(p.savedAt).toLocaleDateString('es-VE',{day:'2-digit',month:'short',year:'numeric'}):'—';
+    const date=p.savedAt?new Date(p.savedAt).toLocaleDateString(\\'es-VE\\',{day:\\'2-digit\\',month:\\'short\\',year:\\'numeric\\'}):\\'—\\';
     const items_count=(p.items||[]).length;
     const pieces_count=(p.pieces||[]).length;
     const mel_count=(p.melaminicos||[]).length;
     const rooms_count=(p.pRooms||[]).length;
     const sub=(p.items||[]).reduce((s,it)=>s+(parseFloat(it.q)||0)*(parseFloat(it.p)||0),0);
     const hasData=items_count>0||pieces_count>0;
-    return`<div class="db-card">
+    return\\'<div class="db-card">
       <div class="db-card-head">
         <div>
-          <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">${esc(p.projectName||'Sin nombre')}</div>
-          ${p.client?`<div style="font-size:12px;color:var(--text2)">👤 ${esc(p.client)}</div>`:''}
-          ${p.location?`<div style="font-size:12px;color:var(--text2)">📍 ${esc(p.location)}</div>`:''}
+          <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">\\'+(esc(p.projectName||\\'Sin nombre\\'))+\\'</div>
+          ${p.client?\\'<div style="font-size:12px;color:var(--text2)">👤 ${esc(p.client)}</div>\\':\\\'\\\'}
+          \\'+(p.location?\'<div style="font-size:12px;color:var(--text2)">📍 ${esc(p.location))+\'</div>\':\'\'}
         </div>
-        <span class="db-badge">${p.currency||'USD'}</span>
+        <span class="db-badge">${p.currency||\'USD\'}</span>
       </div>
       <div class="db-card-body">
         <div class="db-stat">Ítems presupuesto: <span>${items_count}</span></div>
         <div class="db-stat">Módulos despiece: <span>${pieces_count}</span></div>
         <div class="db-stat">Melamínicos: <span>${mel_count}</span></div>
         <div class="db-stat">Ambientes plano: <span>${rooms_count}</span></div>
-        ${sub>0?`<div class="db-stat" style="margin-top:6px">Total: <span style="color:var(--gold)">${p.currency||'USD'} ${fmt(sub)}</span></div>`:''}
+        ${sub>0?\'<div class="db-stat" style="margin-top:6px">Total: <span style="color:var(--gold)">\'+(p.currency||\'USD\')+\' ${fmt(sub)}</span></div>\':\'\'}
         <div style="font-size:11px;color:var(--text3);margin-top:8px">Guardado: ${date}</div>
       </div>
       <div class="db-card-foot">
@@ -1871,30 +1871,30 @@ function dbRender(){
         <button class="btn btn-sm" onclick="dbExportOne(${i})">⬇ JSON</button>
         <button class="btn btn-sm btn-del" onclick="dbDelete(${i})">× Eliminar</button>
       </div>
-    </div>`;
-  }).join('');
+    </div>\';
+  }).join(\\'\\');
 }
 
 function showAutosave(msg){
-  const bar=document.getElementById('autosaveBar');
-  const txt=document.getElementById('autosaveMsg');
+  const bar=document.getElementById(\\'autosaveBar\\');
+  const txt=document.getElementById(\\'autosaveMsg\\');
   if(!bar||!txt)return;
-  txt.textContent=msg||'Guardado automáticamente';
-  bar.style.display='flex';
-  setTimeout(()=>{bar.style.display='none';},4000);
+  txt.textContent=msg||\\'Guardado automáticamente\\';
+  bar.style.display=\\'flex\\';
+  setTimeout(()=>{bar.style.display=\\'none\\';},4000);
 }
 
-// ── Auto-save every 60s if there's data ──────────────────────────────────────
+// ── Auto-save every 60s if there\\'s data ──────────────────────────────────────
 function dbAutoSave(){
   if(!items.length&&!pieces.length&&!melaminicos.length)return;
   const snap=dbSnapshot();
-  snap.projectName=(snap.projectName&&snap.projectName!=='Sin nombre')?snap.projectName:'Autoguardado';
+  snap.projectName=(snap.projectName&&snap.projectName!==\\'Sin nombre\\')?snap.projectName:\\'Autoguardado\\';
   localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(snap));
 }
 setInterval(dbAutoSave, 60000);
 
 // ── Restore autosave on load if exists ───────────────────────────────────────
-window.addEventListener('load',()=>{
+window.addEventListener(\\'load\\',()=>{
   dbRender();
   // restore autosave silently
   try{
@@ -1903,7 +1903,7 @@ window.addEventListener('load',()=>{
       const snap=JSON.parse(as);
       if((snap.items&&snap.items.length)||(snap.melaminicos&&snap.melaminicos.length)){
         dbRestore(snap);
-        showAutosave('Sesión anterior restaurada automáticamente');
+        showAutosave(\\'Sesión anterior restaurada automáticamente\\');
       }
     }
   } catch(e){}
@@ -1920,34 +1920,34 @@ window.addEventListener('load',()=>{
 
 /* ===== LOGIN ===== */
 (function(){
-  var SK = 'ln1';
-  var OU = 'Linaro';
-  var OP = 'Asdru20101999';
+  var SK = \\'ln1\\';
+  var OU = \\'Linaro\\';
+  var OP = \\'Asdru20101999\\';
 
   window.doLogin = function(){
-    var u = (document.getElementById('loginUser').value||'').trim();
-    var p =  document.getElementById('loginPass').value||'';
-    var err = document.getElementById('loginError');
+    var u = (document.getElementById(\\'loginUser\\').value||\\'\\').trim();
+    var p =  document.getElementById(\\'loginPass\\').value||\\'\\';
+    var err = document.getElementById(\\'loginError\\');
     if(u===OU && p===OP){
-      try{ sessionStorage.setItem(SK,'1'); }catch(e){}
-      var ov=document.getElementById('loginOverlay');
+      try{ sessionStorage.setItem(SK,\\'1\\'); }catch(e){}
+      var ov=document.getElementById(\\'loginOverlay\\');
       if(ov){
-        ov.style.transition='opacity .4s';
-        ov.style.opacity='0';
-        setTimeout(function(){ ov.style.display='none'; },420);
+        ov.style.transition=\\'opacity .4s\\';
+        ov.style.opacity=\\'0\\';
+        setTimeout(function(){ ov.style.display=\\'none\\'; },420);
       }
-      if(err) err.style.display='none';
+      if(err) err.style.display=\\'none\\';
     } else {
-      if(err) err.style.display='block';
-      var pe=document.getElementById('loginPass');
-      if(pe){ pe.value=''; pe.focus(); }
-      var bx=document.getElementById('loginBox');
+      if(err) err.style.display=\\'block\\';
+      var pe=document.getElementById(\\'loginPass\\');
+      if(pe){ pe.value=\\'\\'; pe.focus(); }
+      var bx=document.getElementById(\\'loginBox\\');
       if(bx){
         var dirs=[-8,8,-6,6,-3,3,0],i=0;
         var iv=setInterval(function(){
-          bx.style.transform='translateX('+dirs[i]+'px)';
+          bx.style.transform=\\'translateX(\\'+dirs[i]+\\'px)\\';
           i++;
-          if(i>=dirs.length){ clearInterval(iv); bx.style.transform=''; }
+          if(i>=dirs.length){ clearInterval(iv); bx.style.transform=\\'\\'; }
         },40);
       }
     }
@@ -1956,7 +1956,7 @@ window.addEventListener('load',()=>{
   // ── Import rooms from floor plan ──────────────────────────────────────
   window.v3importFromPlan = function(){
     if(!pRooms || !pRooms.length){
-      toast('No hay ambientes en el Plano. Agrégalos primero en la pestaña Planos.');
+      toast(\\'No hay ambientes en el Plano. Agrégalos primero en la pestaña Planos.\\');
       return;
     }
     v3rooms = [];
@@ -1964,15 +1964,15 @@ window.addEventListener('load',()=>{
     v3furnOff = 0;
     pRooms.forEach(function(r){
       var alt = 2.6;
-      var col = {kitchen:'#EEF5E8',closet:'#EFEEFD',bath:'#E8F5F0',bed:'#F5EEF4',room:'#F5F0E8'}[r.type]||'#F5F0E8';
+      var col = {kitchen:\\'#EEF5E8\\',closet:\\'#EFEEFD\\',bath:\\'#E8F5F0\\',bed:\\'#F5EEF4\\',room:\\'#F5F0E8\\'}[r.type]||\\'#F5F0E8\\';
       v3rooms.push({name:r.name, w:r.W||r.w, h:r.H||r.h, alt:alt, col:col, ox:r.x||0, oz:r.y||0});
     });
     v3rebuild();
     v3updList();
-    toast('✓ '+v3rooms.length+' ambiente(s) importados desde el Plano');
+    toast(\\'✓ \\'+v3rooms.length+\\' ambiente(s) importados desde el Plano\\');
   };
 
-  document.addEventListener('DOMContentLoaded',function(){
+  document.addEventListener(\\'DOMContentLoaded\\',function(){
     // ── Restore persistent libraries ──
     var savedMel = loadMelLocal();
     if(savedMel.length){ melaminicos = savedMel; renderMelList(); updateMatSelect(); }
@@ -1991,15 +1991,15 @@ window.addEventListener('load',()=>{
 
     // ── Login check ──
     var logged=false;
-    try{ logged=sessionStorage.getItem(SK)==='1'; }catch(e){}
-    var ov=document.getElementById('loginOverlay');
+    try{ logged=sessionStorage.getItem(SK)===\\'1\\'; }catch(e){}
+    var ov=document.getElementById(\\'loginOverlay\\');
     if(!ov) return;
     if(logged){
-      ov.style.display='none';
+      ov.style.display=\\'none\\';
     } else {
-      ov.style.display='flex';
+      ov.style.display=\\'flex\\';
       setTimeout(function(){
-        var u=document.getElementById('loginUser');
+        var u=document.getElementById(\\'loginUser\\');
         if(u) u.focus();
       },150);
     }
@@ -2010,40 +2010,40 @@ window.addEventListener('load',()=>{
 let tapacantosInv = [];
 
 function switchInvTab(tab, btn){
-  document.querySelectorAll('.inv-tab').forEach(b=>b.classList.remove('on'));
-  if(btn) btn.classList.add('on');
-  document.getElementById('invTableros').style.display  = tab==='tableros'  ? 'block' : 'none';
-  document.getElementById('invTapacanto').style.display = tab==='tapacanto' ? 'block' : 'none';
-  document.getElementById('invAdhesivos').style.display = tab==='adhesivos' ? 'block' : 'none';
+  document.querySelectorAll(\\'.inv-tab\\').forEach(b=>b.classList.remove(\\'on\\'));
+  if(btn) btn.classList.add(\\'on\\');
+  document.getElementById(\\'invTableros\\').style.display  = tab===\\'tableros\\'  ? \\'block\\' : \\'none\\';
+  document.getElementById(\\'invTapacanto\\').style.display = tab===\\'tapacanto\\' ? \\'block\\' : \\'none\\';
+  document.getElementById(\\'invAdhesivos\\').style.display = tab===\\'adhesivos\\' ? \\'block\\' : \\'none\\';
 }
 
 function addTc(){
-  const nombre = document.getElementById('tcNombre').value;
-  if(!nombre){ toast('Escribe la descripción del tapacanto'); return; }
+  const nombre = document.getElementById(\\'tcNombre\\').value;
+  if(!nombre){ toast(\\'Escribe la descripción del tapacanto\\'); return; }
   const t = {
     id: uid(),
     nombre,
-    color:    document.getElementById('tcColor').value,
-    mat:      document.getElementById('tcMat').value,
-    espesor:  parseFloat(document.getElementById('tcEspesor').value)||1,
-    ancho:    parseFloat(document.getElementById('tcAncho').value)||22,
-    largo:    parseFloat(document.getElementById('tcLargo').value)||50,
-    precio:   parseFloat(document.getElementById('tcPrecio').value)||0,
-    moneda:   document.getElementById('tcMoneda').value,
-    proveedor:document.getElementById('tcProv').value,
-    stock:    parseInt(document.getElementById('tcStock').value),
-    notas:    document.getElementById('tcNotas').value,
+    color:    document.getElementById(\\'tcColor\\').value,
+    mat:      document.getElementById(\\'tcMat\\').value,
+    espesor:  parseFloat(document.getElementById(\\'tcEspesor\\').value)||1,
+    ancho:    parseFloat(document.getElementById(\\'tcAncho\\').value)||22,
+    largo:    parseFloat(document.getElementById(\\'tcLargo\\').value)||50,
+    precio:   parseFloat(document.getElementById(\\'tcPrecio\\').value)||0,
+    moneda:   document.getElementById(\\'tcMoneda\\').value,
+    proveedor:document.getElementById(\\'tcProv\\').value,
+    stock:    parseInt(document.getElementById(\\'tcStock\\').value),
+    notas:    document.getElementById(\\'tcNotas\\').value,
   };
   tapacantosInv.push(t);
   renderTcList();
   // clear form
-  document.getElementById('tcNombre').value='';
-  document.getElementById('tcColor').value='';
-  document.getElementById('tcProv').value='';
-  document.getElementById('tcNotas').value='';
-  document.getElementById('tcPrecio').value='0';
+  document.getElementById(\\'tcNombre\\').value=\\'\\';
+  document.getElementById(\\'tcColor\\').value=\\'\\';
+  document.getElementById(\\'tcProv\\').value=\\'\\';
+  document.getElementById(\\'tcNotas\\').value=\\'\\';
+  document.getElementById(\\'tcPrecio\\').value=\\'0\\';
   saveTcLocal();
-  toast(`✓ "${t.nombre}" registrado en la biblioteca`);
+  toast(\\'✓ "\\'+(t.nombre)+\\'" registrado en la biblioteca\\');
 }
 
 function delTc(id){
@@ -2053,26 +2053,26 @@ function delTc(id){
 }
 
 function renderTcList(){
-  const list = document.getElementById('tcList');
-  const count = document.getElementById('tcCount');
+  const list = document.getElementById(\\'tcList\\');
+  const count = document.getElementById(\\'tcCount\\');
   if(!list) return;
-  count.textContent = `${tapacantosInv.length} referencia${tapacantosInv.length!==1?'s':''} registrada${tapacantosInv.length!==1?'s':''}`;
+  count.textContent = \\'\\'+(tapacantosInv.length)+\\' referencia\'+(tapacantosInv.length!==1?\\'s\\':\\'\\')+\' registrada${tapacantosInv.length!==1?\\\'s\\\':\\\'\\\'}\\';
   if(!tapacantosInv.length){
-    list.innerHTML=`<div class="empty card"><div class="empty-icon">📏</div><p>Registra tus referencias de tapacanto</p></div>`;
+    list.innerHTML=\\'<div class="empty card"><div class="empty-icon">📏</div><p>Registra tus referencias de tapacanto</p></div>\\';
     return;
   }
   list.innerHTML = tapacantosInv.map(t=>{
-    const ppm = t.precio>0&&t.largo>0 ? (t.precio/t.largo).toFixed(3) : '—';
-    return `<div class="mel-card">
+    const ppm = t.precio>0&&t.largo>0 ? (t.precio/t.largo).toFixed(3) : \\'—\\';
+    return \\'<div class="mel-card">
       <div class="mel-head">
         <div class="flex gap8 wrap" style="align-items:center">
-          <span style="font-size:14px;font-weight:600">${esc(t.nombre)}</span>
-          ${t.color?`<span class="tag">${esc(t.color)}</span>`:''}
-          <span class="tag">${t.mat}</span>
+          <span style="font-size:14px;font-weight:600">\\'+(esc(t.nombre))+\\'</span>
+          ${t.color?\\'<span class="tag">${esc(t.color)}</span>\\':\\\'\\\'}
+          <span class="tag">\\'+(t.mat)+\\'</span>
           <span class="tag">${t.espesor}mm × ${t.ancho}mm</span>
-          <span class="stock-badge ${t.stock?'in-stock':'no-stock'}">${t.stock?'En stock':'Sin stock'}</span>
+          <span class="stock-badge ${t.stock?\\\'in-stock\\\':\\\'no-stock\\\'}">${t.stock?\\\'En stock\\\':\\\'Sin stock\\\'}</span>
         </div>
-        <button class="btn btn-sm btn-del" onclick="delTc('${t.id}')">Eliminar</button>
+        <button class="btn btn-sm btn-del" onclick="delTc(\\\'${t.id}\\\')">Eliminar</button>
       </div>
       <div class="mel-body">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
@@ -2087,85 +2087,85 @@ function renderTcList(){
           </div>
           <div>
             <div class="mlabel">Precio por metro</div>
-            <div style="font-size:15px;font-weight:600;font-family:monospace;color:var(--blue)">${ppm!=='—'?t.moneda+' '+ppm:'—'}</div>
+            <div style="font-size:15px;font-weight:600;font-family:monospace;color:var(--blue)">${ppm!==\\\'—\\\'?t.moneda+\\\' \\\'+ppm:\\\'—\\\'}</div>
           </div>
           <div>
             <div class="mlabel">Proveedor</div>
-            <div style="font-size:13px">${esc(t.proveedor)||'—'}</div>
-            ${t.notas?`<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">${esc(t.notas)}</div>`:''}
+            <div style="font-size:13px">${esc(t.proveedor)||\\\'—\\\'}</div>
+            ${t.notas?\\'<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">${esc(t.notas)}</div>\':\'\'}
           </div>
         </div>
       </div>
-    </div>`;
-  }).join('');
+    </div>\';
+  }).join(\\'\\');
 }
 
 /* ===== INVENTARIO ADHESIVOS ===== */
 let adhesivosInv = [];
-const AD_KEY = 'linaro_ad_v1';
+const AD_KEY = \\'linaro_ad_v1\\';
 function saveAdLocal(){ try{ localStorage.setItem(AD_KEY, JSON.stringify(adhesivosInv)); }catch(e){} }
-function loadAdLocal(){ try{ return JSON.parse(localStorage.getItem(AD_KEY)||'[]'); }catch(e){ return []; } }
+function loadAdLocal(){ try{ return JSON.parse(localStorage.getItem(AD_KEY)||\\'[]\\'); }catch(e){ return []; } }
 
 const AD_LABELS = {
-  pega_amarilla: '🟡 Pega amarilla',
-  pega_blanca:   '⬜ Pega blanca',
-  silicon:       '🔵 Silicón',
-  otro:          '🧴 Adhesivo'
+  pega_amarilla: \\'🟡 Pega amarilla\\',
+  pega_blanca:   \\'⬜ Pega blanca\\',
+  silicon:       \\'🔵 Silicón\\',
+  otro:          \\'🧴 Adhesivo\\'
 };
 const AD_COLORS = {
-  pega_amarilla: '#FFF8DC',
-  pega_blanca:   '#F0F4FF',
-  silicon:       '#E8F0FF',
-  otro:          '#F5F5F5'
+  pega_amarilla: \\'#FFF8DC\\',
+  pega_blanca:   \\'#F0F4FF\\',
+  silicon:       \\'#E8F0FF\\',
+  otro:          \\'#F5F5F5\\'
 };
 const AD_BORDER = {
-  pega_amarilla: '#D4A017',
-  pega_blanca:   '#4A7CC7',
-  silicon:       '#5B6FA8',
-  otro:          '#999'
+  pega_amarilla: \\'#D4A017\\',
+  pega_blanca:   \\'#4A7CC7\\',
+  silicon:       \\'#5B6FA8\\',
+  otro:          \\'#999\\'
 };
 
 function adTipoChange(){
-  const tipo = document.getElementById('adTipo').value;
-  const marca = document.getElementById('adMarca');
-  const desc  = document.getElementById('adDesc');
-  if(tipo==='pega_amarilla'){ marca.placeholder='Ej: 3M, Loctite, genérica…'; desc.placeholder='Para tapacanto, laminado, enchape…'; }
-  else if(tipo==='pega_blanca'){ marca.placeholder='Ej: Titebond, Cemento Cola…'; desc.placeholder='Para madera, MDF, uniones estructurales…'; }
-  else if(tipo==='silicon'){ marca.placeholder='Ej: GE, Dow, genérico…'; desc.placeholder='Para sellado, juntas, vidrio…'; }
+  const tipo = document.getElementById(\\'adTipo\\').value;
+  const marca = document.getElementById(\\'adMarca\\');
+  const desc  = document.getElementById(\\'adDesc\\');
+  if(tipo===\\'pega_amarilla\\'){ marca.placeholder=\\'Ej: 3M, Loctite, genérica…\\'; desc.placeholder=\\'Para tapacanto, laminado, enchape…\\'; }
+  else if(tipo===\\'pega_blanca\\'){ marca.placeholder=\\'Ej: Titebond, Cemento Cola…\\'; desc.placeholder=\\'Para madera, MDF, uniones estructurales…\\'; }
+  else if(tipo===\\'silicon\\'){ marca.placeholder=\\'Ej: GE, Dow, genérico…\\'; desc.placeholder=\\'Para sellado, juntas, vidrio…\\'; }
 }
 
 function addAd(){
-  const marca = document.getElementById('adMarca').value;
-  if(!marca){ toast('Escribe la marca o referencia del adhesivo'); return; }
+  const marca = document.getElementById(\\'adMarca\\').value;
+  if(!marca){ toast(\\'Escribe la marca o referencia del adhesivo\\'); return; }
   const a = {
     id:      uid(),
-    tipo:    document.getElementById('adTipo').value,
+    tipo:    document.getElementById(\\'adTipo\\').value,
     marca,
-    desc:    document.getElementById('adDesc').value,
-    pres:    document.getElementById('adPres').value,
-    cant:    parseFloat(document.getElementById('adCant').value)||1,
-    precio:  parseFloat(document.getElementById('adPrecio').value)||0,
-    moneda:  document.getElementById('adMoneda').value,
-    rend:    parseFloat(document.getElementById('adRend').value)||0,
-    stock:   parseInt(document.getElementById('adStock').value),
-    prov:    document.getElementById('adProv').value,
-    notas:   document.getElementById('adNotas').value,
+    desc:    document.getElementById(\\'adDesc\\').value,
+    pres:    document.getElementById(\\'adPres\\').value,
+    cant:    parseFloat(document.getElementById(\\'adCant\\').value)||1,
+    precio:  parseFloat(document.getElementById(\\'adPrecio\\').value)||0,
+    moneda:  document.getElementById(\\'adMoneda\\').value,
+    rend:    parseFloat(document.getElementById(\\'adRend\\').value)||0,
+    stock:   parseInt(document.getElementById(\\'adStock\\').value),
+    prov:    document.getElementById(\\'adProv\\').value,
+    notas:   document.getElementById(\\'adNotas\\').value,
   };
   adhesivosInv.push(a);
   saveAdLocal();
   renderAdList();
   // clear
-  ['adMarca','adDesc','adProv','adNotas'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('adPrecio').value='0';
-  document.getElementById('adRend').value='0';
-  toast('✓ "'+a.marca+'" registrado');
+  [\\'adMarca\\',\\'adDesc\\',\\'adProv\\',\\'adNotas\\'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=\\'\\'; });
+  document.getElementById(\\'adPrecio\\').value=\\'0\\';
+  document.getElementById(\\'adRend\\').value=\\'0\\';
+  toast(\\'✓ "\\'+a.marca+\\'" registrado\\');
 }
 
 function quickAddAd(tipo){
-  document.getElementById('adTipo').value = tipo;
+  document.getElementById(\\'adTipo\\').value = tipo;
   adTipoChange();
-  document.getElementById('adMarca').focus();
-  switchInvTab('adhesivos', document.getElementById('invTab3'));
+  document.getElementById(\\'adMarca\\').focus();
+  switchInvTab(\\'adhesivos\\', document.getElementById(\\'invTab3\\'));
 }
 
 function delAd(id){
@@ -2175,116 +2175,116 @@ function delAd(id){
 }
 
 function renderAdList(){
-  const list  = document.getElementById('adList');
-  const count = document.getElementById('adCount');
+  const list  = document.getElementById(\\'adList\\');
+  const count = document.getElementById(\\'adCount\\');
   if(!list) return;
-  if(count) count.textContent = adhesivosInv.length+' referencia'+(adhesivosInv.length!==1?'s':'')+' registrada'+(adhesivosInv.length!==1?'s':'');
+  if(count) count.textContent = adhesivosInv.length+\\' referencia\\'+(adhesivosInv.length!==1?\\'s\\':\\'\\')+\\' registrada\\'+(adhesivosInv.length!==1?\\'s\\':\\'\\');
   if(!adhesivosInv.length){
-    list.innerHTML='<div class="empty card"><div class="empty-icon">🧴</div><p>Registra tus adhesivos</p><p style="font-size:12px;margin-top:6px;color:var(--text3)">Pega amarilla · Pega blanca · Silicón</p></div>';
+    list.innerHTML=\\'<div class="empty card"><div class="empty-icon">🧴</div><p>Registra tus adhesivos</p><p style="font-size:12px;margin-top:6px;color:var(--text3)">Pega amarilla · Pega blanca · Silicón</p></div>\\';
     return;
   }
-  const PRES={litro:'L',galon:'gal',kg:'kg',unidad:'und'};
+  const PRES={litro:\\'L\\',galon:\\'gal\\',kg:\\'kg\\',unidad:\\'und\\'};
   list.innerHTML = adhesivosInv.map(a=>{
-    const label  = AD_LABELS[a.tipo]||'🧴 Adhesivo';
-    const bgCol  = AD_COLORS[a.tipo]||'#F5F5F5';
-    const bdCol  = AD_BORDER[a.tipo]||'#999';
-    const ppu    = a.precio>0&&a.cant>0?(a.precio/a.cant).toFixed(2):'—';
-    const pm2    = a.precio>0&&a.rend>0?(a.precio/(a.rend*a.cant)).toFixed(3):'—';
-    return '<div class="mel-card" style="border-color:'+bdCol+'">'
-      +'<div class="mel-head" style="background:'+bgCol+'">'
-        +'<div class="flex gap8 wrap" style="align-items:center">'
-          +'<span style="font-size:14px;font-weight:600">'+label+'</span>'
-          +'<span style="font-size:14px;font-weight:600;color:var(--text)">'+esc(a.marca)+'</span>'
-          +(a.desc?'<span class="tag">'+esc(a.desc)+'</span>':'')
-          +'<span class="stock-badge '+(a.stock?'in-stock':'no-stock')+'">'+(a.stock?'En stock':'Sin stock')+'</span>'
-        +'</div>'
-        +'<button class="btn btn-sm btn-del" onclick="delAd(''+a.id+'')">Eliminar</button>'
-      +'</div>'
-      +'<div class="mel-body">'
-        +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">'
-          +'<div><div class="mlabel">Presentación</div>'
-            +'<div style="font-size:15px;font-weight:600;font-family:monospace">'+a.cant+' '+(PRES[a.pres]||a.pres)+'</div>'
-          +'</div>'
-          +'<div><div class="mlabel">Precio por envase</div>'
-            +'<div class="mel-price">'+a.moneda+' '+fmt(a.precio)+'</div>'
-          +'</div>'
-          +'<div><div class="mlabel">'+(a.rend>0?'Precio por m²':'Precio por '+( PRES[a.pres]||a.pres))+'</div>'
-            +'<div style="font-size:15px;font-weight:600;font-family:monospace;color:var(--blue)">'
-              +(pm2!=='—'?a.moneda+' '+pm2:(ppu!=='—'?a.moneda+' '+ppu+'/'+(PRES[a.pres]||a.pres):'—'))
-            +'</div>'
-          +'</div>'
-          +'<div><div class="mlabel">Proveedor</div>'
-            +'<div style="font-size:13px">'+esc(a.prov||'—')+'</div>'
-            +(a.notas?'<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">'+esc(a.notas)+'</div>':'')
-          +'</div>'
-        +'</div>'
-      +'</div>'
-    +'</div>';
-  }).join('');
+    const label  = AD_LABELS[a.tipo]||\\'🧴 Adhesivo\\';
+    const bgCol  = AD_COLORS[a.tipo]||\\'#F5F5F5\\';
+    const bdCol  = AD_BORDER[a.tipo]||\\'#999\\';
+    const ppu    = a.precio>0&&a.cant>0?(a.precio/a.cant).toFixed(2):\\'—\\';
+    const pm2    = a.precio>0&&a.rend>0?(a.precio/(a.rend*a.cant)).toFixed(3):\\'—\\';
+    return \\'<div class="mel-card" style="border-color:\\'+bdCol+\\'">\\'
+      +\\'<div class="mel-head" style="background:\\'+bgCol+\\'">\\'
+        +\\'<div class="flex gap8 wrap" style="align-items:center">\\'
+          +\\'<span style="font-size:14px;font-weight:600">\\'+label+\\'</span>\\'
+          +\\'<span style="font-size:14px;font-weight:600;color:var(--text)">\\'+esc(a.marca)+\\'</span>\\'
+          +(a.desc?\\'<span class="tag">\\'+esc(a.desc)+\\'</span>\\':\\'\\')
+          +\\'<span class="stock-badge \\'+(a.stock?\\'in-stock\\':\\'no-stock\\')+\\'">\\'+(a.stock?\\'En stock\\':\\'Sin stock\\')+\\'</span>\\'
+        +\\'</div>\\'
+        +\\'<button class="btn btn-sm btn-del" onclick="delAd(\\'\\'+a.id+\\'\\')">Eliminar</button>\\'
+      +\\'</div>\\'
+      +\\'<div class="mel-body">\\'
+        +\\'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">\\'
+          +\\'<div><div class="mlabel">Presentación</div>\\'
+            +\\'<div style="font-size:15px;font-weight:600;font-family:monospace">\\'+a.cant+\\' \\'+(PRES[a.pres]||a.pres)+\\'</div>\\'
+          +\\'</div>\\'
+          +\\'<div><div class="mlabel">Precio por envase</div>\\'
+            +\\'<div class="mel-price">\\'+a.moneda+\\' \\'+fmt(a.precio)+\\'</div>\\'
+          +\\'</div>\\'
+          +\\'<div><div class="mlabel">\\'+(a.rend>0?\\'Precio por m²\\':\\'Precio por \\'+( PRES[a.pres]||a.pres))+\\'</div>\\'
+            +\\'<div style="font-size:15px;font-weight:600;font-family:monospace;color:var(--blue)">\\'
+              +(pm2!==\\'—\\'?a.moneda+\\' \\'+pm2:(ppu!==\\'—\\'?a.moneda+\\' \\'+ppu+\\'/\\'+(PRES[a.pres]||a.pres):\\'—\\'))
+            +\\'</div>\\'
+          +\\'</div>\\'
+          +\\'<div><div class="mlabel">Proveedor</div>\\'
+            +\\'<div style="font-size:13px">\\'+esc(a.prov||\\'—\\')+\\'</div>\\'
+            +(a.notas?\\'<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">\\'+esc(a.notas)+\\'</div>\\':\\'\\')
+          +\\'</div>\\'
+        +\\'</div>\\'
+      +\\'</div>\\'
+    +\\'</div>\\';
+  }).join(\\'\\');
 }
 
 /* ===== INVENTARIO PEGAMENTOS ===== */
 let pegamentosInv = [];
-const PG_KEY = 'linaro_pg_v1';
+const PG_KEY = \\'linaro_pg_v1\\';
 function savePgLocal(){ try{ localStorage.setItem(PG_KEY, JSON.stringify(pegamentosInv)); }catch(e){} }
-function loadPgLocal(){ try{ return JSON.parse(localStorage.getItem(PG_KEY)||'[]'); }catch(e){ return []; } }
+function loadPgLocal(){ try{ return JSON.parse(localStorage.getItem(PG_KEY)||\\'[]\\'); }catch(e){ return []; } }
 
 const PG_DEFAULTS = {
-  amarilla:{ tipo:'amarilla', nombre:'Pega amarilla contacto', desc:'Tapacanto, laminado de superficies', pres:'1L', rend:8,  col:'#A07800', emoji:'🟡' },
-  blanca:  { tipo:'blanca',   nombre:'Pega blanca PVA',        desc:'Enchape de madera, uniones de MDF', pres:'1L', rend:10, col:'#2060A0', emoji:'⚪' },
+  amarilla:{ tipo:\\'amarilla\\', nombre:\\'Pega amarilla contacto\\', desc:\\'Tapacanto, laminado de superficies\\', pres:\\'1L\\', rend:8,  col:\\'#A07800\\', emoji:\\'🟡\\' },
+  blanca:  { tipo:\\'blanca\\',   nombre:\\'Pega blanca PVA\\',        desc:\\'Enchape de madera, uniones de MDF\\', pres:\\'1L\\', rend:10, col:\\'#2060A0\\', emoji:\\'⚪\\' },
 };
 
 function pgTipoChange(){
-  const t = document.getElementById('pgTipo').value;
+  const t = document.getElementById(\\'pgTipo\\').value;
   const d = PG_DEFAULTS[t];
   if(d){
-    document.getElementById('pgNombre').value = d.nombre;
-    document.getElementById('pgDesc').value   = d.desc;
-    document.getElementById('pgRend').value   = d.rend;
+    document.getElementById(\\'pgNombre\\').value = d.nombre;
+    document.getElementById(\\'pgDesc\\').value   = d.desc;
+    document.getElementById(\\'pgRend\\').value   = d.rend;
   }
 }
 
 function quickPg(tipo){
   const d = PG_DEFAULTS[tipo];
   if(!d) return;
-  document.getElementById('pgTipo').value   = tipo;
-  document.getElementById('pgNombre').value = d.nombre;
-  document.getElementById('pgDesc').value   = d.desc;
-  document.getElementById('pgRend').value   = d.rend;
-  document.getElementById('pgPrecio').value = '0';
-  document.getElementById('pgPres').value   = '1L';
+  document.getElementById(\\'pgTipo\\').value   = tipo;
+  document.getElementById(\\'pgNombre\\').value = d.nombre;
+  document.getElementById(\\'pgDesc\\').value   = d.desc;
+  document.getElementById(\\'pgRend\\').value   = d.rend;
+  document.getElementById(\\'pgPrecio\\').value = \\'0\\';
+  document.getElementById(\\'pgPres\\').value   = \\'1L\\';
   // switch to that tab if not already
-  var btn = document.getElementById('invTab3');
-  switchInvTab('pegamento', btn);
-  document.getElementById('pgPrecio').focus();
+  var btn = document.getElementById(\\'invTab3\\');
+  switchInvTab(\\'pegamento\\', btn);
+  document.getElementById(\\'pgPrecio\\').focus();
 }
 
 function addPg(){
-  const nombre = document.getElementById('pgNombre').value;
-  if(!nombre){ toast('Escribe el nombre del pegamento'); return; }
+  const nombre = document.getElementById(\\'pgNombre\\').value;
+  if(!nombre){ toast(\\'Escribe el nombre del pegamento\\'); return; }
   const pg = {
     id:       uid(),
-    tipo:     document.getElementById('pgTipo').value,
+    tipo:     document.getElementById(\\'pgTipo\\').value,
     nombre,
-    desc:     document.getElementById('pgDesc').value,
-    pres:     document.getElementById('pgPres').value,
-    rend:     parseFloat(document.getElementById('pgRend').value)||8,
-    precio:   parseFloat(document.getElementById('pgPrecio').value)||0,
-    moneda:   document.getElementById('pgMoneda').value,
-    stock:    parseInt(document.getElementById('pgStock').value)||0,
-    proveedor:document.getElementById('pgProv').value,
-    notas:    document.getElementById('pgNotas').value,
+    desc:     document.getElementById(\\'pgDesc\\').value,
+    pres:     document.getElementById(\\'pgPres\\').value,
+    rend:     parseFloat(document.getElementById(\\'pgRend\\').value)||8,
+    precio:   parseFloat(document.getElementById(\\'pgPrecio\\').value)||0,
+    moneda:   document.getElementById(\\'pgMoneda\\').value,
+    stock:    parseInt(document.getElementById(\\'pgStock\\').value)||0,
+    proveedor:document.getElementById(\\'pgProv\\').value,
+    notas:    document.getElementById(\\'pgNotas\\').value,
   };
   pegamentosInv.push(pg);
   savePgLocal();
   renderPgList();
-  document.getElementById('pgNombre').value='';
-  document.getElementById('pgDesc').value='';
-  document.getElementById('pgPrecio').value='0';
-  document.getElementById('pgStock').value='0';
-  document.getElementById('pgProv').value='';
-  document.getElementById('pgNotas').value='';
-  toast(`✓ "${pg.nombre}" registrado`);
+  document.getElementById(\\'pgNombre\\').value=\\'\\';
+  document.getElementById(\\'pgDesc\\').value=\\'\\';
+  document.getElementById(\\'pgPrecio\\').value=\\'0\\';
+  document.getElementById(\\'pgStock\\').value=\\'0\\';
+  document.getElementById(\\'pgProv\\').value=\\'\\';
+  document.getElementById(\\'pgNotas\\').value=\\'\\';
+  toast(\\'✓ "\\'+(pg.nombre)+\\'" registrado\\');
 }
 
 function delPg(id){
@@ -2293,34 +2293,34 @@ function delPg(id){
 }
 
 function renderPgList(){
-  const list  = document.getElementById('pgList');
-  const count = document.getElementById('pgCount');
+  const list  = document.getElementById(\\'pgList\\');
+  const count = document.getElementById(\\'pgCount\\');
   if(!list) return;
-  if(count) count.textContent = `${pegamentosInv.length} producto${pegamentosInv.length!==1?'s':''} registrado${pegamentosInv.length!==1?'s':''}`;
+  if(count) count.textContent = \\'\\'+(pegamentosInv.length)+\\' producto\'+(pegamentosInv.length!==1?\\'s\\':\\'\\')+\' registrado${pegamentosInv.length!==1?\\\'s\\\':\\\'\\\'}\\';
   if(!pegamentosInv.length){
-    list.innerHTML='<div class="empty card"><div class="empty-icon">🪣</div><p>Registra tus pegamentos</p></div>';
+    list.innerHTML=\\'<div class="empty card"><div class="empty-icon">🪣</div><p>Registra tus pegamentos</p></div>\\';
     return;
   }
-  const colorMap={ amarilla:{ bg:'#FFFBEA', border:'#E8C44A', txt:'#A07800', emoji:'🟡' }, blanca:{ bg:'#F0F6FF', border:'#B0C8E8', txt:'#2060A0', emoji:'⚪' }, otro:{ bg:'var(--bg3)', border:'var(--border)', txt:'var(--text)', emoji:'🪣' } };
+  const colorMap={ amarilla:{ bg:\\'#FFFBEA\\', border:\\'#E8C44A\\', txt:\\'#A07800\\', emoji:\\'🟡\\' }, blanca:{ bg:\\'#F0F6FF\\', border:\\'#B0C8E8\\', txt:\\'#2060A0\\', emoji:\\'⚪\\' }, otro:{ bg:\\'var(--bg3)\\', border:\\'var(--border)\\', txt:\\'var(--text)\\', emoji:\\'🪣\\' } };
   list.innerHTML = pegamentosInv.map(pg=>{
     const c = colorMap[pg.tipo]||colorMap.otro;
-    const ppm2 = pg.precio>0&&pg.rend>0 ? (pg.precio/pg.rend).toFixed(3) : '—';
-    return `<div class="mel-card" style="border-color:${c.border}">
+    const ppm2 = pg.precio>0&&pg.rend>0 ? (pg.precio/pg.rend).toFixed(3) : \\'—\\';
+    return \\'<div class="mel-card" style="border-color:\\'+(c.border)+\\'">
       <div class="mel-head" style="background:${c.bg}">
         <div class="flex gap8 wrap" style="align-items:center">
           <span style="font-size:18px">${c.emoji}</span>
           <span style="font-size:14px;font-weight:600;color:${c.txt}">${esc(pg.nombre)}</span>
           <span class="tag">${pg.pres}</span>
-          <span class="tag">${pg.tipo==='amarilla'?'Contacto':pg.tipo==='blanca'?'PVA':'Adhesivo'}</span>
-          <span class="stock-badge ${pg.stock>0?'in-stock':'no-stock'}">${pg.stock>0?pg.stock+' und':'Sin stock'}</span>
+          <span class="tag">${pg.tipo===\\\'amarilla\\\'?\\\'Contacto\\\':pg.tipo===\\\'blanca\\\'?\\\'PVA\\\':\\\'Adhesivo\\\'}</span>
+          <span class="stock-badge ${pg.stock>0?\\\'in-stock\\\':\\\'no-stock\\\'}">${pg.stock>0?pg.stock+\\\' und\\\':\\\'Sin stock\\\'}</span>
         </div>
-        <button class="btn btn-sm btn-del" onclick="delPg('${pg.id}')">Eliminar</button>
+        <button class="btn btn-sm btn-del" onclick="delPg(\\\'${pg.id}\\\')">Eliminar</button>
       </div>
       <div class="mel-body">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
           <div>
             <div class="mlabel">Uso / descripción</div>
-            <div style="font-size:13px;font-weight:500">${esc(pg.desc)||'—'}</div>
+            <div style="font-size:13px;font-weight:500">${esc(pg.desc)||\\\'—\\\'}</div>
             <div style="font-size:12px;color:var(--text2)">Presentación: ${pg.pres}</div>
           </div>
           <div>
@@ -2330,65 +2330,65 @@ function renderPgList(){
           <div>
             <div class="mlabel">Rendimiento / Costo m²</div>
             <div style="font-size:14px;font-weight:600;font-family:monospace">${pg.rend} m²/L</div>
-            <div style="font-size:13px;font-weight:600;font-family:monospace;color:var(--blue)">${ppm2!=='—'?pg.moneda+' '+ppm2+'/m²':'—'}</div>
+            <div style="font-size:13px;font-weight:600;font-family:monospace;color:var(--blue)">${ppm2!==\\\'—\\\'?pg.moneda+\\\' \\\'+ppm2+\\\'/m²\\\':\\\'—\\\'}</div>
           </div>
           <div>
             <div class="mlabel">Proveedor</div>
-            <div style="font-size:13px">${esc(pg.proveedor)||'—'}</div>
-            ${pg.notas?`<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">${esc(pg.notas)}</div>`:''}
+            <div style="font-size:13px">${esc(pg.proveedor)||\\\'—\\\'}</div>
+            ${pg.notas?\\'<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">${esc(pg.notas)}</div>\':\'\'}
           </div>
         </div>
       </div>
-    </div>`;
-  }).join('');
+    </div>\';
+  }).join(\\'\\');
 }
 
 /* ===== INVENTARIO PEGAMENTOS ===== */
 let pegamentosInv = [];
-const PG_KEY = 'linaro_pg_v1';
+const PG_KEY = \\'linaro_pg_v1\\';
 
 function savePgLocal(){ try{ localStorage.setItem(PG_KEY, JSON.stringify(pegamentosInv)); }catch(e){} }
-function loadPgLocal(){ try{ return JSON.parse(localStorage.getItem(PG_KEY)||'[]'); }catch(e){ return []; } }
+function loadPgLocal(){ try{ return JSON.parse(localStorage.getItem(PG_KEY)||\\'[]\\'); }catch(e){ return []; } }
 
 const PG_INFO = {
-  amarilla: '<strong>Pega amarilla (contacto):</strong> Se aplica en ambas superficies, se deja secar y se presiona. Ideal para tapacanto, formica y chapillas. Rendimiento aprox. 6–10 m²/L.',
-  blanca:   '<strong>Pega blanca (PVA):</strong> Cola vinílica para madera, MDF y aglomerado. Se aplica en una superficie y se prensa. Rendimiento aprox. 8–12 m²/L. Secado 30–60 min.',
-  silicon:  '<strong>Silicón:</strong> Sellante y adhesivo flexible. Ideal para uniones mixtas, marcos y elementos decorativos. Rendimiento según aplicación.',
-  otro:     '<strong>Otro pegamento:</strong> Especifica el uso y rendimiento según el fabricante.',
+  amarilla: \\'<strong>Pega amarilla (contacto):</strong> Se aplica en ambas superficies, se deja secar y se presiona. Ideal para tapacanto, formica y chapillas. Rendimiento aprox. 6–10 m²/L.\\',
+  blanca:   \\'<strong>Pega blanca (PVA):</strong> Cola vinílica para madera, MDF y aglomerado. Se aplica en una superficie y se prensa. Rendimiento aprox. 8–12 m²/L. Secado 30–60 min.\\',
+  silicon:  \\'<strong>Silicón:</strong> Sellante y adhesivo flexible. Ideal para uniones mixtas, marcos y elementos decorativos. Rendimiento según aplicación.\\',
+  otro:     \\'<strong>Otro pegamento:</strong> Especifica el uso y rendimiento según el fabricante.\\',
 };
 
 function pgTipoChange(){
-  const t = document.getElementById('pgTipo').value;
-  const info = document.getElementById('pgInfo');
-  if(info) info.innerHTML = PG_INFO[t] || '';
+  const t = document.getElementById(\\'pgTipo\\').value;
+  const info = document.getElementById(\\'pgInfo\\');
+  if(info) info.innerHTML = PG_INFO[t] || \\'\\';
   // auto fill rendimiento
-  const rend = document.getElementById('pgRend');
-  if(rend){ if(t==='amarilla') rend.value=8; else if(t==='blanca') rend.value=10; else if(t==='silicon') rend.value=4; }
+  const rend = document.getElementById(\\'pgRend\\');
+  if(rend){ if(t===\\'amarilla\\') rend.value=8; else if(t===\\'blanca\\') rend.value=10; else if(t===\\'silicon\\') rend.value=4; }
 }
 
 function addPg(){
-  const nombre = document.getElementById('pgNombre').value;
-  if(!nombre){ toast('Escribe el nombre del pegamento'); return; }
+  const nombre = document.getElementById(\\'pgNombre\\').value;
+  if(!nombre){ toast(\\'Escribe el nombre del pegamento\\'); return; }
   const p = {
     id:       uid(),
-    tipo:     document.getElementById('pgTipo').value,
+    tipo:     document.getElementById(\\'pgTipo\\').value,
     nombre,
-    desc:     document.getElementById('pgDesc').value,
-    pres:     document.getElementById('pgPres').value,
-    rend:     parseFloat(document.getElementById('pgRend').value)||8,
-    precio:   parseFloat(document.getElementById('pgPrecio').value)||0,
-    moneda:   document.getElementById('pgMoneda').value,
-    proveedor:document.getElementById('pgProv').value,
-    stock:    parseInt(document.getElementById('pgStock').value),
-    notas:    document.getElementById('pgNotas').value,
+    desc:     document.getElementById(\\'pgDesc\\').value,
+    pres:     document.getElementById(\\'pgPres\\').value,
+    rend:     parseFloat(document.getElementById(\\'pgRend\\').value)||8,
+    precio:   parseFloat(document.getElementById(\\'pgPrecio\\').value)||0,
+    moneda:   document.getElementById(\\'pgMoneda\\').value,
+    proveedor:document.getElementById(\\'pgProv\\').value,
+    stock:    parseInt(document.getElementById(\\'pgStock\\').value),
+    notas:    document.getElementById(\\'pgNotas\\').value,
   };
   pegamentosInv.push(p);
   savePgLocal();
   renderPgList();
   // clear
-  ['pgNombre','pgDesc','pgProv','pgNotas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('pgPrecio').value='0';
-  toast(`✓ "${p.nombre}" registrado`);
+  [\\'pgNombre\\',\\'pgDesc\\',\\'pgProv\\',\\'pgNotas\\'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=\\'\\';});
+  document.getElementById(\\'pgPrecio\\').value=\\'0\\';
+  toast(\\'✓ "\\'+(p.nombre)+\\'" registrado\\');
 }
 
 function delPg(id){
@@ -2397,34 +2397,34 @@ function delPg(id){
   renderPgList();
 }
 
-const PG_EMOJI = {amarilla:'🟡',blanca:'⚪',silicon:'🔵',otro:'🪣'};
-const PG_LABEL = {amarilla:'Pega amarilla',blanca:'Pega blanca (PVA)',silicon:'Silicón',otro:'Otro'};
+const PG_EMOJI = {amarilla:\\'🟡\\',blanca:\\'⚪\\',silicon:\\'🔵\\',otro:\\'🪣\\'};
+const PG_LABEL = {amarilla:\\'Pega amarilla\\',blanca:\\'Pega blanca (PVA)\\',silicon:\\'Silicón\\',otro:\\'Otro\\'};
 
 function renderPgList(){
-  const list = document.getElementById('pgList');
-  const count = document.getElementById('pgCount');
+  const list = document.getElementById(\\'pgList\\');
+  const count = document.getElementById(\\'pgCount\\');
   if(!list) return;
-  if(count) count.textContent = `${pegamentosInv.length} producto${pegamentosInv.length!==1?'s':''} registrado${pegamentosInv.length!==1?'s':''}`;
+  if(count) count.textContent = \\'\\'+(pegamentosInv.length)+\\' producto\'+(pegamentosInv.length!==1?\\'s\\':\\'\\')+\' registrado${pegamentosInv.length!==1?\\\'s\\\':\\\'\\\'}\\';
   if(!pegamentosInv.length){
-    list.innerHTML=`<div class="empty card"><div class="empty-icon">🪣</div><p>Registra tus pegamentos con precio y rendimiento</p></div>`;
+    list.innerHTML=\\'<div class="empty card"><div class="empty-icon">🪣</div><p>Registra tus pegamentos con precio y rendimiento</p></div>\\';
     return;
   }
   list.innerHTML = pegamentosInv.map(p=>{
-    const ppm2 = p.precio>0&&p.rend>0 ? (p.precio/p.rend).toFixed(3) : '—';
-    const color = p.tipo==='amarilla'?'#FFF3CD':p.tipo==='blanca'?'#F8F9FA':p.tipo==='silicon'?'#E6F1FB':'#F1EFE8';
-    const border= p.tipo==='amarilla'?'#D4A000':p.tipo==='blanca'?'#CCC':p.tipo==='silicon'?'#185FA5':'#999';
-    return `<div class="mel-card" style="border-color:${border}">
+    const ppm2 = p.precio>0&&p.rend>0 ? (p.precio/p.rend).toFixed(3) : \\'—\\';
+    const color = p.tipo===\\'amarilla\\'?\\'#FFF3CD\\':p.tipo===\\'blanca\\'?\\'#F8F9FA\\':p.tipo===\\'silicon\\'?\\'#E6F1FB\\':\\'#F1EFE8\\';
+    const border= p.tipo===\\'amarilla\\'?\\'#D4A000\\':p.tipo===\\'blanca\\'?\\'#CCC\\':p.tipo===\\'silicon\\'?\\'#185FA5\\':\\'#999\\';
+    return \\'<div class="mel-card" style="border-color:\\'+(border)+\\'">
       <div class="mel-head" style="background:${color}">
         <div class="flex gap8 wrap" style="align-items:center">
-          <span style="font-size:18px">${PG_EMOJI[p.tipo]||'🪣'}</span>
+          <span style="font-size:18px">${PG_EMOJI[p.tipo]||\\\'🪣\\\'}</span>
           <div>
             <div style="font-size:14px;font-weight:600">${esc(p.nombre)}</div>
             <div style="font-size:11px;color:var(--text2)">${PG_LABEL[p.tipo]||p.tipo} · ${p.pres}</div>
           </div>
-          ${p.desc?`<span class="tag">${esc(p.desc)}</span>`:''}
-          <span class="stock-badge ${p.stock?'in-stock':'no-stock'}">${p.stock?'En stock':'Sin stock'}</span>
+          ${p.desc?\\'<span class="tag">${esc(p.desc)}</span>\\':\\\'\\\'}
+          <span class="stock-badge \\'+(p.stock?\\'in-stock\\':\\'no-stock\\')+\\'">${p.stock?\\\'En stock\\\':\\\'Sin stock\\\'}</span>
         </div>
-        <button class="btn btn-sm btn-del" onclick="delPg('${p.id}')">Eliminar</button>
+        <button class="btn btn-sm btn-del" onclick="delPg(\\\'${p.id}\\\')">Eliminar</button>
       </div>
       <div class="mel-body">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
@@ -2439,212 +2439,152 @@ function renderPgList(){
           </div>
           <div>
             <div class="mlabel">Costo por m²</div>
-            <div style="font-size:15px;font-weight:600;font-family:monospace;color:var(--blue)">${ppm2!=='—'?p.moneda+' '+ppm2:'—'}</div>
+            <div style="font-size:15px;font-weight:600;font-family:monospace;color:var(--blue)">${ppm2!==\\\'—\\\'?p.moneda+\\\' \\\'+ppm2:\\\'—\\\'}</div>
           </div>
           <div>
             <div class="mlabel">Proveedor</div>
-            <div style="font-size:13px">${esc(p.proveedor)||'—'}</div>
-            ${p.notas?`<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">${esc(p.notas)}</div>`:''}
+            <div style="font-size:13px">${esc(p.proveedor)||\\\'—\\\'}</div>
+            ${p.notas?\\'<div style="font-size:12px;color:var(--text2);font-style:italic;margin-top:2px">${esc(p.notas)}</div>\':\'\'}
           </div>
         </div>
       </div>
-    </div>`;
+    </div>';
   }).join('');
 }
 
 /* ===== PLANO DE CORTE ===== */
 
-// Colors per piece type
-const CP_COLORS = [
-  '#B8D4E8','#B8E8C8','#E8D4B8','#D4B8E8','#E8E8B8',
-  '#B8E8E8','#E8B8D4','#C8D4B8','#D4C8B8','#B8C8E8',
-  '#E8C8B8','#C8E8D4','#D8B8B8','#B8D8C8','#C8C8E8',
-];
+var CP_COLORS=['#B8D4E8','#B8E8C8','#E8D4B8','#D4B8E8','#E8E8B8','#B8E8E8','#E8B8D4','#C8D4B8','#D4C8B8','#B8C8E8','#E8C8B8','#C8E8D4','#D8B8B8','#B8D8C8','#C8C8E8'];
 
 function genCutPlan(pid){
-  const piece = pieces.find(p=>p.id===pid);
-  if(!piece){ toast('Módulo no encontrado'); return; }
+  var piece=pieces.find(function(p){return p.id===pid;});
+  if(!piece){toast('Módulo no encontrado');return;}
+  var matObj=piece.matObj;
+  var sheetW=matObj?matObj.ancho:2440;
+  var sheetH=matObj?matObj.alto:1220;
+  var matName=matObj?matObj.nombre:'MDF estándar';
+  var hasGrain=matObj&&/nogal|roble|cerezo|wengu|teka|pino|caoba|cedro|beta|mader|wood|grain|veta|natural/i.test(matObj.nombre+' '+(matObj.color||''));
+  var KERF=4,PAD=10;
 
-  // Get sheet dimensions from selected melaminico
-  const matObj = piece.matObj;
-  const sheetW = matObj ? matObj.ancho : 2440; // mm
-  const sheetH = matObj ? matObj.alto  : 1220; // mm
-  const matName = matObj ? matObj.nombre : 'MDF estándar';
-
-  // Determine if grain (beta maderado) - check material name
-  const hasGrain = matObj && /nogal|roble|cerezo|wengué|teka|pino|caoba|cedro|beta|mader|wood|grain|veta|natural/i.test(matObj.nombre + ' ' + (matObj.color||''));
-
-  // Build flat list of pieces to cut (only thick >= 15mm ones for main sheet)
-  let cutList = [];
-  piece.cuts.filter(c => c.thick >= 15).forEach((c, ci) => {
-    const [w, h] = c.dims.split(' × ').map(Number);
-    for(let q = 0; q < c.qty; q++){
-      cutList.push({
-        label: c.n,
-        w: w,    // width in mm
-        h: h,    // height in mm
-        colorIdx: ci % CP_COLORS.length,
-        idx: cutList.length,
-      });
+  var cutList=[];
+  piece.cuts.filter(function(c){return c.thick>=15;}).forEach(function(c,ci){
+    var parts=c.dims.split(' × ').map(Number);
+    var cw=parts[0],ch=parts[1];
+    for(var q=0;q<c.qty;q++){
+      cutList.push({label:c.n,w:cw,h:ch,colorIdx:ci%CP_COLORS.length,idx:cutList.length});
     }
   });
+  if(!cutList.length){toast('No hay piezas de tablero para distribuir');return;}
 
-  if(!cutList.length){ toast('No hay piezas de tablero para distribuir'); return; }
+  cutList=cutList.map(function(p){
+    var pw=p.w,ph=p.h,rotated=false;
+    if(hasGrain){if(ph>pw){var tmp=pw;pw=ph;ph=tmp;rotated=true;}}
+    return {label:p.label,w:p.w,h:p.h,pw:pw,ph:ph,rotated:rotated,colorIdx:p.colorIdx,idx:p.idx};
+  });
 
-  // Grain direction: orient piece so longest dimension is horizontal (along sheet width)
-  const KERF = 4; // saw blade kerf in mm
-  const PAD  = 10; // edge padding
+  var sorted=cutList.slice().sort(function(a,b){return b.ph-a.ph||b.pw-a.pw;});
 
-  // Orient each piece for grain or max fit
-  cutList = cutList.map(p => {
-    let pw = p.w, ph = p.h;
+  function newSheet(){return {items:[],usedArea:0,freeRects:[{x:PAD,y:PAD,w:sheetW-PAD*2,h:sheetH-PAD*2}]};}
+  function tryPlace(sheet,pw,ph){
+    var best=null,bestArea=1e18;
+    for(var i=0;i<sheet.freeRects.length;i++){
+      var r=sheet.freeRects[i];
+      if(r.w>=pw&&r.h>=ph){var area=r.w*r.h;if(area<bestArea){bestArea=area;best=r;}}
+    }
+    if(!best)return null;
+    var x=best.x,y=best.y;
+    sheet.freeRects=sheet.freeRects.filter(function(r){return r!==best;});
+    if(best.w-pw-KERF>20)sheet.freeRects.push({x:x+pw+KERF,y:best.y,w:best.w-pw-KERF,h:best.h});
+    if(best.h-ph-KERF>20)sheet.freeRects.push({x:best.x,y:y+ph+KERF,w:pw,h:best.h-ph-KERF});
+    sheet.usedArea+=pw*ph;
+    return {x:x,y:y,pw:pw,ph:ph};
+  }
+
+  var sheets=[],currentSheet=newSheet();
+  for(var si=0;si<sorted.length;si++){
+    var item=sorted[si];
+    var pos=tryPlace(currentSheet,item.pw+KERF,item.ph+KERF);
+    if(pos){currentSheet.items.push({label:item.label,pw:item.pw,ph:item.ph,rotated:item.rotated,colorIdx:item.colorIdx,x:pos.x,y:pos.y});}
+    else{
+      sheets.push(currentSheet);currentSheet=newSheet();
+      var pos2=tryPlace(currentSheet,item.pw+KERF,item.ph+KERF);
+      if(pos2)currentSheet.items.push({label:item.label,pw:item.pw,ph:item.ph,rotated:item.rotated,colorIdx:item.colorIdx,x:pos2.x,y:pos2.y});
+    }
+  }
+  if(currentSheet.items.length)sheets.push(currentSheet);
+
+  var SCALE=Math.min(500/sheetW,260/sheetH);
+  var svgW=Math.round(sheetW*SCALE);
+  var svgH=Math.round(sheetH*SCALE);
+  var totalArea=sheetW*sheetH;
+  var out='';
+
+  for(var li=0;li<sheets.length;li++){
+    var sheet=sheets[li];
+    var utilPct=((sheet.usedArea/totalArea)*100).toFixed(1);
+    var waste=(100-parseFloat(utilPct)).toFixed(1);
+    var utilColor=parseFloat(utilPct)>75?'#27500A':parseFloat(utilPct)>50?'#BA7517':'#A32D2D';
+
+    // Build SVG pieces
+    var svgPieces='';
+    var legendItems='';
+    var grainLines='';
     if(hasGrain){
-      // Grain runs horizontally (along sheet width)
-      // Longest side of piece must be horizontal
-      if(ph > pw){ // piece is taller than wide → rotate so long side is horizontal
-        [pw, ph] = [ph, pw];
+      var lineCount=Math.floor(svgH/8);
+      for(var gi=0;gi<lineCount;gi++){
+        grainLines+='<line x1="0" y1="'+(gi*8+4)+'" x2="'+svgW+'" y2="'+(gi*8+4)+'" stroke="#C8B898" stroke-width="0.4" opacity="0.5"/>';
       }
     }
-    return {...p, pw, ph, rotated: pw !== p.w};
-  });
-
-  // Pack using guillotine strip algorithm
-  // Sort by height descending for better packing
-  const sorted = [...cutList].sort((a,b) => b.ph - a.ph || b.pw - a.pw);
-
-  const sheets = [];
-  let placed = [];
-
-  function newSheet(){ return { items:[], usedArea:0, freeRects:[{x:PAD,y:PAD,w:sheetW-PAD*2,h:sheetH-PAD*2}] }; }
-
-  function tryPlace(sheet, pw, ph){
-    // Find best fit (smallest area that fits)
-    let best = null, bestArea = Infinity;
-    for(let r of sheet.freeRects){
-      if(r.w >= pw && r.h >= ph){
-        const area = r.w * r.h;
-        if(area < bestArea){ bestArea = area; best = r; }
-      }
+    for(var pi=0;pi<sheet.items.length;pi++){
+      var it=sheet.items[pi];
+      var px=Math.round(it.x*SCALE),py=Math.round(it.y*SCALE);
+      var pw2=Math.round(it.pw*SCALE),ph2=Math.round(it.ph*SCALE);
+      var col=CP_COLORS[it.colorIdx%CP_COLORS.length];
+      var fs=Math.max(7,Math.min(11,pw2/(it.label.length||1)*1.4));
+      var arrow='';
+      if(hasGrain){arrow='<line x1="'+(px+6)+'" y1="'+(py+Math.round(ph2/2))+'" x2="'+(px+pw2-6)+'" y2="'+(py+Math.round(ph2/2))+'" stroke="#555" stroke-width="1.5" opacity="0.6"/>';}
+      var rotMark=it.rotated?'<text x="'+(px+pw2-3)+'" y="'+(py+10)+'" font-size="7" fill="#888" text-anchor="end" font-family="monospace">&#x21BB;</text>':'';
+      svgPieces+='<rect x="'+px+'" y="'+py+'" width="'+pw2+'" height="'+ph2+'" fill="'+col+'" stroke="#444" stroke-width="1" rx="1"/>'+arrow+'<text x="'+(px+Math.round(pw2/2))+'" y="'+(py+Math.round(ph2/2)-4)+'" text-anchor="middle" font-size="'+fs+'" font-weight="600" fill="#1a1a1a" font-family="sans-serif">'+esc(it.label)+'</text><text x="'+(px+Math.round(pw2/2))+'" y="'+(py+Math.round(ph2/2)+8)+'" text-anchor="middle" font-size="7" fill="#333" font-family="monospace">'+it.pw+'x'+it.ph+'</text>'+rotMark;
+      legendItems+='<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:4px;background:'+col+';color:#1a1a1a;border:.5px solid #999;margin:2px"><span style="font-weight:600">'+esc(it.label)+'</span><span style="font-family:monospace">'+it.pw+'x'+it.ph+'mm'+(it.rotated?' &#x21BB;':'')+'</span></span>';
     }
-    if(!best) return null;
-    // Place here
-    const x = best.x, y = best.y;
-    // Split remaining free space (guillotine cut — maximize rightward)
-    sheet.freeRects = sheet.freeRects.filter(r => r !== best);
-    // Right strip
-    if(best.w - pw - KERF > 20){
-      sheet.freeRects.push({x: x+pw+KERF, y: best.y, w: best.w-pw-KERF, h: best.h});
-    }
-    // Bottom strip of placed piece area
-    if(best.h - ph - KERF > 20){
-      sheet.freeRects.push({x: best.x, y: y+ph+KERF, w: pw, h: best.h-ph-KERF});
-    }
-    sheet.usedArea += pw * ph;
-    return {x, y, pw, ph};
+
+    out+='<div style="margin-bottom:28px;page-break-inside:avoid">';
+    out+='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
+    out+='<div><span style="font-size:14px;font-weight:600">Lámina '+(li+1)+' de '+sheets.length+'</span>';
+    out+='<span style="display:inline-block;background:var(--bg3);border:.5px solid var(--border);border-radius:var(--r);padding:1px 7px;font-size:11px;font-family:monospace;margin-left:8px">'+sheetW+' x '+sheetH+' mm</span>';
+    out+='<span style="display:inline-block;background:var(--bg3);border:.5px solid var(--border);border-radius:var(--r);padding:1px 7px;font-size:11px;font-family:monospace;margin-left:4px">'+matName+'</span>';
+    out+=(hasGrain?'<span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500;background:var(--blue-l);color:var(--blue);margin-left:4px">&#x27F7; Beta horizontal</span>':'<span style="font-size:11px;color:var(--text2);margin-left:8px">Sin beta — libre rotaci&oacute;n</span>')+'</div>';
+    out+='<div style="display:flex;gap:12px">';
+    out+='<div style="background:var(--bg3);border-radius:var(--r);padding:6px 12px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--text2);margin-bottom:2px">Aprovechamiento</div><div style="font-size:16px;font-weight:600;font-family:monospace;color:'+utilColor+'">'+utilPct+'%</div></div>';
+    out+='<div style="background:var(--bg3);border-radius:var(--r);padding:6px 12px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--text2);margin-bottom:2px">Desperdicio</div><div style="font-size:16px;font-weight:600;font-family:monospace;color:var(--text2)">'+waste+'%</div></div>';
+    out+='</div></div>';
+    out+='<div style="overflow-x:auto"><svg width="'+svgW+'" height="'+svgH+'" style="border:2px solid #888;border-radius:4px;background:#F5F0E8;display:block">';
+    out+='<defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><polygon points="0 1,6 3,0 5" fill="#555"/></marker></defs>';
+    out+=grainLines+svgPieces;
+    out+='<rect x="0" y="0" width="'+svgW+'" height="'+svgH+'" fill="none" stroke="#BA7517" stroke-width="1.5" stroke-dasharray="4,4"/>';
+    out+='</svg></div>';
+    out+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">'+legendItems+'</div>';
+    out+='</div>';
   }
 
-  let currentSheet = newSheet();
-  for(let item of sorted){
-    const pos = tryPlace(currentSheet, item.pw+KERF, item.ph+KERF);
-    if(pos){
-      currentSheet.items.push({...item, x:pos.x, y:pos.y, pw:item.pw, ph:item.ph});
-    } else {
-      // Try current sheet done, start new
-      sheets.push(currentSheet);
-      currentSheet = newSheet();
-      const pos2 = tryPlace(currentSheet, item.pw+KERF, item.ph+KERF);
-      if(pos2){
-        currentSheet.items.push({...item, x:pos2.x, y:pos2.y, pw:item.pw, ph:item.ph});
-      }
-    }
-  }
-  if(currentSheet.items.length) sheets.push(currentSheet);
+  // Global summary
+  var totalUsed=sheets.reduce(function(s,sh){return s+sh.usedArea;},0);
+  var globalPct=((totalUsed/(sheets.length*totalArea))*100).toFixed(1);
+  out+='<div style="background:var(--green-l);border:.5px solid var(--green-b);border-radius:var(--rl);padding:16px 18px">';
+  out+='<div style="display:flex;gap:20px;flex-wrap:wrap">';
+  out+='<div><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text2);margin-bottom:2px">Total l&aacute;minas</div><div style="font-size:20px;font-weight:600">'+sheets.length+'</div></div>';
+  out+='<div><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text2);margin-bottom:2px">Piezas distribuidas</div><div style="font-size:20px;font-weight:600">'+cutList.length+'</div></div>';
+  out+='<div><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text2);margin-bottom:2px">Aprovechamiento global</div><div style="font-size:20px;font-weight:600;color:var(--green)">'+globalPct+'%</div></div>';
+  out+='<div><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text2);margin-bottom:2px">Material</div><div style="font-size:15px;font-weight:500">'+matName+'</div></div>';
+  if(hasGrain)out+='<div><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text2);margin-bottom:2px">Direcci&oacute;n beta</div><div style="font-size:13px">&#x27F7; Horizontal (a lo largo de la l&aacute;mina)</div></div>';
+  out+='</div></div>';
 
-  // ── Render ──────────────────────────────────────────────────────────────
-  const totalArea = sheetW * sheetH;
-  const SCALE = Math.min(500/sheetW, 260/sheetH); // px per mm
-
-  let html2 = '';
-  sheets.forEach((sheet, si) => {
-    const utilPct = ((sheet.usedArea/totalArea)*100).toFixed(1);
-    const waste   = (100 - parseFloat(utilPct)).toFixed(1);
-    const svgW    = Math.round(sheetW*SCALE);
-    const svgH    = Math.round(sheetH*SCALE);
-
-    html2 += `
-    <div style="margin-bottom:28px;page-break-inside:avoid">
-      <div class="flexb mb8 wrap gap8">
-        <div>
-          <span style="font-size:14px;font-weight:600">Lámina ${si+1} de ${sheets.length}</span>
-          <span class="tag" style="margin-left:8px">${sheetW} × ${sheetH} mm</span>
-          <span class="tag" style="margin-left:4px">${matName}</span>
-          ${hasGrain?'<span class="badge bbl" style="margin-left:4px">⟷ Beta horizontal</span>':'<span style="margin-left:4px;font-size:11px;color:var(--text2)">Sólido — libre rotación</span>'}
-        </div>
-        <div class="flex gap12">
-          <div class="metric" style="padding:6px 12px"><div class="mlabel">Aprovechamiento</div><div style="font-size:16px;font-weight:600;font-family:monospace;color:${parseFloat(utilPct)>75?'#27500A':parseFloat(utilPct)>50?'#BA7517':'#A32D2D'}">${utilPct}%</div></div>
-          <div class="metric" style="padding:6px 12px"><div class="mlabel">Desperdicio</div><div style="font-size:16px;font-weight:600;font-family:monospace;color:var(--text2)">${waste}%</div></div>
-        </div>
-      </div>
-      <div style="overflow-x:auto">
-        <svg width="${svgW}" height="${svgH}" style="border:2px solid #888;border-radius:4px;background:#F5F0E8;display:block">
-          <!-- sheet boundary -->
-          <rect x="0" y="0" width="${svgW}" height="${svgH}" fill="#F5F0E8"/>
-          <!-- grain lines if applicable -->
-          ${hasGrain ? Array.from({length:Math.floor(svgH/8)},(_,i)=>`<line x1="0" y1="${i*8+4}" x2="${svgW}" y2="${i*8+4}" stroke="#C8B898" stroke-width="0.4" opacity="0.5"/>`).join('') : ''}
-          <!-- pieces -->
-          ${sheet.items.map(item=>{
-            const px=Math.round(item.x*SCALE), py=Math.round(item.y*SCALE);
-            const pw=Math.round(item.pw*SCALE), ph=Math.round(item.ph*SCALE);
-            const col = CP_COLORS[item.colorIdx];
-            const fontSize = Math.max(7, Math.min(11, pw/item.label.length*1.4));
-            // Grain direction arrow on piece
-            const arrow = hasGrain ? `<line x1="${px+6}" y1="${py+ph/2}" x2="${px+pw-6}" y2="${py+ph/2}" stroke="#555" stroke-width="1" marker-end="url(#arr)"/>` : '';
-            const rotTag = item.rotated ? `<text x="${px+pw-4}" y="${py+10}" font-size="7" fill="#888" text-anchor="end" font-family="monospace">↻</text>` : '';
-            return `<g>
-              <rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="${col}" stroke="#555" stroke-width="1" rx="1"/>
-              ${arrow}
-              <text x="${px+pw/2}" y="${py+ph/2-5}" text-anchor="middle" font-size="${fontSize}" font-weight="600" fill="#1a1a1a" font-family="sans-serif">${item.label}</text>
-              <text x="${px+pw/2}" y="${py+ph/2+8}" text-anchor="middle" font-size="7" fill="#444" font-family="monospace">${item.pw}×${item.ph}</text>
-              ${rotTag}
-            </g>`;
-          }).join('')}
-          <!-- edge padding markers -->
-          <rect x="0" y="0" width="${svgW}" height="${svgH}" fill="none" stroke="#BA7517" stroke-width="1.5" stroke-dasharray="4,4"/>
-          <!-- defs for arrow -->
-          <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><polygon points="0 1,6 3,0 5" fill="#555"/></marker></defs>
-        </svg>
-      </div>
-      <!-- Piece legend -->
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
-        ${sheet.items.map(item=>`<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:4px;background:${CP_COLORS[item.colorIdx]};color:#1a1a1a;border:.5px solid #999">
-          <span style="font-weight:600">${item.label}</span>
-          <span style="font-family:monospace">${item.pw}×${item.ph}mm${item.rotated?' ↻':''}</span>
-        </span>`).join('')}
-      </div>
-    </div>`;
-  });
-
-  // Summary
-  const totalUsed = sheets.reduce((s,sh)=>s+sh.usedArea,0);
-  const totalSheetArea = sheets.length * totalArea;
-  const globalPct = ((totalUsed/totalSheetArea)*100).toFixed(1);
-
-  html2 += `<div class="card" style="background:var(--green-l);border-color:var(--green-b)">
-    <div class="flex gap12 wrap">
-      <div><div class="mlabel">Total láminas</div><div style="font-size:18px;font-weight:600">${sheets.length}</div></div>
-      <div><div class="mlabel">Piezas distribuidas</div><div style="font-size:18px;font-weight:600">${cutList.length}</div></div>
-      <div><div class="mlabel">Aprovechamiento global</div><div style="font-size:18px;font-weight:600;color:var(--green)">${globalPct}%</div></div>
-      <div><div class="mlabel">Material</div><div style="font-size:14px;font-weight:500">${matName}</div></div>
-      ${hasGrain?'<div><div class="mlabel">Dirección de beta</div><div style="font-size:13px">⟷ Horizontal (a lo largo)</div></div>':''}
-    </div>
-  </div>`;
-
-  // Show modal
-  document.getElementById('cpTitle').textContent = `Plano de corte — ${piece.name}`;
-  document.getElementById('cpSubtitle').textContent = `${sheets.length} lámina(s) de ${sheetW}×${sheetH}mm · ${matName}${hasGrain?' · Beta maderado':''}`;
-  document.getElementById('cpContent').innerHTML = html2;
-  document.getElementById('cutPlanModal').style.display = 'block';
+  document.getElementById('cpTitle').textContent='Plano de corte \u2014 '+piece.name;
+  document.getElementById('cpSubtitle').textContent=sheets.length+' l\u00e1mina(s) de '+sheetW+'\u00d7'+sheetH+'mm \u00b7 '+matName+(hasGrain?' \u00b7 Beta maderado':'');
+  document.getElementById('cpContent').innerHTML=out;
+  document.getElementById('cutPlanModal').style.display='block';
 }
+
 </script>
 
 <!-- CUT PLAN MODAL -->
