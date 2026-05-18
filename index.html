@@ -5,86 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Linaro - Presupuestación Arquitectónica</title>
     <style>
-        :root {
-            --primary-color: #333;
-            --bg-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --text-muted: #6c757d;
-        }
-
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .login-container {
-            background: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            width: 100%;
-            max-width: 380px;
-            text-align: center;
-        }
-
-        .logo {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin: 0;
-            letter-spacing: -1px;
-        }
-
-        .tagline {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            text-align: left;
-            margin-bottom: 1.2rem;
-        }
-
-        label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #444;
-            margin-bottom: 0.5rem;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1.5px solid #e0e0e0;
-            border-radius: 6px;
-            box-sizing: border-box;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 14px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 1rem;
-        }
-
-        .footer {
-            margin-top: 2.5rem;
-            font-size: 0.8rem;
-            color: #999;
-        }
+        :root { --primary-color: #333; --bg-color: #f8f9fa; --card-bg: #ffffff; --text-muted: #6c757d; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-container { background: var(--card-bg); padding: 2.5rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); width: 100%; max-width: 380px; text-align: center; }
+        .logo { font-size: 2.2rem; font-weight: 700; color: var(--primary-color); margin: 0; }
+        .tagline { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 2rem; }
+        .form-group { text-align: left; margin-bottom: 1.2rem; }
+        label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; }
+        input { width: 100%; padding: 12px; border: 1.5px solid #e0e0e0; border-radius: 6px; box-sizing: border-box; }
+        .btn-submit { width: 100%; padding: 14px; background-color: var(--primary-color); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 1rem; }
+        .footer { margin-top: 2.5rem; font-size: 0.8rem; color: #999; }
     </style>
 </head>
 <body>
@@ -95,17 +25,15 @@
             <p class="tagline">Presupuestación arquitectónica</p>
         </header>
 
-        <form onsubmit="doLogin(event)">
+        <form id="loginForm" onsubmit="doLogin(event)">
             <div class="form-group">
-                <label>Usuario / Email</label>
+                <label for="email">Usuario / Email</label>
                 <input type="email" id="email" required>
             </div>
-
             <div class="form-group">
-                <label>Contraseña</label>
+                <label for="password">Contraseña</label>
                 <input type="password" id="password" required>
             </div>
-
             <button type="submit" class="btn-submit">Ingresar</button>
         </form>
 
@@ -115,40 +43,34 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <script>
-        // Configura aquí tus credenciales de Supabase
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        const SUPABASE_URL = 'https://iufichkkkhjednfljy.supabase.co';
+        const SUPABASE_KEY = 'TU_ANON_KEY_AQUÍ'; // <--- PEGA TU LLAVE AQUÍ
 
-<script>
-// 1. Configuración de conexión
-const SUPABASE_URL = 'https://iufichkkkhjednfljy.supabase.co'; 
-const SUPABASE_KEY = 'TU_ANON_KEY_AQUÍ'; // Pega tu llave anon aquí
+        const _supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const _supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        async function doLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
 
-// 2. Función de ingreso
-async function doLogin(event) {
-    event.preventDefault();
-    
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+            try {
+                const { data, error } = await _supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
 
-    const { data, error } = await _supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password
-    });
+                if (error) {
+                    alert('Error: ' + error.message);
+                } else {
+                    alert('¡Bienvenido a Linaro!');
+                }
+            } catch (err) {
+                console.error('Error inesperado:', err);
+            }
+        }
 
-    if (error) {
-        alert('Error al ingresar: ' + error.message);
-    } else {
-        alert('¡Bienvenido a Linaro!');
-        // window.location.href = 'dashboard.html';
-    }
-}
-
-// 3. Texto del pie de página
-document.getElementById('copyrightText').textContent = `Linaro © 2025 — Todos los derechos reservados`;
-</script>
+        document.getElementById('copyrightText').textContent = `Linaro © 2026 — Todos los derechos reservados`;
+    </script>
 </body>
 </html>
