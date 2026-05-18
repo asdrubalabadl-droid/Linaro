@@ -118,38 +118,37 @@
 
     <script>
         // Configura aquí tus credenciales de Supabase
-     // PEGA ESTO EN SU LUGAR
-const SUPABASE_URL = 'https://iufichkkkhjednfljy.supabase.co'; 
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZmljaHB5a2ZraGplZG5mbGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDI3NzMsImV4cCI6MjA5NDYxODc3M30.0OG0e2Oj_5-uJckF-a0duPDgBmgyYr-3VLJm3HvQRVM'; // <--- PEGA AQUÍ TU CLAVE ANON
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-// Usamos un nombre diferente para evitar el error de "redeclaration"
+<script>
+// 1. Configuración de conexión
+const SUPABASE_URL = 'https://iufichkkkhjednfljy.supabase.co'; 
+const SUPABASE_KEY = 'TU_ANON_KEY_AQUÍ'; // Pega tu llave anon aquí
+
 const _supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// 2. Función de ingreso
 async function doLogin(event) {
     event.preventDefault();
     
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    // Aquí también usamos el nombre nuevo
     const { data, error } = await _supabaseClient.auth.signInWithPassword({
         email: email,
-        password: password,
+        password: password
     });
 
     if (error) {
         alert('Error al ingresar: ' + error.message);
     } else {
         alert('¡Bienvenido a Linaro!');
-        // window.location.href = 'dashboard.html'; 
+        // window.location.href = 'dashboard.html';
     }
 }
-                // window.location.href = 'dashboard.html';
-            }
-        }
 
-        // Texto con backticks para evitar SyntaxError
-        document.getElementById('copyrightText').textContent = `Linaro © 2025 — Todos los derechos reservados`;
-    </script>
+// 3. Texto del pie de página
+document.getElementById('copyrightText').textContent = `Linaro © 2025 — Todos los derechos reservados`;
+</script>
 </body>
 </html>
