@@ -118,26 +118,32 @@
 
     <script>
         // Configura aquí tus credenciales de Supabase
-        const SUPABASE_URL = 'TU_PROYECTO_URL';
-        const SUPABASE_KEY = 'TU_ANON_KEY';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+     // PEGA ESTO EN SU LUGAR
+const SUPABASE_URL = 'https://iufichkkkhjednfljy.supabase.co'; 
+const SUPABASE_KEY = 'TU_ANON_KEY_REAL_AQUÍ'; // <--- PEGA AQUÍ TU CLAVE ANON
 
-        // Función corregida para evitar ReferenceError
-        async function doLogin(event) {
-            event.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+// Usamos un nombre diferente para evitar el error de "redeclaration"
+const _supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
+async function doLogin(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-            if (error) {
-                alert('Error: ' + error.message);
-            } else {
-                alert('¡Bienvenido!');
+    // Aquí también usamos el nombre nuevo
+    const { data, error } = await _supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password,
+    });
+
+    if (error) {
+        alert('Error al ingresar: ' + error.message);
+    } else {
+        alert('¡Bienvenido a Linaro!');
+        // window.location.href = 'dashboard.html'; 
+    }
+}
                 // window.location.href = 'dashboard.html';
             }
         }
