@@ -25,7 +25,7 @@
             <p class="tagline">Presupuestación arquitectónica</p>
         </header>
 
-        <form id="loginForm" onsubmit="doLogin(event)">
+        <form onsubmit="doLogin(event)">
             <div class="form-group">
                 <label for="email">Usuario / Email</label>
                 <input type="email" id="email" required>
@@ -44,33 +44,31 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const SUPABASE_URL = 'https://iufichkkkhjednfljy.supabase.co';
-        const SUPABASE_KEY = 'TU_ANON_KEY_AQUÍ'; // <--- PEGA TU LLAVE AQUÍ
+        // Configuración de Supabase
+        const _URL = 'https://iufichkkkhjednfljy.supabase.co';
+        const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZmljaHB5a2ZraGplZG5mbGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDI3NzMsImV4cCI6MjA5NDYxODc3M30.0OG0e2Oj_5-uJckF-a0duPDgBmgyYr-3VLJm3HvQRVM'; // <--- PEGA AQUÍ TU LLAVE LARGA
 
-        const _supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const _supabase = supabase.createClient(_URL, _KEY);
 
         async function doLogin(event) {
             event.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            try {
-                const { data, error } = await _supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
+            const { data, error } = await _supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
 
-                if (error) {
-                    alert('Error: ' + error.message);
-                } else {
-                    alert('¡Bienvenido a Linaro!');
-                }
-            } catch (err) {
-                console.error('Error inesperado:', err);
+            if (error) {
+                alert('Error: ' + error.message);
+            } else {
+                alert('¡Bienvenido a Linaro!');
+                // window.location.href = 'dashboard.html';
             }
         }
 
-        document.getElementById('copyrightText').textContent = `Linaro © 2026 — Todos los derechos reservados`;
+        document.getElementById('copyrightText').textContent = 'Linaro © 2026 — Todos los derechos reservados';
     </script>
 </body>
 </html>
