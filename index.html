@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Linaro — Presupuestación Arquitectónica</title>
+    <!-- Favicon de la marca -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/%3E%3Crect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/%3E%3Cpath d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/%3E%3Crect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/%3E%3C/svg%3E'">
     
+    <!-- Dependencias Externas (PDF y Supabase) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -209,6 +211,7 @@
 </head>
 <body>
 
+    <!-- SECCIÓN ACCESO (LOGIN) -->
     <div id="loginSection">
         <div class="login-container">
             <header>
@@ -230,6 +233,7 @@
         </div>
     </div>
 
+    <!-- ENTORNO DE TRABAJO (WORKSPACE) -->
     <div id="mainWorkspace">
         <header class="main-header">
             <div class="brand">
@@ -240,6 +244,7 @@
         </header>
 
         <div class="workspace-layout">
+            <!-- PANEL DE AGREGAR PIEZAS (SIDEBAR) -->
             <div class="sidebar">
                 <div class="sidebar-scroll">
                     <div class="card">
@@ -280,6 +285,7 @@
                 </div>
             </div>
 
+            <!-- CONTENEDOR PRINCIPAL DE PESTAÑAS -->
             <div class="main-content">
                 <div class="tabs">
                     <button class="tab active" onclick="switchTab(event, 'tab-parts')">📋 Lista de Modulación</button>
@@ -287,6 +293,7 @@
                     <button class="tab" onclick="switchTab(event, 'tab-cloud')">📁 Servidor en la Nube</button>
                 </div>
 
+                <!-- PESTAÑA: PIEZAS -->
                 <div id="tab-parts" class="tab-panel active">
                     <div class="card-title" style="margin-bottom:12px">Desglose de Piezas Cargadas</div>
                     <div class="table-container">
@@ -309,6 +316,7 @@
                     </div>
                 </div>
 
+                <!-- PESTAÑA: PRESUPUESTO -->
                 <div id="tab-budget" class="tab-panel">
                     <div class="flex gap8 mb16">
                         <button class="btn btn-gold" onclick="exportBudgetPDF()">📄 Descargar PDF de Estructura de Costos</button>
@@ -347,6 +355,7 @@
                     </div>
                 </div>
 
+                <!-- PESTAÑA: NUBE -->
                 <div id="tab-cloud" class="tab-panel">
                     <div class="card">
                         <div class="card-title">Registrar Plano Técnico en Repositorio Cloud</div>
@@ -367,8 +376,10 @@
         </div>
     </div>
 
+    <!-- NOTIFICACIONES TOAST -->
     <div class="toast" id="toast"></div>
 
+    <!-- PLANO GRÁFICO DE CORTE -->
     <div id="cutPlanModal" class="cp-modal">
         <div class="cp-inner">
             <div class="cp-head">
