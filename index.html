@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linaro Pro Studio — Sistema de Ingeniería y Presupuestos</title>
+    <title>Linaro Pro Studio — Sistema de Ingeniería y Catálogo Centralizado</title>
     
-    <!-- Favicon Técnico -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/%3E%3Crect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/%3E%3Cpath d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/%3E%3Crect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/%3E%3C/svg%3E'">
     
-    <!-- Librerías de Soporte -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -40,7 +38,6 @@
             overflow: hidden;
         }
 
-        /* VISTAS PRINCIPALES Y ACCESO */
         #loginSection {
             display: flex;
             justify-content: center;
@@ -83,13 +80,11 @@
         .form-group input:focus { outline: none; border-color: var(--gold); }
         .btn-login { width: 100%; padding: 14px; background-color: var(--gold); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 1rem; }
         .btn-login:hover { background-color: var(--gold-hover); }
-        .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
         
         .alert { padding: 10px 14px; border-radius: 6px; font-size: 12px; margin-top: 1.2rem; display: none; }
         .alert.error { background: rgba(207, 102, 121, 0.15); border: 1px solid var(--error); color: var(--error); }
         .alert.success { background: rgba(76, 175, 80, 0.15); border: 1px solid var(--success); color: var(--success); }
 
-        /* CABECERA PRINCIPAL */
         header.main-header {
             display: flex;
             align-items: center;
@@ -106,11 +101,9 @@
         
         .workspace-layout { display: flex; flex: 1; overflow: hidden; }
         
-        /* CONTROL LATERAL DEL ENTORNO */
-        .sidebar { width: 300px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar { width: 280px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
         .sidebar-scroll { flex: 1; overflow-y: auto; padding: 16px; }
         
-        /* CONTENEDOR CENTRAL Y NAVEGACIÓN */
         .main-content { flex: 1; background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
         .tabs { display: flex; background: var(--panel); border-bottom: 1px solid var(--border); padding-left: 8px; flex-shrink: 0; }
         .tab { padding: 14px 18px; background: transparent; border: none; color: var(--text2); cursor: pointer; font-size: 12px; font-weight: 500; border-bottom: 2px solid transparent; }
@@ -120,7 +113,6 @@
         .tab-panel { flex: 1; overflow-y: auto; padding: 20px; display: none; }
         .tab-panel.active { display: block; }
         
-        /* COMPONENTES DE DISEÑO U.I. */
         .card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin-bottom: 16px; }
         .card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text2); margin-bottom: 12px; letter-spacing: 0.5px; }
         .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -146,12 +138,7 @@
         .db-card:hover { border-color: var(--gold); }
         .db-delete { position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: var(--text2); cursor: pointer; }
         .db-delete:hover { color: var(--error); }
-        
-        .preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 8px; }
-        .preset-card { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 12px; cursor: pointer; text-align: center; }
-        .preset-card:hover { border-color: var(--gold); }
 
-        canvas { background: #252526; border: 1px solid #3d3d3d; max-width: 100%; display: block; margin: 10px auto; }
         .toast { position: fixed; bottom: 20px; right: 20px; background: var(--panel); border: 1px solid var(--gold); color: var(--text); padding: 12px 24px; border-radius: 6px; display: none; z-index: 9999; }
         .flex { display: flex; }
         .gap8 { gap: 8px; }
@@ -162,271 +149,199 @@
 </head>
 <body>
 
-    <!-- CONTROL ACCESO -->
+    <!-- ACCESO OPERATIVO -->
     <div id="loginSection">
         <div class="login-container">
             <header>
                 <h1 class="login-logo">LINARO</h1>
-                <p class="login-tagline">Presupuestación e Ingeniería Técnica</p>
+                <p class="login-tagline">Presupuestación e Ingeniería de Materiales</p>
             </header>
             <form id="loginForm" onsubmit="executeAuth(event)">
                 <div class="form-group">
                     <label>Email del Operador</label>
-                    <input type="email" id="email" placeholder="arquitecto@linaro.com" required>
+                    <input type="email" id="email" value="arquitecto@linaro.com" required>
                 </div>
                 <div class="form-group">
                     <label>Contraseña Técnica</label>
                     <input type="password" id="password" placeholder="••••••••" required>
                 </div>
-                <button type="submit" class="btn-login" id="btnSubmit">Verificar Identidad</button>
+                <button type="submit" class="btn-login" id="btnSubmit">Ingresar al Sistema</button>
             </form>
             <div id="loginAlertBox" class="alert"></div>
         </div>
     </div>
 
-    <!-- WORKSPACE INTEGRADO -->
+    <!-- WORKSPACE CON DESACOPLE DE CATÁLOGO -->
     <div id="mainWorkspace">
         <header class="main-header">
             <div class="brand">
                 <svg viewBox="0 0 64 64" fill="none"><rect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/><rect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/><path d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/><rect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/></svg>
-                <span>LINARO PRO STUDIO</span>
+                <span>LINARO PRO STUDIO v3</span>
             </div>
-            <div id="userBadge" class="user-badge">Operador</div>
+            <div id="userBadge" class="user-badge">Cargando...</div>
         </header>
 
         <div class="workspace-layout">
-            <!-- SIDEBAR CONFIGURACIÓN OPERATIVA -->
+            <!-- SIDEBAR LOGÍSTICO -->
             <div class="sidebar">
                 <div class="sidebar-scroll">
                     <div class="card">
-                        <div class="card-title">Mano de Obra y Diseño</div>
-                        <div class="field"><label>Diseño / Proyecto ($)</label><input type="number" id="feeDesign" value="150.00" onchange="recalculateAllSections()"></div>
-                        <div class="field"><label>Mano de Obra General ($)</label><input type="number" id="feeLabor" value="250.00" onchange="recalculateAllSections()"></div>
-                        <div class="field"><label>Instalación / Carpintería ($)</label><input type="number" id="feeCarpentry" value="180.00" onchange="recalculateAllSections()"></div>
+                        <div class="card-title">Costos Operativos Globales</div>
+                        <div class="field"><label>Diseño y Proyecto ($)</label><input type="number" id="feeDesign" value="150.00" onchange="calculateBudget()"></div>
+                        <div class="field"><label>Mano de Obra Planta ($)</label><input type="number" id="feeLabor" value="250.00" onchange="calculateBudget()"></div>
+                        <div class="field"><label>Instalación Taller ($)</label><input type="number" id="feeCarpentry" value="180.00" onchange="calculateBudget()"></div>
                     </div>
-
-                    <div class="card">
-                        <div class="card-title">Dimensiones de Placa (mm)</div>
-                        <div class="grid2">
-                            <div class="field"><label>Largo</label><input type="number" id="sheetLong" value="2440"></div>
-                            <div class="field"><label>Ancho</label><input type="number" id="sheetWidth" value="1830"></div>
-                        </div>
-                    </div>
-                    
-                    <button class="btn btn-gold" style="width:100%" onclick="recalculateAllSections()">⚙ Recalcular Presupuestos</button>
+                    <button class="btn btn-gold" style="width:100%" onclick="calculateBudget()">⚙ Recalcular Todo</button>
                 </div>
             </div>
 
-            <!-- NAVEGACIÓN DE FLUJOS -->
             <div class="main-content">
+                <!-- PESTAÑAS ESTRUCTURALES -->
                 <div class="tabs">
-                    <button class="tab active" onclick="changeSection(event, 'sec-budget')">💰 Presupuestos</button>
-                    <button class="tab" onclick="changeSection(event, 'sec-parts')">📋 Despieces</button>
-                    <button class="tab" onclick="changeSection(event, 'sec-blueprints')">📐 Planos y Modulación</button>
-                    <button class="tab" onclick="changeSection(event, 'sec-cloud')">📁 Nube Supabase</button>
+                    <button class="tab active" onclick="changeSection(event, 'sec-catalog')">📦 Catálogo Maestro Nube</button>
+                    <button class="tab" onclick="changeSection(event, 'sec-budget')">💰 Presupuesto del Proyecto</button>
+                    <button class="tab" onclick="changeSection(event, 'sec-projects')">📁 Proyectos Guardados</button>
                 </div>
 
-                <!-- APARTADO 1: PRESUPUESTOS Y REGISTRO DE MATERIALES -->
-                <div id="sec-budget" class="tab-panel active">
-                    <div class="flex gap8 mb16">
-                        <button class="btn btn-gold" onclick="exportStructuredPDF()">📄 Exportar Cotización PDF</button>
-                    </div>
-                    
-                    <!-- RESUMEN DE INVERSIÓN -->
-                    <div class="card">
-                        <div class="card-title">Estructura de Costos del Proyecto</div>
-                        <div class="grid2" style="grid-template-columns: repeat(5, 1fr); text-align:center">
-                            <div style="background:var(--panel2); padding:10px; border-radius:4px">
-                                <div style="font-size:11px; color:var(--text2)">Diseño</div>
-                                <div style="font-size:15px; font-weight:700; color:var(--gold)" id="outDesign">$0.00</div>
-                            </div>
-                            <div style="background:var(--panel2); padding:10px; border-radius:4px">
-                                <div style="font-size:11px; color:var(--text2)">Mano de Obra</div>
-                                <div style="font-size:15px; font-weight:700;" id="outLabor">$0.00</div>
-                            </div>
-                            <div style="background:var(--panel2); padding:10px; border-radius:4px">
-                                <div style="font-size:11px; color:var(--text2)">Carpintería</div>
-                                <div style="font-size:15px; font-weight:700;" id="outCarpentry">$0.00</div>
-                            </div>
-                            <div style="background:var(--panel2); padding:10px; border-radius:4px">
-                                <div style="font-size:11px; color:var(--text2)">Materiales</div>
-                                <div style="font-size:15px; font-weight:700; color:var(--success)" id="outMaterial">$0.00</div>
-                            </div>
-                            <div style="background:var(--panel2); padding:10px; border-radius:4px">
-                                <div style="font-size:11px; color:var(--text2)">Total General</div>
-                                <div style="font-size:15px; font-weight:700; color:#fff" id="outTotalText">$0.00</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- NUEVO REGISTRO Y SELECCIÓN DE MATERIALES CON ATRIBUTOS SOLICITADOS -->
+                <!-- 1. APARTADO: CATÁLOGO MAESTRO CENTRALIZADO -->
+                <div id="sec-catalog" class="tab-panel active">
                     <div class="grid2">
-                        <!-- FORMULARIO DE REGISTRO -->
+                        <!-- Carga o Edición de Materiales -->
                         <div class="card">
-                            <div class="card-title">Registrar Material en Catálogo</div>
+                            <div class="card-title" id="catalogFormTitle">Registrar / Editar Material en Catálogo General</div>
+                            <input type="hidden" id="editMaterialId" value="">
                             <div class="grid2">
                                 <div class="field">
-                                    <label>Tipo de Suministro</label>
+                                    <label>Tipo</label>
                                     <select id="matType">
                                         <option value="Melaminico">Melamínico (Tablero)</option>
                                         <option value="Formica">Formica</option>
-                                        <option value="Tapacanto">Tapacanto (Metro)</option>
-                                        <option value="Pega Amarilla">Pega Amarilla (Galón)</option>
-                                        <option value="Herraje / Insumo">Herraje / Insumo</option>
+                                        <option value="Tapacanto">Tapacanto</option>
+                                        <option value="Pega Amarilla">Pega Amarilla</option>
+                                        <option value="Herrajes / Otros">Herrajes / Otros</option>
                                     </select>
                                 </div>
-                                <div class="field"><label>Características / Descripción</label><input type="text" id="matDesc" placeholder="Ej: Roble Thermo 18mm / Galón 4G"></div>
+                                <div class="field"><label>Características / Color / Espesor</label><input type="text" id="matDesc" placeholder="Ej: Roble Thermo 18mm / Galón 4G"></div>
                             </div>
-                            <div class="grid3">
-                                <div class="field"><label>Costo Unitario ($)</label><input type="number" id="matCost" value="45.00" step="0.01"></div>
-                                <div class="field"><label>Proveedor</label><input type="text" id="matProvider" placeholder="Ej: Madetor / Maderajara"></div>
-                                <div class="field"><label>Cantidad a Usar</label><input type="number" id="matQty" value="1" min="1"></div>
+                            <div class="grid2">
+                                <div class="field"><label>Costo Unitario base ($)</label><input type="number" id="matCost" value="45.00" step="0.01"></div>
+                                <div class="field"><label>Proveedor Oficial</label><input type="text" id="matProvider" placeholder="Madetor / Maderajara"></div>
                             </div>
-                            <button class="btn btn-gold" style="width:100%" onclick="addMaterialToInventory()">＋ Indexar y Aplicar al Presupuesto</button>
+                            <div class="flex gap8">
+                                <button class="btn btn-gold" style="flex:1" onclick="saveMaterialToCatalogCloud()">💾 Guardar en Catálogo Nube</button>
+                                <button class="btn" id="btnCancelEdit" style="display:none" onclick="cancelCatalogEdit()">Cancelar</button>
+                            </div>
                         </div>
 
-                        <!-- LISTADO SELECCIONADO -->
+                        <!-- Inventario General desde la Nube -->
                         <div class="card" style="display:flex; flex-direction:column">
-                            <div class="card-title">Materiales Asignados y Computados</div>
-                            <div class="table-container" style="flex:1; max-height:220px; overflow-y:auto">
+                            <div class="card-title">Materiales Registrados Globalmente en la Nube</div>
+                            <div class="table-container" style="flex:1; max-height:280px; overflow-y:auto">
                                 <table>
                                     <thead>
-                                        <tr><th>Tipo</th><th>Características</th><th>Costo</th><th>Prov.</th><th>Cant.</th><th>Acción</th></tr>
+                                        <tr><th>Tipo</th><th>Características</th><th>Precio</th><th>Proveedor</th><th>Acciones</th></tr>
                                     </thead>
-                                    <tbody id="materialsTableBody">
-                                        <tr><td colspan="6" style="text-align:center; color:var(--text2)">Ningún material registrado. Agrega ítems arriba.</td></tr>
+                                    <tbody id="catalogTableBody">
+                                        <tr><td colspan="5" style="text-align:center; color:var(--text2)">Consultando catálogo en la nube...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
-
-                    <!-- MATRIZ OPERATIVA DE LIQUIDACIÓN -->
-                    <div class="card-title">Matriz Analítica de Liquidación Comercial</div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr><th>Fase Operativa</th><th>Descripción del Proceso Técnico</th><th>Subtotal Asignado</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr><td><strong>1.0 — Diseño</strong></td><td>Planificación espacial, renderizado conceptual y planos modulares</td><td id="rowDesign">$0.00</td></tr>
-                                <tr><td><strong>2.0 — Planta / CNC</strong></td><td>Optimización de corte automatizado y mano de obra técnica</td><td id="rowLabor">$0.00</td></tr>
-                                <tr><td><strong>3.0 — Carpintería</strong></td><td>Ensamble estructural en taller, fijación y logística de instalación</td><td id="rowCarpentry">$0.00</td></tr>
-                                <tr><td><strong>4.0 — Suministros</strong></td><td>Cómputo global de materiales cargados (Melamínicos, Formicas, Insumos)</td><td id="rowMaterials">$0.00</td></tr>
-                                <tr style="font-weight:700; background:var(--panel2); font-size:14px">
-                                    <td>PRECIO TOTAL</td>
-                                    <td>Presupuesto Consolidado de Fabricación Linaro</td>
-                                    <td id="rowTotal" style="color:var(--gold)">$0.00</td>
-                                end;
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
 
-                <!-- APARTADO 2: DESPIECES -->
-                <div id="sec-parts" class="tab-panel">
+                <!-- 2. APARTADO: PRESUPUESTO DEL PROYECTO ACTUAL -->
+                <div id="sec-budget" class="tab-panel">
                     <div class="card">
-                        <div class="card-title">Insertar Nueva Pieza Mecánica</div>
-                        <div class="grid3">
-                            <div class="field"><label>Nombre / Etiqueta</label><input type="text" id="partLabel" placeholder="Ej: Lateral Bajo"></div>
-                            <div class="field"><label>Largo (mm)</label><input type="number" id="partLong" placeholder="720"></div>
-                            <div class="field"><label>Ancho (mm)</label><input type="number" id="partWidth" placeholder="560"></div>
-                        </div>
-                        <div class="grid3">
-                            <div class="field"><label>Cantidad</label><input type="number" id="partQtyInput" value="1" min="1"></div>
-                            <div class="field"><label>Color Identificador</label><input type="color" id="partColor" value="#ba7517"></div>
-                            <div class="field" style="display:flex; align-items:center; margin-top:20px; gap:8px">
-                                <input type="checkbox" id="partRotate" checked style="width:auto">
-                                <label for="partRotate">Permitir Rotación</label>
+                        <div class="card-title">Estructura de Inversión Consolidada</div>
+                        <div class="grid3" style="grid-template-columns: repeat(5, 1fr); text-align:center">
+                            <div style="background:var(--panel2); padding:10px; border-radius:4px">
+                                <div style="font-size:11px; color:var(--text2)">Diseño</div>
+                                <div style="font-size:14px; font-weight:700; color:var(--gold)" id="lblDesign">$0.00</div>
                             </div>
-                        </div>
-                        <button class="btn btn-gold" onclick="addCustomPart()">＋ Insertar Pieza en Despiece</button>
-                    </div>
-
-                    <div class="card-title">Gabinete de Piezas Activas (Desglose Analítico)</div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr><th>Etiqueta</th><th>Largo (mm)</th><th>Ancho (mm)</th><th>Cantidad</th><th>Giro</th><th>Color</th><th>Acción</th></tr>
-                            </thead>
-                            <tbody id="partsTableBody">
-                                <tr><td colspan="7" style="text-align:center; color:var(--text2)">No hay piezas cargadas en la matriz operativa.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- APARTADO 3: PLANOS Y MODULACIÓN -->
-                <div id="sec-blueprints" class="tab-panel">
-                    <div class="card">
-                        <div class="card-title">Inyectores Modulares de Presets Inteligentes</div>
-                        <p style="color:var(--text2); margin-bottom:12px">Añade módulos preconfigurados. Esto cargará las piezas de forma automatizada:</p>
-                        
-                        <div class="preset-grid">
-                            <div class="preset-card" onclick="injectModularCabinet('base')">
-                                <div class="preset-icon">🗄️</div>
-                                <div style="font-weight:600">Mueble Base Bajo</div>
-                                <div style="font-size:11px; color:var(--text2)">720x600x560 mm</div>
+                            <div style="background:var(--panel2); padding:10px; border-radius:4px">
+                                <div style="font-size:11px; color:var(--text2)">Mano de Obra</div>
+                                <div style="font-size:14px; font-weight:700;" id="lblLabor">$0.00</div>
                             </div>
-                            <div class="preset-card" onclick="injectModularCabinet('aereo')">
-                                <div class="preset-icon">🔲</div>
-                                <div style="font-weight:600">Mueble Aéreo Superior</div>
-                                <div style="font-size:11px; color:var(--text2)">600x600x320 mm</div>
+                            <div style="background:var(--panel2); padding:10px; border-radius:4px">
+                                <div style="font-size:11px; color:var(--text2)">Carpintería</div>
+                                <div style="font-size:14px; font-weight:700;" id="lblCarpentry">$0.00</div>
                             </div>
-                            <div class="preset-card" onclick="injectModularCabinet('torre')">
-                                <div class="preset-icon">🏛️</div>
-                                <div style="font-weight:600">Mueble Torre / Despensa</div>
-                                <div style="font-size:11px; color:var(--text2)">2100x600x560 mm</div>
+                            <div style="background:var(--panel2); padding:10px; border-radius:4px">
+                                <div style="font-size:11px; color:var(--text2)">Suministros</div>
+                                <div style="font-size:14px; font-weight:700; color:var(--success)" id="lblMaterials">$0.00</div>
+                            </div>
+                            <div style="background:var(--panel2); padding:10px; border-radius:4px">
+                                <div style="font-size:11px; color:var(--text2)">Total de la Obra</div>
+                                <div style="font-size:14px; font-weight:700; color:#fff" id="lblTotal">$0.00</div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div class="card-title">Esquema Lineal de Modulación / Plano de Planta</div>
-                        <canvas id="blueprintCanvas" width="800" height="340"></canvas>
-                        <div style="text-align:center; font-size:11px; color:var(--text2)" id="canvasFeedback">
-                            El plano dinámico se renderizará automáticamente al modular elementos.
+                    <div class="grid2">
+                        <!-- Importador rápido del catálogo maestro -->
+                        <div class="card">
+                            <div class="card-title">👇 Añadir del Catálogo Maestro al Presupuesto de Obra</div>
+                            <div class="field">
+                                <label>Selecciona Material Disponible</label>
+                                <select id="budgetSelectorMaterial" onchange="syncSelectedPriceField()"></select>
+                            </div>
+                            <div class="grid2">
+                                <div class="field"><label>Precio de Suministro ($)</label><input type="number" id="budgetMatPrice" readonly style="opacity:0.6"></div>
+                                <div class="field"><label>Cantidad Requerida</label><input type="number" id="budgetMatQty" value="1" min="1"></div>
+                            </div>
+                            <button class="btn btn-gold" style="width:100%" onclick="addMaterialToCurrentBudget()">➕ Insertar en esta Cotización</button>
+                        </div>
+
+                        <!-- Suministros calculados en este presupuesto -->
+                        <div class="card">
+                            <div class="card-title">Suministros Cómputados para esta Obra</div>
+                            <div class="table-container" style="max-height:200px; overflow-y:auto">
+                                <table>
+                                    <thead>
+                                        <tr><th>Material</th><th>Costo Unit.</th><th>Cant.</th><th>Subtotal</th><th>Quitar</th></tr>
+                                    </thead>
+                                    <tbody id="projectBudgetTableBody">
+                                        <tr><td colspan="5" style="text-align:center; color:var(--text2)">No hay suministros asignados a esta cotización.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- APARTADO 4: REPOSITORIO NUBE -->
-                <div id="sec-cloud" class="tab-panel">
+                <!-- 3. APARTADO: PROYECTOS GUARDADOS -->
+                <div id="sec-projects" class="tab-panel">
                     <div class="card">
-                        <div class="card-title">Sincronizar Registro Técnico Actual</div>
+                        <div class="card-title">Respaldar Cotización Completa Actual</div>
                         <div class="flex gap8" style="align-items:flex-end">
                             <div class="field" style="flex:1; margin:0">
-                                <label>Referencia del Proyecto</label>
-                                <input type="text" id="dbProjName" placeholder="Ej: Remodelación Cocina Moderna - Barquisimeto">
+                                <label>Nombre / Referencia de la Obra</label>
+                                <input type="text" id="txProjectName" placeholder="Ej: Remodelación Cocina Integral - Barquisimeto">
                             </div>
-                            <button class="btn btn-gold" onclick="saveToSupabaseCloud()">💾 Guardar en Supabase</button>
+                            <button class="btn btn-gold" onclick="saveEntireProjectToCloud()">💾 Guardar Todo en Servidor</button>
                         </div>
                     </div>
-                    <div class="card-title">Ficheros Sincronizados en Servidor</div>
-                    <div id="dbGrid" class="db-grid"></div>
+                    <div class="card-title">Ficheros de Proyectos Sincronizados</div>
+                    <div id="projectsGrid" class="db-grid"></div>
                 </div>
 
-                <footer>Desarrollado para <span>Linaro</span> — Modulación Arquitectónica Integral</footer>
+                <footer>Desarrollado para <span>Linaro</span> — Modulación y Control de Costos Centralizados</footer>
             </div>
         </div>
     </div>
 
-    <!-- TOAST NOTIFICADOR -->
     <div class="toast" id="toast"></div>
 
     <script>
-        // Configuración e Inicialización de Supabase
+        // Supabase Client Setup
         const SUPABASE_URL = 'https://iufichpykfkhjednfljy.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZmljaHB5a2ZraGplZG5mbGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDI3NzMsImV4cCI6MjA5NDYxODc3M30.0OG0e2Oj_5-uJckF-a0duPDgBmgyYr-3VLJm3HvQRVM';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let partsList = [];
-        let materialsList = [
-            { type: 'Pega Amarilla', desc: 'Pega Amarilla de Alta Resistencia (Galón)', cost: 25.00, provider: 'Suministros Central', qty: 1 },
-            { type: 'Tapacanto', desc: 'Tapacanto PVC Delgado 22mm', cost: 0.85, provider: 'Madetor', qty: 30 }
-        ];
+        let globalCatalog = [];       // Materiales maestros en la nube
+        let activeProjectMaterials = []; // Materiales usados en el presupuesto actual
 
-        // AUTENTICACIÓN Y ENTRADA LIMPIA
         async function executeAuth(event) {
             event.preventDefault();
             const email = document.getElementById('email').value.trim();
@@ -434,41 +349,29 @@
             const btn = document.getElementById('btnSubmit');
 
             btn.disabled = true;
-            btn.textContent = 'Verificando Operador...';
-            setLoginAlert('none');
+            btn.textContent = 'Verificando Credenciales...';
 
             try {
                 const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
                 if (error) {
-                    setLoginAlert('error', 'Llaves denegadas. Revisa correo o contraseña técnica.');
+                    alert('Acceso denegado: Revisa los parámetros de conexión o llaves del taller.');
                     btn.disabled = false;
-                    btn.textContent = 'Verificar Identidad';
+                    btn.textContent = 'Ingresar al Sistema';
                 } else {
-                    setLoginAlert('success', 'Llaves aprobadas. Iniciando Linaro Core...');
                     document.getElementById('userBadge').textContent = `Operador: ${data.user.email}`;
+                    document.getElementById('loginSection').style.setProperty('display', 'none', 'important');
+                    document.getElementById('mainWorkspace').style.display = 'flex';
                     
-                    setTimeout(() => {
-                        document.getElementById('loginSection').style.setProperty('display', 'none', 'important');
-                        document.getElementById('mainWorkspace').style.display = 'flex';
-                        renderMaterialsTable();
-                        recalculateAllSections();
-                        loadCloudGrid();
-                        drawDefaultCanvas();
-                    }, 500);
+                    // Cargar ecosistema técnico completo
+                    await fetchCatalogCloud();
+                    await fetchProjectsGridCloud();
+                    calculateBudget();
                 }
             } catch (err) {
-                setLoginAlert('error', 'Error crítico de enrutamiento o conexión de red.');
+                alert('Error crítico de enrutamiento.');
                 btn.disabled = false;
-                btn.textContent = 'Verificar Identidad';
+                btn.textContent = 'Ingresar al Sistema';
             }
-        }
-
-        function setLoginAlert(type, msg = '') {
-            const box = document.getElementById('loginAlertBox');
-            if (type === 'none') { box.style.display = 'none'; return; }
-            box.className = `alert ${type}`;
-            box.textContent = msg;
-            box.style.display = 'block';
         }
 
         function changeSection(e, secId) {
@@ -478,214 +381,215 @@
             document.getElementById(secId).classList.add('active');
         }
 
-        // GESTIÓN DINÁMICA DEL CATÁLOGO DE MATERIALES SOLICITADOS
-        function addMaterialToInventory() {
-            const type = document.getElementById('matType').value;
-            const desc = document.getElementById('matDesc').value.trim() || `${type} Estándar`;
-            const cost = parseFloat(document.getElementById('matCost').value) || 0;
-            const provider = document.getElementById('matProvider').value.trim() || 'General';
-            const qty = parseInt(document.getElementById('matQty').value) || 1;
-
-            materialsList.push({ type, desc, cost, provider, qty });
-            renderMaterialsTable();
-            recalculateAllSections();
-            popToast(`✓ ${type} incorporado al presupuesto.`);
-
-            document.getElementById('matDesc').value = '';
-            document.getElementById('matProvider').value = '';
-            document.getElementById('matQty').value = '1';
+        // ==========================================
+        // GESTIÓN DEL CATÁLOGO MAESTRO INDEPENDIENTE
+        // ==========================================
+        async function fetchCatalogCloud() {
+            const { data, error } = await _supabase.from('materiales_catalogo').select('*').order('type', { ascending: true });
+            if (!error && data) {
+                globalCatalog = data;
+                renderCatalogTable();
+                populateBudgetSelector();
+            }
         }
 
-        function renderMaterialsTable() {
-            const body = document.getElementById('materialsTableBody');
-            if (materialsList.length === 0) {
-                body.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text2)">Ningún material registrado. Agrega ítems arriba.</td></tr>';
+        function renderCatalogTable() {
+            const body = document.getElementById('catalogTableBody');
+            if (globalCatalog.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text2)">El catálogo maestro está vacío.</td></tr>';
                 return;
             }
             body.innerHTML = '';
-            materialsList.forEach((m, i) => {
+            globalCatalog.forEach(m => {
                 body.innerHTML += `
                     <tr>
                         <td><span style="color:var(--gold); font-weight:600">${m.type}</span></td>
-                        <td>${m.desc}</td>
-                        <td>$${m.cost.toFixed(2)}</td>
-                        <td><span style="font-size:11px; color:var(--text2)">${m.provider}</span></td>
-                        <td>${m.qty}x</td>
-                        <td><button class="btn btn-danger" style="padding:2px 6px; font-size:11px" onclick="deleteMaterial(${i})">✕</button></td>
+                        <td><strong>${m.description}</strong></td>
+                        <td>$${parseFloat(m.cost).toFixed(2)}</td>
+                        <td><span style="color:var(--text2); font-size:11px">${m.provider || 'N/A'}</span></td>
+                        <td>
+                            <button class="btn" style="padding:2px 6px; font-size:11px; margin-right:4px;" onclick="loadMaterialToEdit(${m.id})">✏️</button>
+                            <button class="btn btn-danger" style="padding:2px 6px; font-size:11px;" onclick="deleteMaterialFromCatalog(${m.id})">✕</button>
+                        </td>
                     </tr>
                 `;
             });
         }
 
-        function deleteMaterial(i) {
-            materialsList.splice(i, 1);
-            renderMaterialsTable();
-            recalculateAllSections();
+        async function saveMaterialToCatalogCloud() {
+            const id = document.getElementById('editMaterialId').value;
+            const type = document.getElementById('matType').value;
+            const description = document.getElementById('matDesc').value.trim();
+            const cost = parseFloat(document.getElementById('matCost').value) || 0;
+            const provider = document.getElementById('matProvider').value.trim();
+
+            if (!description) { alert('Asigna características específicas al suministro.'); return; }
+
+            const payload = { type, description, cost, provider };
+
+            if (id) {
+                // Modo Edición Conjunta
+                await _supabase.from('materiales_catalogo').update(payload).eq('id', id);
+                popToast("✓ Material maestro actualizado en la nube.");
+            } else {
+                // Nuevo registro
+                await _supabase.from('materiales_catalogo').insert([payload]);
+                popToast("✓ Suministro anexado al catálogo central global.");
+            }
+
+            cancelCatalogEdit();
+            await fetchCatalogCloud();
+            calculateBudget();
         }
 
-        // CONTROL DE PIEZAS Y DESPIECE
-        function addCustomPart() {
-            const label = document.getElementById('partLabel').value.trim() || `Pieza ${partsList.length + 1}`;
-            const long = parseInt(document.getElementById('partLong').value);
-            const width = parseInt(document.getElementById('partWidth').value);
-            const qty = parseInt(document.getElementById('partQtyInput').value) || 1;
-            const color = document.getElementById('partColor').value;
-            const rotate = document.getElementById('partRotate').checked;
+        function loadMaterialToEdit(id) {
+            const mat = globalCatalog.find(m => m.id === id);
+            if (!mat) return;
 
-            if (!long || !width || long <= 0 || width <= 0) {
-                popToast("⚠️ Ingresa dimensiones geométricas coherentes.");
+            document.getElementById('editMaterialId').value = mat.id;
+            document.getElementById('matType').value = mat.type;
+            document.getElementById('matDesc').value = mat.description;
+            document.getElementById('matCost').value = mat.cost;
+            document.getElementById('matProvider').value = mat.provider;
+
+            document.getElementById('catalogFormTitle').textContent = "📝 Editando Material del Catálogo Maestro";
+            document.getElementById('btnCancelEdit').style.display = 'inline-flex';
+        }
+
+        function cancelCatalogEdit() {
+            document.getElementById('editMaterialId').value = "";
+            document.getElementById('matDesc').value = "";
+            document.getElementById('matCost').value = "45.00";
+            document.getElementById('matProvider').value = "";
+            document.getElementById('catalogFormTitle').textContent = "Registrar / Editar Material en Catálogo General";
+            document.getElementById('btnCancelEdit').style.display = 'none';
+        }
+
+        async function deleteMaterialFromCatalog(id) {
+            if (confirm("¿Expulsar este material del catálogo maestro global? Se actualizarán las cotizaciones asociadas.")) {
+                await _supabase.from('materiales_catalogo').delete().eq('id', id);
+                popToast("Material purgado.");
+                await fetchCatalogCloud();
+                calculateBudget();
+            }
+        }
+
+        // ==========================================
+        // SISTEMA DE INTERFACES DE PRESUPUESTACIÓN
+        // ==========================================
+        function populateBudgetSelector() {
+            const select = document.getElementById('budgetSelectorMaterial');
+            select.innerHTML = '';
+            
+            if (globalCatalog.length === 0) {
+                select.innerHTML = '<option value="">(Registra materiales en el catálogo central primero)</option>';
                 return;
             }
 
-            partsList.push({ label, long, width, qty, color, rotate });
-            renderPartsTable();
-            recalculateAllSections();
-            popToast("✓ Pieza acoplada al despiece mecánico.");
-
-            document.getElementById('partLabel').value = '';
-            document.getElementById('partLong').value = '';
-            document.getElementById('partWidth').value = '';
+            globalCatalog.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = `[${m.type}] ${m.description} — $${parseFloat(m.cost).toFixed(2)} (${m.provider})`;
+                select.appendChild(opt);
+            });
+            syncSelectedPriceField();
         }
 
-        function renderPartsTable() {
-            const body = document.getElementById('partsTableBody');
-            if (partsList.length === 0) {
-                body.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text2)">No hay piezas cargadas en la matriz operativa.</td></tr>';
+        function syncSelectedPriceField() {
+            const select = document.getElementById('budgetSelectorMaterial');
+            const matId = parseInt(select.value);
+            const mat = globalCatalog.find(m => m.id === matId);
+            if (mat) {
+                document.getElementById('budgetMatPrice').value = mat.cost;
+            } else {
+                document.getElementById('budgetMatPrice').value = 0;
+            }
+        }
+
+        function addMaterialToCurrentBudget() {
+            const select = document.getElementById('budgetSelectorMaterial');
+            const matId = parseInt(select.value);
+            const qty = parseInt(document.getElementById('budgetMatQty').value) || 1;
+
+            const mat = globalCatalog.find(m => m.id === matId);
+            if (!mat) return;
+
+            // Verificar si ya fue ingresado para acumular cantidad
+            const existing = activeProjectMaterials.find(x => x.catalogId === matId);
+            if (existing) {
+                existing.qty += qty;
+            } else {
+                activeProjectMaterials.push({
+                    catalogId: mat.id,
+                    type: mat.type,
+                    description: mat.description,
+                    cost: mat.cost,
+                    qty: qty
+                });
+            }
+
+            renderProjectBudgetTable();
+            calculateBudget();
+            popToast(`✓ Incorporado al presupuesto actual.`);
+        }
+
+        function renderProjectBudgetTable() {
+            const body = document.getElementById('projectBudgetTableBody');
+            if (activeProjectMaterials.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text2)">No hay suministros asignados a esta cotización.</td></tr>';
                 return;
             }
             body.innerHTML = '';
-            partsList.forEach((p, i) => {
+            activeProjectMaterials.forEach((m, index) => {
+                const subtotal = m.cost * m.qty;
                 body.innerHTML += `
                     <tr>
-                        <td><strong>${p.label}</strong></td>
-                        <td>${p.long} mm</td>
-                        <td>${p.width} mm</td>
-                        <td>${p.qty}x</td>
-                        <td>${p.rotate ? 'Sí' : 'No'}</td>
-                        <td><span style="display:inline-block; width:12px; height:12px; background:${p.color}; border-radius:2px;"></span></td>
-                        <td><button class="btn btn-danger" style="padding:2px 6px; font-size:11px" onclick="deletePart(${i})">✕</button></td>
+                        <td><strong>${m.description}</strong> <span style="font-size:10px; color:var(--text2)">(${m.type})</span></td>
+                        <td>$${parseFloat(m.cost).toFixed(2)}</td>
+                        <td>${m.qty}x</td>
+                        <td>$${subtotal.toFixed(2)}</td>
+                        <td><button class="btn btn-danger" style="padding:2px 6px; font-size:11px" onclick="removeMaterialFromBudget(${index})">✕</button></td>
                     </tr>
                 `;
             });
         }
 
-        function deletePart(i) {
-            partsList.splice(i, 1);
-            renderPartsTable();
-            recalculateAllSections();
+        function removeMaterialFromBudget(index) {
+            activeProjectMaterials.splice(index, 1);
+            renderProjectBudgetTable();
+            calculateBudget();
         }
 
-        // MODELADO E INYECCIÓN AUTOMÁTICA DE PRESETS DE MUEBLES
-        function injectModularCabinet(type) {
-            if (type === 'base') {
-                partsList.push({ label: 'Lateral Base (Mueble Bajo)', long: 720, width: 560, qty: 2, color: '#2ecc71', rotate: true });
-                partsList.push({ label: 'Piso Base (Mueble Bajo)', long: 568, width: 560, qty: 1, color: '#3498db', rotate: true });
-                partsList.push({ label: 'Amarres Superiores', long: 568, width: 100, qty: 2, color: '#f1c40f', rotate: true });
-                popToast("🗄️ Mueble Base acoplado estructuralmente.");
-            } else if (type === 'aereo') {
-                partsList.push({ label: 'Lateral Superior Aéreo', long: 600, width: 320, qty: 2, color: '#e67e22', rotate: true });
-                partsList.push({ label: 'Techo/Piso Superior', long: 568, width: 320, qty: 2, color: '#1abc9c', rotate: true });
-                popToast("🔲 Mueble Aéreo Estándar acoplado estructuralmente.");
-            } else if (type === 'torre') {
-                partsList.push({ label: 'Costado Torre Alta', long: 2100, width: 560, qty: 2, color: '#e74c3c', rotate: true });
-                partsList.push({ label: 'Estante Columna', long: 568, width: 540, qty: 4, color: '#9b59b6', rotate: true });
-                popToast("🏛️ Columna Torre acoplada estructuralmente.");
-            }
-            renderPartsTable();
-            recalculateAllSections();
-            drawModularSimulation(type);
-        }
+        function calculateBudget() {
+            const feeDesign = parseFloat(document.getElementById('feeDesign').value) || 0;
+            const feeLabor = parseFloat(document.getElementById('feeLabor').value) || 0;
+            const feeCarpentry = parseFloat(document.getElementById('feeCarpentry').value) || 0;
 
-        // CÓMPUTO GENERAL DE PRESUPUESTOS (RECALCULO MATRIZ)
-        function recalculateAllSections() {
-            const fDesign = parseFloat(document.getElementById('feeDesign').value) || 0;
-            const fLabor = parseFloat(document.getElementById('feeLabor').value) || 0;
-            const fCarpentry = parseFloat(document.getElementById('feeCarpentry').value) || 0;
-
-            // Calcular costo acumulado del catálogo dinámico de materiales
-            let computedMaterialsTotal = 0;
-            materialsList.forEach(m => {
-                computedMaterialsTotal += (m.cost * m.qty);
+            let totalMaterials = 0;
+            activeProjectMaterials.forEach(m => {
+                totalMaterials += (m.cost * m.qty);
             });
 
-            const totalGeneral = fDesign + fLabor + fCarpentry + computedMaterialsTotal;
+            const totalProject = feeDesign + feeLabor + feeCarpentry + totalMaterials;
 
-            // Actualizar bloques superiores de visualización
-            document.getElementById('outDesign').textContent = `$${fDesign.toFixed(2)}`;
-            document.getElementById('outLabor').textContent = `$${fLabor.toFixed(2)}`;
-            document.getElementById('outCarpentry').textContent = `$${fCarpentry.toFixed(2)}`;
-            document.getElementById('outMaterial').textContent = `$${computedMaterialsTotal.toFixed(2)}`;
-            document.getElementById('outTotalText').textContent = `$${totalGeneral.toFixed(2)}`;
-
-            // Actualizar Matriz Comercial Analítica
-            document.getElementById('rowDesign').textContent = `$${fDesign.toFixed(2)}`;
-            document.getElementById('rowLabor').textContent = `$${fLabor.toFixed(2)}`;
-            document.getElementById('rowCarpentry').textContent = `$${fCarpentry.toFixed(2)}`;
-            document.getElementById('rowMaterials').textContent = `$${computedMaterialsTotal.toFixed(2)}`;
-            document.getElementById('rowTotal').textContent = `$${totalGeneral.toFixed(2)}`;
+            document.getElementById('lblDesign').textContent = `$${feeDesign.toFixed(2)}`;
+            document.getElementById('lblLabor').textContent = `$${feeLabor.toFixed(2)}`;
+            document.getElementById('lblCarpentry').textContent = `$${feeCarpentry.toFixed(2)}`;
+            document.getElementById('lblMaterials').textContent = `$${totalMaterials.toFixed(2)}`;
+            document.getElementById('lblTotal').textContent = `$${totalProject.toFixed(2)}`;
         }
 
-        // CANVAS PLANOS TÉCNICOS
-        function drawDefaultCanvas() {
-            const canvas = document.getElementById('blueprintCanvas');
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = '#1e1e1e';
-            ctx.fillRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = '#888888';
-            ctx.font = '12px sans-serif';
-            ctx.fillText("Configura o selecciona un módulo preestablecido para proyectar la elevación arquitectónica.", 150, 170);
-        }
-
-        function drawModularSimulation(type) {
-            const canvas = document.getElementById('blueprintCanvas');
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-
-            ctx.fillStyle = '#252526';
-            ctx.fillRect(0,0,canvas.width,canvas.height);
-            ctx.strokeStyle = '#ba7517';
-            ctx.lineWidth = 2;
-
-            if (type === 'base') {
-                ctx.strokeRect(320, 70, 180, 220);
-                ctx.fillStyle = 'rgba(186, 117, 23, 0.1)';
-                ctx.fillRect(320, 70, 180, 220);
-                ctx.strokeRect(320, 260, 180, 30); // Zócalo
-                ctx.strokeRect(320, 70, 90, 190);
-                ctx.strokeRect(410, 70, 90, 190);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText("MÓDULO BAJO BASE (VISTA FRONTAL ELEVACIÓN)", 270, 45);
-            } else if (type === 'aereo') {
-                ctx.strokeRect(330, 60, 160, 180);
-                ctx.fillStyle = 'rgba(52, 152, 219, 0.1)';
-                ctx.fillRect(330, 60, 160, 180);
-                ctx.strokeRect(330, 60, 80, 180);
-                ctx.strokeRect(410, 60, 80, 180);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText("MÓDULO AÉREO SUPERIOR (VISTA FRONTAL ELEVACIÓN)", 260, 40);
-            } else {
-                ctx.strokeRect(360, 40, 100, 270);
-                ctx.fillStyle = 'rgba(155, 89, 182, 0.1)';
-                ctx.fillRect(360, 40, 100, 270);
-                ctx.strokeRect(360, 40, 100, 80);
-                ctx.strokeRect(360, 120, 100, 190);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText("COLUMNA TORRE DE ALMACENAMIENTO", 300, 25);
-            }
-            document.getElementById('canvasFeedback').textContent = `Geometría analítica de módulo lineal renderizada para: [Mueble ${type.toUpperCase()}].`;
-        }
-
-        // PERSISTENCIA Y REGISTROS EN SUPABASE CLOUD
-        async function saveToSupabaseCloud() {
-            const name = document.getElementById('dbProjName').value.trim();
-            if (!name) { popToast("⚠️ Asigna una referencia de obra para guardar."); return; }
+        // ==========================================
+        // PROYECTOS COMPLETOS Y PERSISTENCIA NUBE
+        // ==========================================
+        async function saveEntireProjectToCloud() {
+            const name = document.getElementById('txProjectName').value.trim();
+            if (!name) { alert("Asigna un nombre o referencia para identificar la obra."); return; }
 
             const payload = {
                 name: name,
-                parts: partsList,
-                materials: materialsList,
-                sheet_data: {
+                materials_snapshot: activeProjectMaterials,
+                fees: {
                     design: document.getElementById('feeDesign').value,
                     labor: document.getElementById('feeLabor').value,
                     carpentry: document.getElementById('feeCarpentry').value
@@ -694,79 +598,57 @@
             };
 
             const { error } = await _supabase.from('proyectos').insert([payload]);
-            if (error) {
-                popToast("❌ Detención crítica: Servidor no respondió.");
+            if (!error) {
+                popToast("💾 Cotización y estructura acoplada con éxito.");
+                document.getElementById('txProjectName').value = "";
+                await fetchProjectsGridCloud();
             } else {
-                popToast("💾 Sincronización exitosa con la nube Supabase.");
-                document.getElementById('dbProjName').value = '';
-                loadCloudGrid();
+                alert("Error de comunicación de red con Supabase.");
             }
         }
 
-        async function loadCloudGrid() {
-            const grid = document.getElementById('dbGrid');
-            grid.innerHTML = '<p style="color:var(--text2)">Consultando registros...</p>';
+        async function fetchProjectsGridCloud() {
+            const grid = document.getElementById('projectsGrid');
+            grid.innerHTML = '<p style="color:var(--text2)">Consultando ficheros remotos...</p>';
 
             const { data, error } = await _supabase.from('proyectos').select('*').order('updated_at', { ascending: false });
             if (error || !data || data.length === 0) {
-                grid.innerHTML = '<p style="color:var(--text2); padding:10px;">No hay registros en la nube.</p>';
+                grid.innerHTML = '<p style="color:var(--text2); padding:10px;">No se encontraron registros de obras en la nube.</p>';
                 return;
             }
 
             grid.innerHTML = '';
-            data.forEach(item => {
-                const partsStr = JSON.stringify(item.parts).replace(/'/g, "&apos;");
-                const matsStr = JSON.stringify(item.materials || []).replace(/'/g, "&apos;");
+            data.forEach(p => {
+                const materialsStr = JSON.stringify(p.materials_snapshot || []).replace(/'/g, "&apos;");
+                const feesStr = JSON.stringify(p.fees || {}).replace(/'/g, "&apos;");
                 grid.innerHTML += `
-                    <div class="db-card" onclick='importCloudProject(${partsStr}, ${matsStr})'>
-                        <div class="db-title">${item.name}</div>
-                        <div style="font-size:11px; color:var(--text2)">Estructura: ${item.parts ? item.parts.length : 0} pz | Insumos: ${item.materials ? item.materials.length : 0}</div>
-                        <button class="db-delete" onclick="event.stopPropagation(); deleteCloudProject(${item.id})">🗑</button>
+                    <div class="db-card" onclick='restoreWholeProject(${materialsStr}, ${feesStr})'>
+                        <div style="font-weight:700; color:#fff">${p.name}</div>
+                        <div style="font-size:11px; color:var(--text2)">Materiales usados: ${p.materials_snapshot ? p.materials_snapshot.length : 0} ítems</div>
+                        <button class="db-delete" onclick="event.stopPropagation(); deleteProjectFromCloud(${p.id})">🗑</button>
                     </div>
                 `;
             });
         }
 
-        function importCloudProject(loadedParts, loadedMats) {
-            if (loadedParts) partsList = loadedParts;
-            if (loadedMats) materialsList = loadedMats;
-            renderPartsTable();
-            renderMaterialsTable();
-            recalculateAllSections();
-            popToast("✓ Fichero modular restaurado completamente.");
-        }
-
-        async function deleteCloudProject(id) {
-            if (confirm("¿Desvincular este registro técnico del servidor permanentemente?")) {
-                await _supabase.from('proyectos').delete().eq('id', id);
-                loadCloudGrid();
-                popToast("Fichero purgado del sistema.");
+        function restoreWholeProject(mats, fees) {
+            if (mats) activeProjectMaterials = mats;
+            if (fees) {
+                if (fees.design) document.getElementById('feeDesign').value = fees.design;
+                if (fees.labor) document.getElementById('feeLabor').value = fees.labor;
+                if (fees.carpentry) document.getElementById('feeCarpentry').value = fees.carpentry;
             }
+            renderProjectBudgetTable();
+            calculateBudget();
+            popToast("✓ Proyecto y cotización cargados en el workspace.");
         }
 
-        // EXPORTACIÓN A PDF ESTRUCTURADO
-        function exportStructuredPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            doc.setFont("Helvetica", "bold");
-            doc.setFontSize(16);
-            doc.text("LINARO PRO STUDIO — RESUMEN DE LIQUIDACIÓN Y SUMINISTROS", 14, 20);
-            
-            doc.setFont("Helvetica", "normal");
-            doc.setFontSize(11);
-            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 28);
-            
-            doc.text(`1.0 - Presupuesto de Diseño: ${document.getElementById('outDesign').textContent}`, 14, 40);
-            doc.text(`2.0 - Presupuesto de Mano de Obra: ${document.getElementById('outLabor').textContent}`, 14, 48);
-            doc.text(`3.0 - Presupuesto de Carpintería: ${document.getElementById('outCarpentry').textContent}`, 14, 56);
-            doc.text(`4.0 - Costo Acumulado Materiales: ${document.getElementById('outMaterial').textContent}`, 14, 64);
-            
-            doc.setFont("Helvetica", "bold");
-            doc.text(`PRECIO TOTAL DEL PROYECTO: ${document.getElementById('outTotalText').textContent}`, 14, 76);
-            
-            doc.save("Presupuesto_Estructurado_Linaro.pdf");
-            popToast("📄 Fichero comercial PDF generado.");
+        async function deleteProjectFromCloud(id) {
+            if (confirm("¿Purgar este registro de cotización del servidor permanentemente?")) {
+                await _supabase.from('proyectos').delete().eq('id', id);
+                popToast("Fichero eliminado.");
+                await fetchProjectsGridCloud();
+            }
         }
 
         function popToast(msg) {
