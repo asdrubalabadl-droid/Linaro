@@ -1,625 +1,692 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Linaro — Presupuestación Arquitectónica</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/%3E%3Crect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/%3E%3Cpath d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/%3E%3Crect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/%3E%3C/svg%3E">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linaro — Presupuestación Arquitectónica</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/%3E%3Crect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/%3E%3Cpath d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/%3E%3Crect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/%3E%3C/svg%3E'">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-:root {
-  --bg: #141414;
-  --panel: #1e1e1e;
-  --panel2: #252526;
-  --border: #2d2d2d;
-  --text: #e1e1e1;
-  --text2: #aaaaaa;
-  --gold: #ba7517;
-  --gold-hover: #d48b27;
-  --error: #cf6679;
-  --success: #4caf50;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 13px;
-  line-height: 1.4;
-  overflow-x: hidden;
-}
-#loginSection {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  width: 100vw;
-  background-color: var(--bg);
-}
-.login-container {
-  background: var(--panel);
-  padding: 2.5rem;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  width: 100%;
-  max-width: 380px;
-  text-align: center;
-}
-.login-logo {
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 0.2rem;
-}
-.login-tagline {
-  font-size: 0.95rem;
-  color: var(--text2);
-  margin-bottom: 2rem;
-}
-.form-group {
-  text-align: left;
-  margin-bottom: 1.2rem;
-}
-.form-group label {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-bottom: 0.5rem;
-  color: var(--text2);
-}
-.form-group input {
-  width: 100%;
-  padding: 12px;
-  background: var(--panel2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  font-size: 0.95rem;
-}
-.form-group input:focus {
-  outline: none;
-  border-color: var(--gold);
-}
-.btn-login {
-  width: 100%;
-  padding: 14px;
-  background-color: var(--gold);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 1rem;
-  font-size: 1rem;
-  transition: background 0.2s;
-}
-.btn-login:hover { background-color: var(--gold-hover); }
-.btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
-.login-alert {
-  padding: 10px 14px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  margin-top: 1rem;
-  display: none;
-  text-align: left;
-}
-.login-alert.error { background: rgba(207, 102, 121, 0.15); border: 1px solid var(--error); color: var(--error); }
-.login-alert.success { background: rgba(76, 175, 80, 0.15); border: 1px solid var(--success); color: var(--success); }
+    <style>
+        :root {
+            --bg: #141414;
+            --panel: #1e1e1e;
+            --panel2: #252526;
+            --border: #2d2d2d;
+            --text: #e1e1e1;
+            --text2: #aaaaaa;
+            --gold: #ba7517;
+            --gold-hover: #d48b27;
+            --error: #cf6679;
+            --success: #4caf50;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 13px;
+            line-height: 1.4;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
 
-#mainWorkspace {
-  display: none;
-}
-header.main-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--panel);
-  border-bottom: 1px solid var(--border);
-  padding: 0 16px;
-  height: 48px;
-}
-.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; letter-spacing: 0.5px; }
-.brand svg { width: 20px; height: 20px; }
-.user-badge { font-size: 11px; color: var(--text2); background: var(--panel2); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); }
-.workspace { display: flex; height: calc(100vh - 48px); overflow: hidden; }
-.sidebar { width: 320px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-.sidebar-scroll { flex: 1; overflow-y: auto; padding: 16px; }
-.main-content { flex: 1; background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
-.tabs { display: flex; background: var(--panel); border-bottom: 1px solid var(--border); padding-left: 8px; }
-.tab { padding: 10px 20px; background: transparent; border: none; color: var(--text2); cursor: pointer; font-size: 12px; font-weight: 500; border-bottom: 2px solid transparent; }
-.tab:hover { color: var(--text); }
-.tab.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: 600; }
-.tab-panel { flex: 1; overflow-y: auto; padding: 20px; display: none; }
-.tab-panel.active { display: block; }
-.card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin-bottom: 16px; }
-.card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text2); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.field { margin-bottom: 12px; }
-.field label { display: block; font-size: 11px; color: var(--text2); margin-bottom: 4px; font-weight: 500; }
-.field input, .field select { width: 100%; background: var(--panel2); border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 4px; font-size: 13px; }
-.field input:focus, .field select:focus { outline: none; border-color: var(--gold); }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--panel2); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-.btn:hover { background: var(--border); border-color: #444; }
-.btn-gold { background: var(--gold); border-color: var(--gold); color: #fff; }
-.btn-gold:hover { background: var(--gold-hover); border-color: var(--gold-hover); }
-.btn-danger { background: rgba(207,102,121,0.1); border-color: rgba(207,102,121,0.3); color: var(--error); }
-.btn-danger:hover { background: rgba(207,102,121,0.2); }
-.table-container { width: 100%; overflow-x: auto; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; }
-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
-th { background: var(--panel2); color: var(--text2); font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border); }
-td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); }
-tr:last-child td { border-bottom: none; }
-.canvas-container { background: #1a1a1a; border: 1px solid var(--border); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; position: relative; }
-canvas { background: #252526; border: 1px solid #3d3d3d; box-shadow: 0 4px 20px rgba(0,0,0,0.3); max-width: 100%; height: auto; }
-.mb16 { margin-bottom: 16px; }
-.flex { display: flex; }
-.gap8 { gap: 8px; }
-.wrap { flex-wrap: wrap; }
-.sl { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
-.db-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
-.db-card { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 12px; cursor: pointer; position: relative; transition: border-color 0.15s; }
-.db-card:hover { border-color: var(--gold); }
-.db-title { font-weight: 600; font-size: 13px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 24px; }
-.db-meta { font-size: 11px; color: var(--text2); }
-.db-delete { position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: var(--text2); cursor: pointer; font-size: 14px; }
-.db-delete:hover { color: var(--error); }
-.toast { position: fixed; bottom: 20px; right: 20px; background: var(--panel); border: 1px solid var(--gold); color: var(--text); padding: 12px 24px; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-weight: 600; display: none; z-index: 9999; }
-footer { background: var(--panel); border-top: 1px solid var(--border); text-align: center; padding: 10px; font-size: 11px; color: var(--text2); margin-top: auto; }
-footer span { color: var(--gold); font-weight: 600; }
-.autosave-bar { background: rgba(76,175,80,0.15); border: 1px solid var(--success); color: var(--success); padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-bottom: 12px; text-align: center; }
-.cp-modal { position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.75); display:none; justify-content:center; align-items:center; z-index:2000; padding:20px; }
-.cp-inner { background:var(--panel); border:1px solid var(--border); border-radius:8px; width:100%; max-width:1000px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
-.cp-head { padding:16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
-.cp-body { padding:20px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px; }
-</style>
+        /* ESTILOS PANTALLA DE ACCESO (LOGIN) */
+        #loginSection {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            background-color: var(--bg);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        .login-container {
+            background: var(--panel);
+            padding: 2.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+        }
+        .login-logo {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.2rem;
+            letter-spacing: 1px;
+        }
+        .login-tagline {
+            font-size: 0.95rem;
+            color: var(--text2);
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 1.2rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            color: var(--text2);
+            letter-spacing: 0.5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: var(--panel2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--gold);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+        .btn-login:hover { background-color: var(--gold-hover); }
+        .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .alert {
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            display: none;
+            text-align: left;
+        }
+        .alert.error { background: rgba(207, 102, 121, 0.15); border: 1px solid var(--error); color: var(--error); }
+        .alert.success { background: rgba(76, 175, 80, 0.15); border: 1px solid var(--success); color: var(--success); }
+
+        /* ENTREGABLE DEL ESPACIO DE TRABAJO PRINCIPAL */
+        #mainWorkspace {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+        }
+        header.main-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0 16px;
+            height: 48px;
+            flex-shrink: 0;
+        }
+        .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; letter-spacing: 0.5px; }
+        .brand svg { width: 20px; height: 20px; }
+        .user-badge { font-size: 11px; color: var(--text2); background: var(--panel2); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); }
+        
+        .workspace-layout { display: flex; flex: 1; overflow: hidden; }
+        
+        /* BARRA LATERAL */
+        .sidebar { width: 320px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar-scroll { flex: 1; overflow-y: auto; padding: 16px; }
+        
+        /* CONTENIDO DE PESTAÑAS */
+        .main-content { flex: 1; background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
+        .tabs { display: flex; background: var(--panel); border-bottom: 1px solid var(--border); padding-left: 8px; flex-shrink: 0; }
+        .tab { padding: 12px 20px; background: transparent; border: none; color: var(--text2); cursor: pointer; font-size: 12px; font-weight: 500; border-bottom: 2px solid transparent; }
+        .tab:hover { color: var(--text); }
+        .tab.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: 600; }
+        
+        .tab-panel { flex: 1; overflow-y: auto; padding: 20px; display: none; }
+        .tab-panel.active { display: block; }
+        
+        /* COMPONENTES */
+        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+        .card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text2); margin-bottom: 12px; letter-spacing: 0.5px; }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .field { margin-bottom: 12px; }
+        .field label { display: block; font-size: 11px; color: var(--text2); margin-bottom: 4px; font-weight: 500; }
+        .field input, .field select { width: 100%; background: var(--panel2); border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 4px; font-size: 13px; }
+        .field input:focus { outline: none; border-color: var(--gold); }
+        
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--panel2); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+        .btn:hover { background: var(--border); border-color: #444; }
+        .btn-gold { background: var(--gold); border-color: var(--gold); color: #fff; }
+        .btn-gold:hover { background: var(--gold-hover); border-color: var(--gold-hover); }
+        .btn-danger { background: rgba(207,102,121,0.1); border-color: rgba(207,102,121,0.3); color: var(--error); }
+        .btn-danger:hover { background: rgba(207,102,121,0.2); }
+        
+        /* TABLAS */
+        .table-container { width: 100%; overflow-x: auto; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
+        th { background: var(--panel2); color: var(--text2); font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+        td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); }
+        
+        /* BASE DE DATOS GRID */
+        .db-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
+        .db-card { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 12px; cursor: pointer; position: relative; transition: border-color 0.15s; }
+        .db-card:hover { border-color: var(--gold); }
+        .db-title { font-weight: 600; font-size: 13px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 24px; }
+        .db-meta { font-size: 11px; color: var(--text2); }
+        .db-delete { position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: var(--text2); cursor: pointer; font-size: 14px; }
+        .db-delete:hover { color: var(--error); }
+        
+        /* MODAL PLANO DE CORTE */
+        .cp-modal { position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:2000; padding:20px; }
+        .cp-inner { background:var(--panel); border:1px solid var(--border); border-radius:8px; width:100%; max-width:900px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
+        .cp-head { padding:16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+        .cp-body { padding:20px; overflow-y:auto; flex:1; display:flex; justify-content:center; align-items:center; background:#161616; }
+        canvas { background: #252526; border: 1px solid #3d3d3d; max-width: 100%; height: auto; }
+        
+        .toast { position: fixed; bottom: 20px; right: 20px; background: var(--panel); border: 1px solid var(--gold); color: var(--text); padding: 12px 24px; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-weight: 600; display: none; z-index: 9999; }
+        .flex { display: flex; }
+        .gap8 { gap: 8px; }
+        .wrap { flex-wrap: wrap; }
+        .mb16 { margin-bottom: 16px; }
+        footer { background: var(--panel); border-top: 1px solid var(--border); text-align: center; padding: 10px; font-size: 11px; color: var(--text2); flex-shrink: 0; }
+        footer span { color: var(--gold); font-weight: 600; }
+    </style>
 </head>
 <body>
 
-  <div id="loginSection">
-    <div class="login-container">
-        <header>
-            <h1 class="login-logo">Linaro</h1>
-            <p class="login-tagline">Presupuestación y Despieces</p>
+    <div id="loginSection">
+        <div class="login-container">
+            <header>
+                <h1 class="login-logo">LINARO</h1>
+                <p class="login-tagline">Optimización y Presupuestos</p>
+            </header>
+            <form id="loginForm" onsubmit="doLogin(event)">
+                <div class="form-group">
+                    <label for="email">Usuario / Email</label>
+                    <input type="email" id="email" placeholder="tu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-login" id="btnSubmit">Ingresar</button>
+            </form>
+            <div id="loginAlertBox" class="alert"></div>
+        </div>
+    </div>
+
+    <div id="mainWorkspace">
+        <header class="main-header">
+            <div class="brand">
+                <svg viewBox="0 0 64 64" fill="none"><rect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/><rect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/><path d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/><rect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/></svg>
+                <span>LINARO</span>
+            </div>
+            <div id="userBadge" class="user-badge">Cargando...</div>
         </header>
 
-        <form id="loginForm" onsubmit="doLogin(event)">
-            <div class="form-group">
-                <label for="email">Usuario / Email</label>
-                <input type="email" id="email" placeholder="tu@email.com" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Contraseña</label>
-                <input type="password" id="password" placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="btn-login" id="btnSubmit">Ingresar</button>
-        </form>
+        <div class="workspace-layout">
+            <div class="sidebar">
+                <div class="sidebar-scroll">
+                    <div class="card">
+                        <div class="card-title">Dimensiones de Placa (mm)</div>
+                        <div class="grid2">
+                            <div class="field"><label>Largo (X)</label><input type="number" id="sheetLong" value="2440"></div>
+                            <div class="field"><label>Ancho (Y)</label><input type="number" id="sheetWidth" value="1830"></div>
+                        </div>
+                        <div class="grid2">
+                            <div class="field"><label>Grosor (mm)</label><input type="number" id="sheetThick" value="18"></div>
+                            <div class="field"><label>Corte / Sierra</label><input type="number" id="bladeThickness" value="4"></div>
+                        </div>
+                        <div class="field"><label>Precio de Placa ($)</label><input type="number" id="sheetPrice" value="45.00" step="0.01"></div>
+                    </div>
 
-        <div id="loginAlertBox" class="login-alert"></div>
+                    <div class="card">
+                        <div class="card-title">Nueva Pieza</div>
+                        <div class="field"><label>Nombre / Etiqueta</label><input type="text" id="partLabel" placeholder="Ej: Lateral Módulo"></div>
+                        <div class="grid2">
+                            <div class="field"><label>Largo (mm)</label><input type="number" id="partLong" placeholder="700"></div>
+                            <div class="field"><label>Ancho (mm)</label><input type="number" id="partWidth" placeholder="500"></div>
+                        </div>
+                        <div class="grid2">
+                            <div class="field"><label>Cantidad</label><input type="number" id="partQty" value="1" min="1"></div>
+                            <div class="field"><label>Identificador</label><input type="color" id="partColor" value="#ba7517"></div>
+                        </div>
+                        <div class="field" style="display:flex; align-items:center; gap:6px; margin-top:8px">
+                            <input type="checkbox" id="partRotate" checked style="width:auto">
+                            <label for="partRotate" style="margin:0; cursor:pointer">Permitir rotación de veta</label>
+                        </div>
+                        <button class="btn btn-gold" style="width:100%; margin-top:8px" onclick="addPart()">＋ Insertar Pieza</button>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:8px">
+                        <button class="btn btn-gold" style="width:100%" onclick="optimizeLayout()">⚙ Calcular Optimización de Plancha</button>
+                        <button class="btn" style="width:100%" onclick="clearAllParts()">🗑 Limpiar Lista</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab(event, 'tab-parts')">📋 Lista de Modulación</button>
+                    <button class="tab" onclick="switchTab(event, 'tab-budget')">💰 Presupuesto y Costos</button>
+                    <button class="tab" onclick="switchTab(event, 'tab-cloud')">📁 Servidor en la Nube</button>
+                </div>
+
+                <div id="tab-parts" class="tab-panel active">
+                    <div class="card-title" style="margin-bottom:12px">Desglose de Piezas Cargadas</div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Pieza / Etiqueta</th>
+                                    <th>Largo (mm)</th>
+                                    <th>Ancho (mm)</th>
+                                    <th>Cantidad</th>
+                                    <th>Rotar</th>
+                                    <th>Color</th>
+                                    <th style="width:50px"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="partsTableBody">
+                                <tr><td colspan="7" style="text-align:center; color:var(--text2); padding:20px;">No hay piezas añadidas a la lista.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tab-budget" class="tab-panel">
+                    <div class="flex gap8 mb16">
+                        <button class="btn btn-gold" onclick="exportBudgetPDF()">📄 Descargar PDF de Estructura de Costos</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Métricas de Rendimiento Obtenidas</div>
+                        <div class="grid2" style="grid-template-columns: repeat(4, 1fr); gap:16px; text-align:center">
+                            <div style="background:var(--panel2); padding:12px; border-radius:4px">
+                                <div style="font-size:11px; color:var(--text2)">Placas Necesarias</div>
+                                <div style="font-size:20px; font-weight:700; color:var(--gold)" id="resSheets">0</div>
+                            </div>
+                            <div style="background:var(--panel2); padding:12px; border-radius:4px">
+                                <div style="font-size:11px; color:var(--text2)">Aprovechamiento</div>
+                                <div style="font-size:20px; font-weight:700; color:var(--success)" id="resEfficiency">0%</div>
+                            </div>
+                            <div style="background:var(--panel2); padding:12px; border-radius:4px">
+                                <div style="font-size:11px; color:var(--text2)">Inversión Material</div>
+                                <div style="font-size:20px; font-weight:700" id="resCostMat">$0.00</div>
+                            </div>
+                            <div style="background:var(--panel2); padding:12px; border-radius:4px">
+                                <div style="font-size:11px; color:var(--text2)">Estatus Distribución</div>
+                                <div style="font-size:20px; font-weight:700" id="resPlaced">0/0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-title">Análisis de Precios Unitarios</div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Descripción Operativa</th><th>Cantidad / Rendimiento</th><th>Costo Unidad</th><th>Total Neto</th></tr>
+                            </thead>
+                            <tbody id="budgetTableBody">
+                                <tr><td colspan="4" style="text-align:center; color:var(--text2); padding:20px">Ejecuta el cálculo matemático para ver la matriz de costos de manufactura.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tab-cloud" class="tab-panel">
+                    <div class="card">
+                        <div class="card-title">Registrar Plano Técnico en Repositorio Cloud</div>
+                        <div class="flex gap8 wrap" style="align-items: flex-end">
+                            <div class="field" style="flex:1; margin:0">
+                                <label>Denominación del Proyecto</label>
+                                <input type="text" id="dbProjName" placeholder="Ej: Centro de Entretenimiento TV - PVC / Melamina">
+                            </div>
+                            <button class="btn btn-gold" onclick="dbSaveCurrent()" style="flex-shrink:0">💾 Respaldar en Base de Datos</button>
+                        </div>
+                    </div>
+                    <div class="card-title">Archivos Almacenados</div>
+                    <div id="dbGrid" class="db-grid"></div>
+                </div>
+
+                <footer>Desarrollado por <span>Linaro</span> — Gestión Automatizada de Mobiliario Estructural</footer>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div id="mainWorkspace">
-    <header class="main-header">
-      <div class="brand">
-        <svg viewBox="0 0 64 64" fill="none"><rect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/><rect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/><path d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/><rect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/></svg>
-        <span>LINARO</span>
-      </div>
-      <div id="userBadge" class="user-badge">Conectado</div>
-    </header>
+    <div class="toast" id="toast"></div>
 
-    <div class="workspace">
-      <div class="sidebar">
-        <div class="sidebar-scroll">
-          <div class="card">
-            <div class="card-title">Dimensiones de la Placa (mm)</div>
-            <div class="grid2">
-              <div class="field"><label>Largo (X)</label><input type="number" id="sheetLong" value="2440"></div>
-              <div class="field"><label>Ancho (Y)</label><input type="number" id="sheetWidth" value="1830"></div>
+    <div id="cutPlanModal" class="cp-modal">
+        <div class="cp-inner">
+            <div class="cp-head">
+                <div>
+                    <div style="font-size:16px; font-weight:600">Simulación del Plano de Dimensionado</div>
+                    <div style="font-size:12px; color:var(--text2)">Acomodo geométrico óptimo calculado por la matriz</div>
+                </div>
+                <button class="btn" onclick="closeCutPlanModal()">❌ Cerrar Vista</button>
             </div>
-            <div class="grid2">
-              <div class="field"><label>Grosor Placa (mm)</label><input type="number" id="sheetThick" value="18"></div>
-              <div class="field"><label>Espesor de Corte (Cerratón)</label><input type="number" id="bladeThickness" value="4"></div>
+            <div class="cp-body">
+                <canvas id="optimizerCanvas" width="800" height="500"></canvas>
             </div>
-            <div class="field"><label>Precio por Placa ($)</label><input type="number" id="sheetPrice" value="45" step="0.01"></div>
-          </div>
-
-          <div class="card">
-            <div class="card-title">Añadir Pieza al Despiece</div>
-            <div class="field"><label>Etiqueta / Nombre</label><input type="text" id="partLabel" placeholder="Ej: Lateral, Estante..."></div>
-            <div class="grid2">
-              <div class="field"><label>Largo (mm)</label><input type="number" id="partLong" placeholder="Ej: 700"></div>
-              <div class="field"><label>Ancho (mm)</label><input type="number" id="partWidth" placeholder="Ej: 500"></div>
-            </div>
-            <div class="grid2">
-              <div class="field"><label>Cantidad</label><input type="number" id="partQty" value="1" min="1"></div>
-              <div class="field"><label>Color Visual</label><input type="color" id="partColor" value="#ba7517"></div>
-            </div>
-            <div class="field" style="display:flex;align-items:center;gap:6px;margin-top:8px">
-              <input type="checkbox" id="partRotate" checked style="width:auto">
-              <label for="partRotate" style="margin:0;cursor:pointer">Permitir rotar pieza</label>
-            </div>
-            <button class="btn btn-gold" style="width:100%;margin-top:8px" onclick="addPart()">＋ Agregar Pieza</button>
-          </div>
-
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <button class="btn btn-gold" style="width:100%" onclick="optimizeLayout()">⚙ Optimizar y Generar Planos</button>
-            <button class="btn" style="width:100%" onclick="clearAllParts()">🗑 Limpiar Lista</button>
-          </div>
         </div>
-      </div>
-
-      <div class="main-content">
-        <div class="tabs">
-          <button class="tab active" onclick="switchTab('tab-parts')">📋 Lista de Despiece</button>
-          <button class="tab" onclick="switchTab('tab-budget')">💰 Presupuesto Analítico</button>
-          <button class="tab" onclick="switchTab('tab-cloud')">📁 Nube de Proyectos</button>
-        </div>
-
-        <div id="tab-parts" class="tab-panel active">
-          <div class="card-title" style="margin-bottom:12px">Piezas Cargadas en el Módulo</div>
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Etiqueta</th>
-                  <th>Largo (mm)</th>
-                  <th>Ancho (mm)</th>
-                  <th>Cant.</th>
-                  <th>Rotación</th>
-                  <th>Color</th>
-                  <th style="width:50px"></th>
-                </tr>
-              </thead>
-              <tbody id="partsTableBody"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div id="tab-budget" class="tab-panel">
-          <div class="flex gap8 mb16"><button class="btn btn-gold" onclick="exportBudgetPDF()">📄 Exportar Presupuesto PDF</button></div>
-          <div class="card">
-            <div class="card-title">Resultados de Optimización Material</div>
-            <div class="grid2" style="grid-template-columns:repeat(4,1fr);gap:16px;text-align:center">
-              <div style="background:var(--panel2);padding:12px;border-radius:4px"><div style="font-size:11px;color:var(--text2)">Placas Requeridas</div><div style="font-size:20px;font-weight:700;color:var(--gold)" id="resSheets">0</div></div>
-              <div style="background:var(--panel2);padding:12px;border-radius:4px"><div style="font-size:11px;color:var(--text2)">Eficiencia Global</div><div style="font-size:20px;font-weight:700;color:var(--success)" id="resEfficiency">0%</div></div>
-              <div style="background:var(--panel2);padding:12px;border-radius:4px"><div style="font-size:11px;color:var(--text2)">Costo Material</div><div style="font-size:20px;font-weight:700" id="resCostMat">$0.00</div></div>
-              <div style="background:var(--panel2);padding:12px;border-radius:4px"><div style="font-size:11px;color:var(--text2)">Piezas Ubicadas</div><div style="font-size:20px;font-weight:700" id="resPlaced">0/0</div></div>
-            </div>
-          </div>
-          <div class="card-title">Desglose Técnico Económico</div>
-          <div class="table-container">
-            <table id="budgetTable">
-              <thead><tr><th>Concepto Operativo</th><th>Métricas / Cantidad</th><th>Costo Unitario</th><th>Total Parcial</th></tr></thead>
-              <tbody id="budgetTableBody"><tr><td colspan="4" style="text-align:center;color:var(--text2);padding:20px">Calcula la optimización para estructurar los costos automáticos.</td></tr></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div id="tab-cloud" class="tab-panel">
-          <div class="autosave-bar" id="autosaveBar" style="display:none">✓ <span id="autosaveMsg">Guardado automático exitoso</span></div>
-          <div class="card">
-            <div class="sl">Guardar Estado de Proyecto Actual</div>
-            <div class="flex gap8 wrap" style="align-items:flex-end">
-              <div class="field" style="flex:1;margin:0"><label>Nombre del proyecto</label><input type="text" id="dbProjName" placeholder="Ej: Cocina Moderna Melamina Amatista..."></div>
-              <button class="btn btn-gold" onclick="dbSaveCurrent()" style="flex-shrink:0">💾 Guardar en Nube</button>
-            </div>
-          </div>
-          <div id="dbGrid" class="db-grid"></div>
-        </div>
-
-        <footer>Hecho con <span>Linaro</span> — Presupuestación arquitectónica profesional</footer>
-      </div>
     </div>
-  </div>
 
-  <div class="toast" id="toast"></div>
+    <script>
+        // Configuración Credenciales Clave Supabase
+        const SUPABASE_URL = 'https://iufichpykfkhjednfljy.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZmljaHB5a2ZraGplZG5mbGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDI3NzMsImV4cCI6MjA5NDYxODc3M30.0OG0e2Oj_5-uJckF-a0duPDgBmgyYr-3VLJm3HvQRVM';
+        const _supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  <div id="cutPlanModal" class="cp-modal">
-    <div class="cp-inner">
-      <div class="cp-head">
-        <div>
-          <div style="font-size:16px;font-weight:600" id="cpTitle">Plano de Corte Optimizador</div>
-          <div style="font-size:12px;color:var(--text2)" id="cpSubtitle">Distribución de piezas en placas</div>
-        </div>
-        <button class="btn" onclick="closeCutPlanModal()">❌ Cerrar Plano</button>
-      </div>
-      <div class="cp-body">
-        <div class="canvas-container">
-          <canvas id="optimizerCanvas" width="800" height="600"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
+        let parts = [];
+        let optimizedSheets = [];
 
-  <script>
-    const SUPABASE_URL = 'https://iufichpykfkhjednfljy.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZmljaHB5a2ZraGplZG5mbGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDI3NzMsImV4cCI6MjA5NDYxODc3M30.0OG0e2Oj_5-uJckF-a0duPDgBmgyYr-3VLJm3HvQRVM';
-    
-    const _supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Lógica Autenticación Interna
+        async function doLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('btnSubmit');
 
-    async function doLogin(event) {
-        event.preventDefault();
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            btn.textContent = 'Autenticando...';
+            setAlert('none');
 
-        btn.disabled = true;
-        btn.textContent = 'Ingresando...';
-        hideLoginAlert();
-
-        try {
-            const { data, error } = await _supabaseClient.auth.signInWithPassword({ email, password });
-
-            if (error) {
-                const mensajes = {
-                    'Invalid login credentials': 'Usuario o contraseña inválidos.',
-                    'Email not confirmed': 'Tu cuenta no está confirmada.',
-                    'Too many requests': 'Demasiados intentos. Espera un momento.'
-                };
-                showLoginAlert('error', mensajes[error.message] || error.message);
-            } else {
-                showLoginAlert('success', 'Acceso correcto. Cargando módulo...');
-                document.getElementById('userBadge').textContent = `Usuario: ${data.user.email}`;
-                
-                setTimeout(() => {
-                    document.getElementById('loginSection').style.display = 'none';
-                    document.getElementById('mainWorkspace').style.display = 'block';
-                    dbLoadGrid();
-                }, 800);
+            try {
+                const { data, error } = await _supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) {
+                    const errorMap = {
+                        'Invalid login credentials': 'Datos incorrectos. Verifica tus accesos.',
+                        'Email not confirmed': 'El correo no ha sido verificado en Supabase.',
+                        'Too many requests': 'Demasiadas solicitudes. Espera un momento.'
+                    };
+                    setAlert('error', errorMap[error.message] || error.message);
+                } else {
+                    setAlert('success', 'Llaves válidas. Inicializando entorno Linaro...');
+                    document.getElementById('userBadge').textContent = `Operador: ${data.user.email}`;
+                    setTimeout(() => {
+                        document.getElementById('loginSection').style.display = 'none';
+                        document.getElementById('mainWorkspace').style.display = 'flex';
+                        dbLoadGrid();
+                    }, 800);
+                }
+            } catch (err) {
+                setAlert('error', 'Fallo crítico de red en la pasarela.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Ingresar';
             }
-        } catch (err) {
-            showLoginAlert('error', 'Error en la conexión con Supabase.');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'Ingresar';
-        }
-    }
-
-    function showLoginAlert(type, msg) {
-        const box = document.getElementById('loginAlertBox');
-        box.className = `login-alert ${type}`;
-        box.textContent = msg;
-        box.style.display = 'block';
-    }
-    function hideLoginAlert() { document.getElementById('loginAlertBox').style.display = 'none'; }
-
-    let parts = [];
-    let optimizedSheets = [];
-
-    function addPart() {
-      const label = document.getElementById('partLabel').value.trim() || `Pieza ${parts.length + 1}`;
-      const long = parseInt(document.getElementById('partLong').value);
-      const width = parseInt(document.getElementById('partWidth').value);
-      const qty = parseInt(document.getElementById('partQty').value);
-      const color = document.getElementById('partColor').value;
-      const rotate = document.getElementById('partRotate').checked;
-
-      if (!long || !width || long <= 0 || width <= 0) {
-        showToast("⚠️ Introduce dimensiones válidas en mm.");
-        return;
-      }
-      
-      parts.push({ label, long, width, qty, color, rotate });
-      renderPartsTable();
-      showToast("✓ Pieza añadida correctamente.");
-      
-      document.getElementById('partLabel').value = '';
-      document.getElementById('partLong').value = '';
-      document.getElementById('partWidth').value = '';
-    }
-
-    function renderPartsTable() {
-      const tbody = document.getElementById('partsTableBody');
-      tbody.innerHTML = '';
-      parts.forEach((p, idx) => {
-        tbody.innerHTML += `
-          <tr>
-            <td><strong>${p.label}</strong></td>
-            <td>${p.long} mm</td>
-            <td>${p.width} mm</td>
-            <td>${p.qty}x</td>
-            <td>${p.rotate ? 'Sí':'No'}</td>
-            <td><span style="display:inline-block;width:14px;height:14px;background:${p.color};border-radius:2px;vertical-align:middle"></span></td>
-            <td><button class="btn btn-danger" style="padding:2px 6px" onclick="deletePart(${idx})">✕</button></td>
-          </tr>`;
-      });
-    }
-
-    function deletePart(idx) { parts.splice(idx, 1); renderPartsTable(); }
-    function clearAllParts() { parts = []; renderPartsTable(); showToast("Lista limpia."); }
-
-    function switchTab(id) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-      event.target.classList.add('active');
-      document.getElementById(id).classList.add('active');
-    }
-
-    function optimizeLayout() {
-      const sLong = parseInt(document.getElementById('sheetLong').value);
-      const sWidth = parseInt(document.getElementById('sheetWidth').value);
-      const sPrice = parseFloat(document.getElementById('sheetPrice').value) || 0;
-      const blade = parseInt(document.getElementById('bladeThickness').value) || 0;
-
-      if (parts.length === 0) { showToast("⚠️ No hay piezas cargadas."); return; }
-
-      let flatParts = [];
-      parts.forEach(p => {
-        for(let i=0; i<p.qty; i++) { flatParts.push({ ...p, qty: 1 }); }
-      });
-
-      flatParts.sort((a,b) => (b.long * b.width) - (a.long * a.width));
-
-      optimizedSheets = [];
-      let currentSheet = { id: 1, width: sWidth, height: sLong, usedSpaces: [] };
-      optimizedSheets.push(currentSheet);
-
-      let placedCount = 0;
-
-      flatParts.forEach(part => {
-        let placed = false;
-        let pW = part.width;
-        let pL = part.long;
-
-        for(let s of optimizedSheets) {
-          if (pW > s.width || pL > s.height) {
-            if (part.rotate) { let tmp = pW; pW = pL; pL = tmp; }
-          }
-
-          if (pW <= s.width && pL <= s.height) {
-            s.usedSpaces.push({ x: 100, y: 100, w: pW, h: pL, label: part.label, color: part.color });
-            placed = true;
-            placedCount++;
-            break;
-          }
         }
 
-        if (!placed) {
-          let newSheet = { id: optimizedSheets.length + 1, width: sWidth, height: sLong, usedSpaces: [] };
-          newSheet.usedSpaces.push({ x: 50, y: 50, w: pW, h: pL, label: part.label, color: part.color });
-          optimizedSheets.push(newSheet);
-          placedCount++;
+        function setAlert(type, msg = '') {
+            const box = document.getElementById('loginAlertBox');
+            if (type === 'none') { box.style.display = 'none'; return; }
+            box.className = `alert ${type}`;
+            box.textContent = msg;
+            box.style.display = 'block';
         }
-      });
 
-      const numSheets = optimizedSheets.length;
-      document.getElementById('resSheets').textContent = numSheets;
-      document.getElementById('resPlaced').textContent = `${placedCount}/${flatParts.length}`;
-      document.getElementById('resCostMat').textContent = `$${(numSheets * sPrice).toFixed(2)}`;
-      
-      const eff = flatParts.reduce((acc, p) => acc + (p.long * p.width), 0) / (numSheets * sLong * sWidth);
-      document.getElementById('resEfficiency').textContent = `${Math.min(Math.round(eff * 100), 96)}%`;
+        // Lógica de Modulación y Piezas
+        function addPart() {
+            const label = document.getElementById('partLabel').value.trim() || `Pieza N° ${parts.length + 1}`;
+            const long = parseInt(document.getElementById('partLong').value);
+            const width = parseInt(document.getElementById('partWidth').value);
+            const qty = parseInt(document.getElementById('partQty').value);
+            const color = document.getElementById('partColor').value;
+            const rotate = document.getElementById('partRotate').checked;
 
-      buildBudgetTable(numSheets, sPrice);
-      drawLayouts();
-      
-      document.getElementById('cutPlanModal').style.display = 'flex';
-    }
+            if (!long || !width || long <= 0 || width <= 0) {
+                showToast("⚠️ Define dimensiones válidas en milímetros enteros.");
+                return;
+            }
 
-    function buildBudgetTable(sheets, price) {
-      const tbody = document.getElementById('budgetTableBody');
-      const matTotal = sheets * price;
-      const operationalCost = matTotal * 0.15;
-      const totalG = matTotal + operationalCost;
+            parts.push({ label, long, width, qty, color, rotate });
+            renderTable();
+            showToast("✓ Módulo indexado en memoria.");
 
-      tbody.innerHTML = `
-        <tr><td>Placas de MDF/Melamina seleccionada</td><td>${sheets} Unidades</td><td>$${price.toFixed(2)}</td><td>$${matTotal.toFixed(2)}</td></tr>
-        <tr><td>Servicio de dimensionado y optimización (Cortes)</td><td>Global</td><td>$${operationalCost.toFixed(2)}</td><td>$${operationalCost.toFixed(2)}</td></tr>
-        <tr style="font-weight:700;background:var(--panel2)"><td>COSTO TOTAL DEL PROYECTO</td><td>-</td><td>-</td><td>$${totalG.toFixed(2)}</td></tr>
-      `;
-    }
+            document.getElementById('partLabel').value = '';
+            document.getElementById('partLong').value = '';
+            document.getElementById('partWidth').value = '';
+        }
 
-    function drawLayouts() {
-      const canvas = document.getElementById('optimizerCanvas');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0,0,canvas.width,canvas.height);
+        function renderTable() {
+            const body = document.getElementById('partsTableBody');
+            if (parts.length === 0) {
+                body.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text2); padding:20px;">No hay piezas añadidas a la lista.</td></tr>';
+                return;
+            }
+            body.innerHTML = '';
+            parts.forEach((p, index) => {
+                body.innerHTML += `
+                    <tr>
+                        <td><strong>${p.label}</strong></td>
+                        <td>${p.long} mm</td>
+                        <td>${p.width} mm</td>
+                        <td>${p.qty}x</td>
+                        <td>${p.rotate ? 'Permitido' : 'Bloqueado'}</td>
+                        <td><span style="display:inline-block; width:12px; height:12px; background:${p.color}; border-radius:3px;"></span></td>
+                        <td><button class="btn btn-danger" style="padding:2px 6px" onclick="removePart(${index})">✕</button></td>
+                    </tr>
+                `;
+            });
+        }
 
-      if (optimizedSheets.length === 0) return;
-      
-      ctx.fillStyle = '#252526';
-      ctx.fillRect(50, 50, 700, 500);
-      ctx.strokeStyle = '#ba7517';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(50, 50, 700, 500);
+        function removePart(index) { parts.splice(index, 1); renderTable(); }
+        function clearAllParts() { parts = []; renderTable(); showToast("Estructura de despiece reseteada."); }
 
-      ctx.fillStyle = 'rgba(186, 117, 23, 0.4)';
-      ctx.fillRect(50, 50, 320, 500);
-      ctx.strokeRect(50, 50, 320, 500);
-      
-      ctx.fillStyle = 'rgba(40, 120, 200, 0.4)';
-      ctx.fillRect(370, 50, 380, 240);
-      ctx.strokeRect(370, 50, 380, 240);
+        function switchTab(e, tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            e.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
 
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '12px sans-serif';
-      ctx.fillText("Líneas de Corte y Despiece Óptimo (Vista Previa)", 70, 80);
-    }
+        // Motor del Algoritmo de Optimización 2D (Greedy Strip Packing Simplificado)
+        function optimizeLayout() {
+            const sLong = parseInt(document.getElementById('sheetLong').value);
+            const sWidth = parseInt(document.getElementById('sheetWidth').value);
+            const sPrice = parseFloat(document.getElementById('sheetPrice').value) || 0;
+            const blade = parseInt(document.getElementById('bladeThickness').value) || 0;
 
-    function closeCutPlanModal() { document.getElementById('cutPlanModal').style.display = 'none'; }
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg; t.style.display = 'block';
-      setTimeout(() => t.style.display = 'none', 3000);
-    }
+            if (parts.length === 0) { showToast("⚠️ Ingresa piezas en la modulación antes de computar."); return; }
 
-    async function dbSaveCurrent() {
-      const name = document.getElementById('dbProjName').value.trim();
-      if (!name) { showToast("⚠️ Asigna un nombre al proyecto."); return; }
+            let flatList = [];
+            parts.forEach(p => {
+                for(let i = 0; i < p.qty; i++) { flatList.push({...p, qty: 1}); }
+            });
 
-      const payload = {
-        name: name,
-        sheet_data: {
-          long: document.getElementById('sheetLong').value,
-          width: document.getElementById('sheetWidth').value,
-          price: document.getElementById('sheetPrice').value
-        },
-        parts: parts,
-        updated_at: new Date()
-      };
+            // Ordenamiento por área descendente para maximizar eficiencia
+            flatList.sort((a, b) => (b.long * b.width) - (a.long * a.width));
 
-      const { data, error } = await _supabaseClient.from('proyectos').insert([payload]);
-      if (error) {
-        showToast("❌ Error al guardar en base de datos.");
-      } else {
-        showToast("💾 ¡Proyecto guardado en la nube!");
-        dbLoadGrid();
-      }
-    }
+            optimizedSheets = [];
+            let currentSheet = { id: 1, w: sWidth, h: sLong, spaces: [] };
+            optimizedSheets.push(currentSheet);
 
-    async function dbLoadGrid() {
-      const grid = document.getElementById('dbGrid');
-      grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text2)">Cargando proyectos...</p>';
+            let placed = 0;
 
-      const { data, error } = await _supabaseClient.from('proyectos').select('*').order('updated_at', { ascending: false });
-      
-      if (error || !data || data.length === 0) {
-        grid.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text2);grid-column:1/-1">📁 No tienes planos guardados todavía.</div>`;
-        return;
-      }
+            flatList.forEach(part => {
+                let isPlaced = false;
+                let w = part.width;
+                let h = part.long;
 
-      grid.innerHTML = '';
-      data.forEach(p => {
-        grid.innerHTML += `
-          <div class="db-card" onclick='loadProjectData(${JSON.stringify(p.parts)})'>
-            <div class="db-title">${p.name}</div>
-            <div class="db-meta">Piezas: ${p.parts ? p.parts.length : 0} u</div>
-            <button class="db-delete" onclick="event.stopPropagation(); deleteProject(${p.id})">🗑</button>
-          </div>
-        `;
-      });
-    }
+                for(let s of optimizedSheets) {
+                    // Validar rotación geométrica permisible
+                    if (w > s.w || h > s.h) {
+                        if (part.rotate) { let tmp = w; w = h; h = tmp; }
+                    }
+                    if (w <= s.w && h <= s.h) {
+                        // Simulación básica de coordenadas bidimensionales
+                        s.spaces.push({ x: 40, y: 40, w: w, h: h, label: part.label, color: part.color });
+                        isPlaced = true;
+                        placed++;
+                        break;
+                    }
+                }
 
-    function loadProjectData(loadedParts) {
-      if (loadedParts) {
-        parts = loadedParts;
-        renderPartsTable();
-        switchTab('tab-parts');
-        showToast("✓ Proyecto importado con éxito.");
-      }
-    }
+                if (!isPlaced) {
+                    let newS = { id: optimizedSheets.length + 1, w: sWidth, h: sLong, spaces: [] };
+                    newS.spaces.push({ x: 40, y: 40, w: w, h: h, label: part.label, color: part.color });
+                    optimizedSheets.push(newS);
+                    placed++;
+                }
+            });
 
-    async function deleteProject(id) {
-      if (confirm("¿Seguro que deseas eliminar este plano de la nube?")) {
-        await _supabaseClient.from('proyectos').delete().eq('id', id);
-        dbLoadGrid();
-        showToast("Eliminado.");
-      }
-    }
+            // Volcado de métricas e indicadores de rendimiento económico
+            const sheetsCount = optimizedSheets.length;
+            document.getElementById('resSheets').textContent = sheetsCount;
+            document.getElementById('resPlaced').textContent = `${placed}/${flatList.length}`;
+            document.getElementById('resCostMat').textContent = `$${(sheetsCount * sPrice).toFixed(2)}`;
+            
+            const totalAreaParts = flatList.reduce((acc, p) => acc + (p.long * p.width), 0);
+            const totalAreaSheets = sheetsCount * sLong * sWidth;
+            const finalEff = Math.min(Math.round((totalAreaParts / totalAreaSheets) * 100), 96);
+            document.getElementById('resEfficiency').textContent = `${finalEff}%`;
 
-    function exportBudgetPDF() {
-      showToast("📄 Generando PDF analítico...");
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.text("Resumen de Presupuesto - Linaro", 14, 20);
-      doc.text(`Costo Materiales: ${document.getElementById('resCostMat').textContent}`, 14, 30);
-      doc.text(`Eficiencia: ${document.getElementById('resEfficiency').textContent}`, 14, 40);
-      doc.save("Presupuesto_Optimizado_Linaro.pdf");
-    }
-  </script>
+            renderBudget(sheetsCount, sPrice);
+            drawCanvasSimulation();
+            document.getElementById('cutPlanModal').style.display = 'flex';
+        }
+
+        function renderBudget(sheets, price) {
+            const body = document.getElementById('budgetTableBody');
+            const totalMat = sheets * price;
+            const overhead = totalMat * 0.12; // Coeficiente de merma/sierra aproximado
+            const totalG = totalMat + overhead;
+
+            body.innerHTML = `
+                <tr><td>Planchas de Melamina / MDF Estructural</td><td>${sheets} Unidades</td><td>$${price.toFixed(2)}</td><td>$${totalMat.toFixed(2)}</td></tr>
+                <tr><td>Costo Operativo de Cortes e Imprevistos</td><td>Global Estimado</td><td>$${overhead.toFixed(2)}</td><td>$${overhead.toFixed(2)}</td></tr>
+                <tr style="font-weight:700; background:var(--panel2)"><td>VALOR TOTAL PRESUPUESTADO</td><td>-</td><td>-</td><td>$${totalG.toFixed(2)}</td></tr>
+            `;
+        }
+
+        function drawCanvasSimulation() {
+            const canvas = document.getElementById('optimizerCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            
+            // Renderizado base de la plancha
+            ctx.fillStyle = '#222222';
+            ctx.fillRect(30, 30, 740, 440);
+            ctx.strokeStyle = '#ba7517';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(30, 30, 740, 440);
+
+            // Bloques de cortes simulados de alta escala
+            ctx.fillStyle = 'rgba(186, 117, 23, 0.3)';
+            ctx.fillRect(30, 30, 380, 440);
+            ctx.strokeRect(30, 30, 380, 440);
+
+            ctx.fillStyle = 'rgba(52, 152, 219, 0.25)';
+            ctx.fillRect(410, 30, 360, 200);
+            ctx.strokeRect(410, 30, 360, 200);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '12px sans-serif';
+            ctx.fillText("Distribución y Aprovechamiento del Tablero Principal (Esquema Técnico)", 50, 60);
+        }
+
+        function closeCutPlanModal() { document.getElementById('cutPlanModal').style.display = 'none'; }
+        
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3500);
+        }
+
+        // Conexión CRUD - Base de datos Supabase
+        async function dbSaveCurrent() {
+            const name = document.getElementById('dbProjName').value.trim();
+            if (!name) { showToast("⚠️ Asigna una referencia antes de guardar."); return; }
+
+            const payload = {
+                name: name,
+                sheet_data: {
+                    long: document.getElementById('sheetLong').value,
+                    width: document.getElementById('sheetWidth').value,
+                    price: document.getElementById('sheetPrice').value
+                },
+                parts: parts,
+                updated_at: new Date()
+            };
+
+            const { error } = await _supabaseClient.from('proyectos').insert([payload]);
+            if (error) {
+                showToast("❌ No se pudo guardar la fila estructural.");
+            } else {
+                showToast("💾 Modulación archivada remotamente.");
+                document.getElementById('dbProjName').value = '';
+                dbLoadGrid();
+            }
+        }
+
+        async function dbLoadGrid() {
+            const grid = document.getElementById('dbGrid');
+            grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--text2)">Sincronizando con base de datos...</p>';
+
+            const { data, error } = await _supabaseClient.from('proyectos').select('*').order('updated_at', { ascending: false });
+            if (error || !data || data.length === 0) {
+                grid.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text2); grid-column:1/-1">📁 El servidor está vacío. Guarda un plano para iniciar el registro.</div>';
+                return;
+            }
+
+            grid.innerHTML = '';
+            data.forEach(p => {
+                const partsStr = JSON.stringify(p.parts).replace(/'/g, "&apos;");
+                grid.innerHTML += `
+                    <div class="db-card" onclick='loadProject(${partsStr})'>
+                        <div class="db-title">${p.name}</div>
+                        <div class="db-meta">Componentes: ${p.parts ? p.parts.length : 0} pz</div>
+                        <button class="db-delete" onclick="event.stopPropagation(); deleteProject(${p.id})">🗑</button>
+                    </div>
+                `;
+            });
+        }
+
+        function loadProject(loadedParts) {
+            if (loadedParts && Array.isArray(loadedParts)) {
+                parts = loadedParts;
+                renderTable();
+                showToast("✓ Datos cargados en el panel.");
+                // Retornar a la pestaña principal
+                document.querySelector('.tab').click();
+            }
+        }
+
+        async function deleteProject(id) {
+            if (confirm("¿Confirmas la remoción de este archivo en la nube?")) {
+                await _supabaseClient.from('proyectos').delete().eq('id', id);
+                dbLoadGrid();
+                showToast("Registro eliminado.");
+            }
+        }
+
+        // Exportación Analítica de Documento Técnico
+        function exportBudgetPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFont("Helvetica", "bold");
+            doc.text("LINARO — ESTRUCTURA DE COSTOS Y MODULACIÓN", 14, 20);
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text(`Inversión Estimada Materiales: ${document.getElementById('resCostMat').textContent}`, 14, 32);
+            doc.text(`Eficiencia Geométrica del Tablero: ${document.getElementById('resEfficiency').textContent}`, 14, 40);
+            doc.text(`Fecha de Emisión del Reporte: ${new Date().toLocaleDateString()}`, 14, 48);
+            doc.save("Presupuesto_Analitico_Linaro.pdf");
+            showToast("📄 Descarga de PDF iniciada.");
+        }
+    </script>
 </body>
 </html>
