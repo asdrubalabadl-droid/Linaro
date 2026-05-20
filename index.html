@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linaro — Presupuestación Arquitectónica</title>
+    <title>Linaro Pro Studio — Sistema de Ingeniería y Presupuestos</title>
     
-    <!-- Favicon -->
+    <!-- Favicon Técnico -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/%3E%3Crect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/%3E%3Cpath d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/%3E%3Crect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/%3E%3C/svg%3E'">
     
-    <!-- Librerías Externas -->
+    <!-- Librerías de Soporte -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -40,9 +40,9 @@
             overflow: hidden;
         }
 
-        /* VISTAS PRINCIPALES (MANEJO DIRECTO DE DISPLAY) */
+        /* VISTAS PRINCIPALES Y ACCESO */
         #loginSection {
-            display: flex; /* Visible por defecto */
+            display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -55,7 +55,7 @@
         }
         
         #mainWorkspace {
-            display: none; /* Oculto hasta login exitoso */
+            display: none;
             height: 100vh;
             width: 100vw;
             flex-direction: column;
@@ -65,7 +65,6 @@
             z-index: 1000;
         }
 
-        /* ESTILOS DEL ACCESO (LOGIN) */
         .login-container {
             background: var(--panel);
             padding: 2.5rem;
@@ -76,74 +75,21 @@
             max-width: 380px;
             text-align: center;
         }
-        .login-logo {
-            font-size: 2.4rem;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 0.2rem;
-            letter-spacing: 2px;
-        }
-        .login-tagline {
-            font-size: 0.9rem;
-            color: var(--text2);
-            margin-bottom: 2rem;
-        }
-        .form-group {
-            text-align: left;
-            margin-bottom: 1.2rem;
-        }
-        .form-group label {
-            display: block;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 0.5rem;
-            color: var(--text2);
-            letter-spacing: 0.5px;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            background: var(--panel2);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: var(--text);
-            font-size: 14px;
-            transition: border-color 0.2s;
-        }
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--gold);
-        }
-        .btn-login {
-            width: 100%;
-            padding: 14px;
-            background-color: var(--gold);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 1rem;
-            font-size: 14px;
-            transition: background 0.2s;
-        }
+        .login-logo { font-size: 2.4rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; letter-spacing: 2px; }
+        .login-tagline { font-size: 0.9rem; color: var(--text2); margin-bottom: 2rem; }
+        .form-group { text-align: left; margin-bottom: 1.2rem; }
+        .form-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; color: var(--text2); }
+        .form-group input { width: 100%; padding: 12px; background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); }
+        .form-group input:focus { outline: none; border-color: var(--gold); }
+        .btn-login { width: 100%; padding: 14px; background-color: var(--gold); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 1rem; }
         .btn-login:hover { background-color: var(--gold-hover); }
         .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        .alert {
-            padding: 10px 14px;
-            border-radius: 6px;
-            font-size: 12px;
-            margin-top: 1.2rem;
-            display: none;
-            text-align: left;
-            line-height: 1.5;
-        }
+        .alert { padding: 10px 14px; border-radius: 6px; font-size: 12px; margin-top: 1.2rem; display: none; }
         .alert.error { background: rgba(207, 102, 121, 0.15); border: 1px solid var(--error); color: var(--error); }
         .alert.success { background: rgba(76, 175, 80, 0.15); border: 1px solid var(--success); color: var(--success); }
 
-        /* INTERFAZ DEL ENTORNO DE TRABAJO (WORKSPACE) */
+        /* CABECERA PRINCIPAL */
         header.main-header {
             display: flex;
             align-items: center;
@@ -160,73 +106,63 @@
         
         .workspace-layout { display: flex; flex: 1; overflow: hidden; }
         
-        /* SIDEBAR (PANEL LATERAL) */
-        .sidebar { width: 320px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+        /* CONTROL LATERAL DEL ENTORNO */
+        .sidebar { width: 300px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
         .sidebar-scroll { flex: 1; overflow-y: auto; padding: 16px; }
         
-        /* CONTENEDOR CENTRAL DE PESTAÑAS */
+        /* CONTENEDOR CENTRAL Y NAVEGACIÓN */
         .main-content { flex: 1; background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
         .tabs { display: flex; background: var(--panel); border-bottom: 1px solid var(--border); padding-left: 8px; flex-shrink: 0; }
-        .tab { padding: 14px 20px; background: transparent; border: none; color: var(--text2); cursor: pointer; font-size: 12px; font-weight: 500; border-bottom: 2px solid transparent; }
+        .tab { padding: 14px 18px; background: transparent; border: none; color: var(--text2); cursor: pointer; font-size: 12px; font-weight: 500; border-bottom: 2px solid transparent; }
         .tab:hover { color: var(--text); }
         .tab.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: 600; }
         
         .tab-panel { flex: 1; overflow-y: auto; padding: 20px; display: none; }
         .tab-panel.active { display: block; }
         
-        /* CARDS Y ENTRADAS */
+        /* COMPONENTES DE DISEÑO U.I. */
         .card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin-bottom: 16px; }
         .card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text2); margin-bottom: 12px; letter-spacing: 0.5px; }
         .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .field { margin-bottom: 12px; }
         .field label { display: block; font-size: 11px; color: var(--text2); margin-bottom: 4px; font-weight: 500; }
         .field input, .field select { width: 100%; background: var(--panel2); border: 1px solid var(--border); color: var(--text); padding: 8px 10px; border-radius: 4px; font-size: 13px; }
         .field input:focus { outline: none; border-color: var(--gold); }
         
-        /* BOTONES */
-        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--panel2); border: 1px solid var(--border); color: var(--text); padding: 9px 16px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-        .btn:hover { background: var(--border); border-color: #444; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--panel2); border: 1px solid var(--border); color: var(--text); padding: 9px 16px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .btn:hover { background: var(--border); }
         .btn-gold { background: var(--gold); border-color: var(--gold); color: #fff; }
-        .btn-gold:hover { background: var(--gold-hover); border-color: var(--gold-hover); }
+        .btn-gold:hover { background: var(--gold-hover); }
         .btn-danger { background: rgba(207,102,121,0.1); border-color: rgba(207,102,121,0.3); color: var(--error); }
-        .btn-danger:hover { background: rgba(207,102,121,0.2); }
         
-        /* LISTAS Y TABLAS */
-        .table-container { width: 100%; overflow-x: auto; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; }
+        .table-container { width: 100%; overflow-x: auto; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 16px; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
         th { background: var(--panel2); color: var(--text2); font-weight: 600; padding: 12px; border-bottom: 1px solid var(--border); }
         td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text); }
         
-        /* BANCO DE DATOS (NUBE) */
         .db-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-top: 12px; }
-        .db-card { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 14px; cursor: pointer; position: relative; transition: border-color 0.15s; }
+        .db-card { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 14px; cursor: pointer; position: relative; }
         .db-card:hover { border-color: var(--gold); }
-        .db-title { font-weight: 600; font-size: 13px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 28px; }
-        .db-meta { font-size: 11px; color: var(--text2); }
-        .db-delete { position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: var(--text2); cursor: pointer; font-size: 14px; }
+        .db-delete { position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: var(--text2); cursor: pointer; }
         .db-delete:hover { color: var(--error); }
         
-        /* MODAL PLANO DE OPTIMIZACIÓN */
-        .cp-modal { position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; z-index:3000; padding:20px; }
-        .cp-inner { background:var(--panel); border:1px solid var(--border); border-radius:8px; width:100%; max-width:960px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 20px 40px rgba(0,0,0,0.6); }
-        .cp-head { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
-        .cp-body { padding:20px; overflow-y:auto; flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#161616; gap: 15px; }
-        canvas { background: #252526; border: 1px solid #3d3d3d; max-width: 100%; height: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        
-        /* TOAST E INDICADORES */
-        .toast { position: fixed; bottom: 20px; right: 20px; background: var(--panel); border: 1px solid var(--gold); color: var(--text); padding: 12px 24px; border-radius: 6px; box-shadow: 0 5px 20px rgba(0,0,0,0.6); font-weight: 600; display: none; z-index: 9999; }
+        .preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 8px; }
+        .preset-card { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 12px; cursor: pointer; text-align: center; }
+        .preset-card:hover { border-color: var(--gold); }
+
+        canvas { background: #252526; border: 1px solid #3d3d3d; max-width: 100%; display: block; margin: 10px auto; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: var(--panel); border: 1px solid var(--gold); color: var(--text); padding: 12px 24px; border-radius: 6px; display: none; z-index: 9999; }
         .flex { display: flex; }
         .gap8 { gap: 8px; }
-        .wrap { flex-wrap: wrap; }
         .mb16 { margin-bottom: 16px; }
-        
-        footer { background: var(--panel); border-top: 1px solid var(--border); text-align: center; padding: 12px; font-size: 11px; color: var(--text2); flex-shrink: 0; }
+        footer { background: var(--panel); border-top: 1px solid var(--border); text-align: center; padding: 12px; font-size: 11px; color: var(--text2); margin-top: auto; }
         footer span { color: var(--gold); font-weight: 600; }
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA 1: ACCESO EXCLUSIVO (LOGIN) -->
+    <!-- CONTROL ACCESO -->
     <div id="loginSection">
         <div class="login-container">
             <header>
@@ -235,12 +171,12 @@
             </header>
             <form id="loginForm" onsubmit="executeAuth(event)">
                 <div class="form-group">
-                    <label for="email">Email del Operador</label>
-                    <input type="email" id="email" placeholder="arquitecto@linaro.com" required autocomplete="username">
+                    <label>Email del Operador</label>
+                    <input type="email" id="email" placeholder="arquitecto@linaro.com" required>
                 </div>
                 <div class="form-group">
-                    <label for="password">Contraseña Técnica</label>
-                    <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+                    <label>Contraseña Técnica</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
                 </div>
                 <button type="submit" class="btn-login" id="btnSubmit">Verificar Identidad</button>
             </form>
@@ -248,179 +184,249 @@
         </div>
     </div>
 
-    <!-- PANTALLA 2: ENTORNO INTEGRADO DE TRABAJO (WORKSPACE) -->
+    <!-- WORKSPACE INTEGRADO -->
     <div id="mainWorkspace">
         <header class="main-header">
             <div class="brand">
                 <svg viewBox="0 0 64 64" fill="none"><rect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/><rect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/><path d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/><rect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/></svg>
-                <span>LINARO STUDIO</span>
+                <span>LINARO PRO STUDIO</span>
             </div>
-            <div id="userBadge" class="user-badge">Operador Activo</div>
+            <div id="userBadge" class="user-badge">Operador</div>
         </header>
 
         <div class="workspace-layout">
-            <!-- SIDEBAR: INGRESO DE DATOS GEOMÉTRICOS -->
+            <!-- SIDEBAR CONFIGURACIÓN OPERATIVA -->
             <div class="sidebar">
                 <div class="sidebar-scroll">
                     <div class="card">
-                        <div class="card-title">Propiedades del Tablero (mm)</div>
-                        <div class="grid2">
-                            <div class="field"><label>Largo (X)</label><input type="number" id="sheetLong" value="2440"></div>
-                            <div class="field"><label>Ancho (Y)</label><input type="number" id="sheetWidth" value="1830"></div>
-                        </div>
-                        <div class="grid2">
-                            <div class="field"><label>Espesor (mm)</label><input type="number" id="sheetThick" value="18"></div>
-                            <div class="field"><label>Hoja Sierra</label><input type="number" id="bladeThickness" value="4"></div>
-                        </div>
-                        <div class="field"><label>Costo de Placa ($ USD)</label><input type="number" id="sheetPrice" value="45.00" step="0.01"></div>
+                        <div class="card-title">Mano de Obra y Diseño</div>
+                        <div class="field"><label>Diseño / Proyecto ($)</label><input type="number" id="feeDesign" value="150.00" onchange="recalculateAllSections()"></div>
+                        <div class="field"><label>Mano de Obra General ($)</label><input type="number" id="feeLabor" value="250.00" onchange="recalculateAllSections()"></div>
+                        <div class="field"><label>Instalación / Carpintería ($)</label><input type="number" id="feeCarpentry" value="180.00" onchange="recalculateAllSections()"></div>
                     </div>
 
                     <div class="card">
-                        <div class="card-title">Inserción de Pieza / Módulo</div>
-                        <div class="field"><label>Etiqueta de Pieza</label><input type="text" id="partLabel" placeholder="Ej: Lateral Izquierdo"></div>
+                        <div class="card-title">Dimensiones de Placa (mm)</div>
                         <div class="grid2">
+                            <div class="field"><label>Largo</label><input type="number" id="sheetLong" value="2440"></div>
+                            <div class="field"><label>Ancho</label><input type="number" id="sheetWidth" value="1830"></div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-gold" style="width:100%" onclick="recalculateAllSections()">⚙ Recalcular Presupuestos</button>
+                </div>
+            </div>
+
+            <!-- NAVEGACIÓN DE FLUJOS -->
+            <div class="main-content">
+                <div class="tabs">
+                    <button class="tab active" onclick="changeSection(event, 'sec-budget')">💰 Presupuestos</button>
+                    <button class="tab" onclick="changeSection(event, 'sec-parts')">📋 Despieces</button>
+                    <button class="tab" onclick="changeSection(event, 'sec-blueprints')">📐 Planos y Modulación</button>
+                    <button class="tab" onclick="changeSection(event, 'sec-cloud')">📁 Nube Supabase</button>
+                </div>
+
+                <!-- APARTADO 1: PRESUPUESTOS Y REGISTRO DE MATERIALES -->
+                <div id="sec-budget" class="tab-panel active">
+                    <div class="flex gap8 mb16">
+                        <button class="btn btn-gold" onclick="exportStructuredPDF()">📄 Exportar Cotización PDF</button>
+                    </div>
+                    
+                    <!-- RESUMEN DE INVERSIÓN -->
+                    <div class="card">
+                        <div class="card-title">Estructura de Costos del Proyecto</div>
+                        <div class="grid2" style="grid-template-columns: repeat(5, 1fr); text-align:center">
+                            <div style="background:var(--panel2); padding:10px; border-radius:4px">
+                                <div style="font-size:11px; color:var(--text2)">Diseño</div>
+                                <div style="font-size:15px; font-weight:700; color:var(--gold)" id="outDesign">$0.00</div>
+                            </div>
+                            <div style="background:var(--panel2); padding:10px; border-radius:4px">
+                                <div style="font-size:11px; color:var(--text2)">Mano de Obra</div>
+                                <div style="font-size:15px; font-weight:700;" id="outLabor">$0.00</div>
+                            </div>
+                            <div style="background:var(--panel2); padding:10px; border-radius:4px">
+                                <div style="font-size:11px; color:var(--text2)">Carpintería</div>
+                                <div style="font-size:15px; font-weight:700;" id="outCarpentry">$0.00</div>
+                            </div>
+                            <div style="background:var(--panel2); padding:10px; border-radius:4px">
+                                <div style="font-size:11px; color:var(--text2)">Materiales</div>
+                                <div style="font-size:15px; font-weight:700; color:var(--success)" id="outMaterial">$0.00</div>
+                            </div>
+                            <div style="background:var(--panel2); padding:10px; border-radius:4px">
+                                <div style="font-size:11px; color:var(--text2)">Total General</div>
+                                <div style="font-size:15px; font-weight:700; color:#fff" id="outTotalText">$0.00</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NUEVO REGISTRO Y SELECCIÓN DE MATERIALES CON ATRIBUTOS SOLICITADOS -->
+                    <div class="grid2">
+                        <!-- FORMULARIO DE REGISTRO -->
+                        <div class="card">
+                            <div class="card-title">Registrar Material en Catálogo</div>
+                            <div class="grid2">
+                                <div class="field">
+                                    <label>Tipo de Suministro</label>
+                                    <select id="matType">
+                                        <option value="Melaminico">Melamínico (Tablero)</option>
+                                        <option value="Formica">Formica</option>
+                                        <option value="Tapacanto">Tapacanto (Metro)</option>
+                                        <option value="Pega Amarilla">Pega Amarilla (Galón)</option>
+                                        <option value="Herraje / Insumo">Herraje / Insumo</option>
+                                    </select>
+                                </div>
+                                <div class="field"><label>Características / Descripción</label><input type="text" id="matDesc" placeholder="Ej: Roble Thermo 18mm / Galón 4G"></div>
+                            </div>
+                            <div class="grid3">
+                                <div class="field"><label>Costo Unitario ($)</label><input type="number" id="matCost" value="45.00" step="0.01"></div>
+                                <div class="field"><label>Proveedor</label><input type="text" id="matProvider" placeholder="Ej: Madetor / Maderajara"></div>
+                                <div class="field"><label>Cantidad a Usar</label><input type="number" id="matQty" value="1" min="1"></div>
+                            </div>
+                            <button class="btn btn-gold" style="width:100%" onclick="addMaterialToInventory()">＋ Indexar y Aplicar al Presupuesto</button>
+                        </div>
+
+                        <!-- LISTADO SELECCIONADO -->
+                        <div class="card" style="display:flex; flex-direction:column">
+                            <div class="card-title">Materiales Asignados y Computados</div>
+                            <div class="table-container" style="flex:1; max-height:220px; overflow-y:auto">
+                                <table>
+                                    <thead>
+                                        <tr><th>Tipo</th><th>Características</th><th>Costo</th><th>Prov.</th><th>Cant.</th><th>Acción</th></tr>
+                                    </thead>
+                                    <tbody id="materialsTableBody">
+                                        <tr><td colspan="6" style="text-align:center; color:var(--text2)">Ningún material registrado. Agrega ítems arriba.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MATRIZ OPERATIVA DE LIQUIDACIÓN -->
+                    <div class="card-title">Matriz Analítica de Liquidación Comercial</div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Fase Operativa</th><th>Descripción del Proceso Técnico</th><th>Subtotal Asignado</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>1.0 — Diseño</strong></td><td>Planificación espacial, renderizado conceptual y planos modulares</td><td id="rowDesign">$0.00</td></tr>
+                                <tr><td><strong>2.0 — Planta / CNC</strong></td><td>Optimización de corte automatizado y mano de obra técnica</td><td id="rowLabor">$0.00</td></tr>
+                                <tr><td><strong>3.0 — Carpintería</strong></td><td>Ensamble estructural en taller, fijación y logística de instalación</td><td id="rowCarpentry">$0.00</td></tr>
+                                <tr><td><strong>4.0 — Suministros</strong></td><td>Cómputo global de materiales cargados (Melamínicos, Formicas, Insumos)</td><td id="rowMaterials">$0.00</td></tr>
+                                <tr style="font-weight:700; background:var(--panel2); font-size:14px">
+                                    <td>PRECIO TOTAL</td>
+                                    <td>Presupuesto Consolidado de Fabricación Linaro</td>
+                                    <td id="rowTotal" style="color:var(--gold)">$0.00</td>
+                                end;
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- APARTADO 2: DESPIECES -->
+                <div id="sec-parts" class="tab-panel">
+                    <div class="card">
+                        <div class="card-title">Insertar Nueva Pieza Mecánica</div>
+                        <div class="grid3">
+                            <div class="field"><label>Nombre / Etiqueta</label><input type="text" id="partLabel" placeholder="Ej: Lateral Bajo"></div>
                             <div class="field"><label>Largo (mm)</label><input type="number" id="partLong" placeholder="720"></div>
                             <div class="field"><label>Ancho (mm)</label><input type="number" id="partWidth" placeholder="560"></div>
                         </div>
-                        <div class="grid2">
-                            <div class="field"><label>Cantidad</label><input type="number" id="partQty" value="1" min="1"></div>
-                            <div class="field"><label>Color Visual</label><input type="color" id="partColor" value="#ba7517"></div>
+                        <div class="grid3">
+                            <div class="field"><label>Cantidad</label><input type="number" id="partQtyInput" value="1" min="1"></div>
+                            <div class="field"><label>Color Identificador</label><input type="color" id="partColor" value="#ba7517"></div>
+                            <div class="field" style="display:flex; align-items:center; margin-top:20px; gap:8px">
+                                <input type="checkbox" id="partRotate" checked style="width:auto">
+                                <label for="partRotate">Permitir Rotación</label>
+                            </div>
                         </div>
-                        <div class="field" style="display:flex; align-items:center; gap:8px; margin-top:8px">
-                            <input type="checkbox" id="partRotate" checked style="width:auto">
-                            <label for="partRotate" style="margin:0; cursor:pointer">Permitir rotar pieza (veta)</label>
-                        </div>
-                        <button class="btn btn-gold" style="width:100%; margin-top:8px" onclick="addPartToList()">＋ Agregar a la Lista</button>
+                        <button class="btn btn-gold" onclick="addCustomPart()">＋ Insertar Pieza en Despiece</button>
                     </div>
 
-                    <div style="display:flex; flex-direction:column; gap:8px">
-                        <button class="btn btn-gold" style="width:100%" onclick="processOptimization()">⚙ Computar Optimización 2D</button>
-                        <button class="btn btn-danger" style="width:100%" onclick="clearCurrentList()">🗑 Vaciar Tablas</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ÁREA PRINCIPAL: PESTAÑAS DINÁMICAS -->
-            <div class="main-content">
-                <div class="tabs">
-                    <button class="tab active" onclick="changeWorkspaceTab(event, 'tab-parts')">📋 Desglose de Modulación</button>
-                    <button class="tab" onclick="changeWorkspaceTab(event, 'tab-budget')">💰 Estructura de Costos</button>
-                    <button class="tab" onclick="changeWorkspaceTab(event, 'tab-cloud')">📁 Servidor Central Cloud</button>
-                </div>
-
-                <!-- PESTAÑA 1: LISTA DE PIEZAS -->
-                <div id="tab-parts" class="tab-panel active">
-                    <div class="card-title" style="margin-bottom:12px">Matriz de Despiece Estructural</div>
+                    <div class="card-title">Gabinete de Piezas Activas (Desglose Analítico)</div>
                     <div class="table-container">
                         <table>
                             <thead>
-                                <tr>
-                                    <th>Descripción de Pieza</th>
-                                    <th>Largo (mm)</th>
-                                    <th>Ancho (mm)</th>
-                                    <th>Cant.</th>
-                                    <th>Giro Veta</th>
-                                    <th>Color</th>
-                                    <th style="width:50px">Acción</th>
-                                </tr>
+                                <tr><th>Etiqueta</th><th>Largo (mm)</th><th>Ancho (mm)</th><th>Cantidad</th><th>Giro</th><th>Color</th><th>Acción</th></tr>
                             </thead>
                             <tbody id="partsTableBody">
-                                <tr><td colspan="7" style="text-align:center; color:var(--text2); padding:30px;">Ninguna pieza cargada en la modulación actual.</td></tr>
+                                <tr><td colspan="7" style="text-align:center; color:var(--text2)">No hay piezas cargadas en la matriz operativa.</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- PESTAÑA 2: COSTOS Y PRESUPUESTOS -->
-                <div id="tab-budget" class="tab-panel">
-                    <div class="flex gap8 mb16">
-                        <button class="btn btn-gold" onclick="generateAnalyticPDF()">📄 Exportar Reporte de Costos (PDF)</button>
-                    </div>
+                <!-- APARTADO 3: PLANOS Y MODULACIÓN -->
+                <div id="sec-blueprints" class="tab-panel">
                     <div class="card">
-                        <div class="card-title">Métricas Técnicas de Aprovechamiento</div>
-                        <div class="grid2" style="grid-template-columns: repeat(4, 1fr); gap:16px; text-align:center">
-                            <div style="background:var(--panel2); padding:12px; border-radius:4px">
-                                <div style="font-size:11px; color:var(--text2); margin-bottom:4px">Planchas Totales</div>
-                                <div style="font-size:22px; font-weight:700; color:var(--gold)" id="resSheets">0</div>
+                        <div class="card-title">Inyectores Modulares de Presets Inteligentes</div>
+                        <p style="color:var(--text2); margin-bottom:12px">Añade módulos preconfigurados. Esto cargará las piezas de forma automatizada:</p>
+                        
+                        <div class="preset-grid">
+                            <div class="preset-card" onclick="injectModularCabinet('base')">
+                                <div class="preset-icon">🗄️</div>
+                                <div style="font-weight:600">Mueble Base Bajo</div>
+                                <div style="font-size:11px; color:var(--text2)">720x600x560 mm</div>
                             </div>
-                            <div style="background:var(--panel2); padding:12px; border-radius:4px">
-                                <div style="font-size:11px; color:var(--text2); margin-bottom:4px">% Optimización</div>
-                                <div style="font-size:22px; font-weight:700; color:var(--success)" id="resEfficiency">0%</div>
+                            <div class="preset-card" onclick="injectModularCabinet('aereo')">
+                                <div class="preset-icon">🔲</div>
+                                <div style="font-weight:600">Mueble Aéreo Superior</div>
+                                <div style="font-size:11px; color:var(--text2)">600x600x320 mm</div>
                             </div>
-                            <div style="background:var(--panel2); padding:12px; border-radius:4px">
-                                <div style="font-size:11px; color:var(--text2); margin-bottom:4px">Costo Base Placas</div>
-                                <div style="font-size:22px; font-weight:700" id="resCostMat">$0.00</div>
-                            </div>
-                            <div style="background:var(--panel2); padding:12px; border-radius:4px">
-                                <div style="font-size:11px; color:var(--text2); margin-bottom:4px">Piezas Ubicadas</div>
-                                <div style="font-size:22px; font-weight:700" id="resPlaced">0/0</div>
+                            <div class="preset-card" onclick="injectModularCabinet('torre')">
+                                <div class="preset-icon">🏛️</div>
+                                <div style="font-weight:600">Mueble Torre / Despensa</div>
+                                <div style="font-size:11px; color:var(--text2)">2100x600x560 mm</div>
                             </div>
                         </div>
                     </div>
-                    <div class="card-title">Análisis de Costos Detallado</div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr><th>Descripción del Insumo / Operación</th><th>Cantidad / Rendimiento</th><th>Costo Unitario</th><th>Costo Total Neto</th></tr>
-                            </thead>
-                            <tbody id="budgetTableBody">
-                                <tr><td colspan="4" style="text-align:center; color:var(--text2); padding:30px">Presupuesto vacío. Ejecute el cómputo de la optimización.</td></tr>
-                            </tbody>
-                        </table>
+
+                    <div class="card">
+                        <div class="card-title">Esquema Lineal de Modulación / Plano de Planta</div>
+                        <canvas id="blueprintCanvas" width="800" height="340"></canvas>
+                        <div style="text-align:center; font-size:11px; color:var(--text2)" id="canvasFeedback">
+                            El plano dinámico se renderizará automáticamente al modular elementos.
+                        </div>
                     </div>
                 </div>
 
-                <!-- PESTAÑA 3: NUBE SUPABASE -->
-                <div id="tab-cloud" class="tab-panel">
+                <!-- APARTADO 4: REPOSITORIO NUBE -->
+                <div id="sec-cloud" class="tab-panel">
                     <div class="card">
-                        <div class="card-title">Archivar Modulación Actual en Servidor</div>
-                        <div class="flex gap8 wrap" style="align-items: flex-end">
+                        <div class="card-title">Sincronizar Registro Técnico Actual</div>
+                        <div class="flex gap8" style="align-items:flex-end">
                             <div class="field" style="flex:1; margin:0">
-                                <label>Denominación del Proyecto Técnico</label>
-                                <input type="text" id="dbProjName" placeholder="Ej: Proyecto Cocina Empotrada - MDF 18mm">
+                                <label>Referencia del Proyecto</label>
+                                <input type="text" id="dbProjName" placeholder="Ej: Remodelación Cocina Moderna - Barquisimeto">
                             </div>
-                            <button class="btn btn-gold" onclick="saveProjectToCloud()" style="flex-shrink:0">💾 Subir a Supabase</button>
+                            <button class="btn btn-gold" onclick="saveToSupabaseCloud()">💾 Guardar en Supabase</button>
                         </div>
                     </div>
-                    <div class="card-title">Repositorio de Archivos Sincronizados</div>
+                    <div class="card-title">Ficheros Sincronizados en Servidor</div>
                     <div id="dbGrid" class="db-grid"></div>
                 </div>
 
-                <footer>Desarrollado en exclusiva por <span>Linaro</span> — Optimización Computarizada Estructural</footer>
+                <footer>Desarrollado para <span>Linaro</span> — Modulación Arquitectónica Integral</footer>
             </div>
         </div>
     </div>
 
-    <!-- TOAST NOTIFICACIONES -->
+    <!-- TOAST NOTIFICADOR -->
     <div class="toast" id="toast"></div>
 
-    <!-- SIMULADOR GRÁFICO (MODAL CANVAS) -->
-    <div id="cutPlanModal" class="cp-modal">
-        <div class="cp-inner">
-            <div class="cp-head">
-                <div>
-                    <div style="font-size:16px; font-weight:600">Esquema Técnico de Dimensionado</div>
-                    <div style="font-size:12px; color:var(--text2)">Cálculo de aprovechamiento bidimensional</div>
-                </div>
-                <button class="btn btn-danger" onclick="closeOptimizationModal()">❌ Cerrar Ventana</button>
-            </div>
-            <div class="cp-body">
-                <canvas id="optimizerCanvas" width="850" height="480"></canvas>
-                <div style="color: var(--text2); font-size:12px; text-align: center;" id="canvasMetricsInfo"></div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // Claves Públicas Supremas Supabase
+        // Configuración e Inicialización de Supabase
         const SUPABASE_URL = 'https://iufichpykfkhjednfljy.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZmljaHB5a2ZraGplZG5mbGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDI3NzMsImV4cCI6MjA5NDYxODc3M30.0OG0e2Oj_5-uJckF-a0duPDgBmgyYr-3VLJm3HvQRVM';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let partsArray = [];
-        let globalSheetsCalculated = [];
+        let partsList = [];
+        let materialsList = [
+            { type: 'Pega Amarilla', desc: 'Pega Amarilla de Alta Resistencia (Galón)', cost: 25.00, provider: 'Suministros Central', qty: 1 },
+            { type: 'Tapacanto', desc: 'Tapacanto PVC Delgado 22mm', cost: 0.85, provider: 'Madetor', qty: 30 }
+        ];
 
-        // SISTEMA DE AUTENTICACIÓN DIRECTA Y TRANSICIÓN EXCLUSIVA
+        // AUTENTICACIÓN Y ENTRADA LIMPIA
         async function executeAuth(event) {
             event.preventDefault();
             const email = document.getElementById('email').value.trim();
@@ -428,42 +434,36 @@
             const btn = document.getElementById('btnSubmit');
 
             btn.disabled = true;
-            btn.textContent = 'Verificando con Servidor...';
-            displayAlertBox('none');
+            btn.textContent = 'Verificando Operador...';
+            setLoginAlert('none');
 
             try {
                 const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-                
                 if (error) {
-                    let friendlyMessage = 'Error de validación. Revise sus datos.';
-                    if (error.message === 'Invalid login credentials') {
-                        friendlyMessage = 'Credenciales Inválidas. Verifique el usuario y la clave.';
-                    } else if (error.message === 'Email not confirmed') {
-                        friendlyMessage = 'El correo electrónico no ha sido confirmado aún.';
-                    }
-                    displayAlertBox('error', friendlyMessage);
+                    setLoginAlert('error', 'Llaves denegadas. Revisa correo o contraseña técnica.');
                     btn.disabled = false;
                     btn.textContent = 'Verificar Identidad';
                 } else {
-                    displayAlertBox('success', 'Llaves validadas. Abriendo Linaro Studio...');
+                    setLoginAlert('success', 'Llaves aprobadas. Iniciando Linaro Core...');
                     document.getElementById('userBadge').textContent = `Operador: ${data.user.email}`;
                     
-                    // EFECTUAR CAMBIO DE PANEL VISUAL USANDO DISPLAY DIRECTO
                     setTimeout(() => {
-                        document.getElementById('loginSection').style.style.setProperty('display', 'none', 'important');
-                        document.getElementById('loginSection').style.display = 'none';
+                        document.getElementById('loginSection').style.setProperty('display', 'none', 'important');
                         document.getElementById('mainWorkspace').style.display = 'flex';
-                        loadProjectsGrid(); // Descargar base de datos
-                    }, 600);
+                        renderMaterialsTable();
+                        recalculateAllSections();
+                        loadCloudGrid();
+                        drawDefaultCanvas();
+                    }, 500);
                 }
             } catch (err) {
-                displayAlertBox('error', 'Fallo de red fatal al conectar con Supabase.');
+                setLoginAlert('error', 'Error crítico de enrutamiento o conexión de red.');
                 btn.disabled = false;
                 btn.textContent = 'Verificar Identidad';
             }
         }
 
-        function displayAlertBox(type, msg = '') {
+        function setLoginAlert(type, msg = '') {
             const box = document.getElementById('loginAlertBox');
             if (type === 'none') { box.style.display = 'none'; return; }
             box.className = `alert ${type}`;
@@ -471,311 +471,308 @@
             box.style.display = 'block';
         }
 
-        // CONTROLADORES DE LA MODULACIÓN DE PIEZAS
-        function addPartToList() {
-            const label = document.getElementById('partLabel').value.trim() || `Módulo Pz ${partsArray.length + 1}`;
+        function changeSection(e, secId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            e.target.classList.add('active');
+            document.getElementById(secId).classList.add('active');
+        }
+
+        // GESTIÓN DINÁMICA DEL CATÁLOGO DE MATERIALES SOLICITADOS
+        function addMaterialToInventory() {
+            const type = document.getElementById('matType').value;
+            const desc = document.getElementById('matDesc').value.trim() || `${type} Estándar`;
+            const cost = parseFloat(document.getElementById('matCost').value) || 0;
+            const provider = document.getElementById('matProvider').value.trim() || 'General';
+            const qty = parseInt(document.getElementById('matQty').value) || 1;
+
+            materialsList.push({ type, desc, cost, provider, qty });
+            renderMaterialsTable();
+            recalculateAllSections();
+            popToast(`✓ ${type} incorporado al presupuesto.`);
+
+            document.getElementById('matDesc').value = '';
+            document.getElementById('matProvider').value = '';
+            document.getElementById('matQty').value = '1';
+        }
+
+        function renderMaterialsTable() {
+            const body = document.getElementById('materialsTableBody');
+            if (materialsList.length === 0) {
+                body.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text2)">Ningún material registrado. Agrega ítems arriba.</td></tr>';
+                return;
+            }
+            body.innerHTML = '';
+            materialsList.forEach((m, i) => {
+                body.innerHTML += `
+                    <tr>
+                        <td><span style="color:var(--gold); font-weight:600">${m.type}</span></td>
+                        <td>${m.desc}</td>
+                        <td>$${m.cost.toFixed(2)}</td>
+                        <td><span style="font-size:11px; color:var(--text2)">${m.provider}</span></td>
+                        <td>${m.qty}x</td>
+                        <td><button class="btn btn-danger" style="padding:2px 6px; font-size:11px" onclick="deleteMaterial(${i})">✕</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function deleteMaterial(i) {
+            materialsList.splice(i, 1);
+            renderMaterialsTable();
+            recalculateAllSections();
+        }
+
+        // CONTROL DE PIEZAS Y DESPIECE
+        function addCustomPart() {
+            const label = document.getElementById('partLabel').value.trim() || `Pieza ${partsList.length + 1}`;
             const long = parseInt(document.getElementById('partLong').value);
             const width = parseInt(document.getElementById('partWidth').value);
-            const qty = parseInt(document.getElementById('partQty').value);
+            const qty = parseInt(document.getElementById('partQtyInput').value) || 1;
             const color = document.getElementById('partColor').value;
             const rotate = document.getElementById('partRotate').checked;
 
-            if (!long || !width || long <= 0 || width <= 0 || qty <= 0) {
-                triggerToast("⚠️ Defina dimensiones reales mayores a cero en milímetros.");
+            if (!long || !width || long <= 0 || width <= 0) {
+                popToast("⚠️ Ingresa dimensiones geométricas coherentes.");
                 return;
             }
 
-            partsArray.push({ label, long, width, qty, color, rotate });
-            refreshPartsTable();
-            triggerToast("✓ Pieza acoplada a la lista actual.");
+            partsList.push({ label, long, width, qty, color, rotate });
+            renderPartsTable();
+            recalculateAllSections();
+            popToast("✓ Pieza acoplada al despiece mecánico.");
 
             document.getElementById('partLabel').value = '';
             document.getElementById('partLong').value = '';
             document.getElementById('partWidth').value = '';
-            document.getElementById('partQty').value = '1';
         }
 
-        function refreshPartsTable() {
+        function renderPartsTable() {
             const body = document.getElementById('partsTableBody');
-            if (partsArray.length === 0) {
-                body.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text2); padding:30px;">Ninguna pieza cargada en la modulación actual.</td></tr>';
+            if (partsList.length === 0) {
+                body.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text2)">No hay piezas cargadas en la matriz operativa.</td></tr>';
                 return;
             }
             body.innerHTML = '';
-            partsArray.forEach((p, idx) => {
+            partsList.forEach((p, i) => {
                 body.innerHTML += `
                     <tr>
                         <td><strong>${p.label}</strong></td>
                         <td>${p.long} mm</td>
                         <td>${p.width} mm</td>
                         <td>${p.qty}x</td>
-                        <td>${p.rotate ? 'Habilitado' : 'Fijo'}</td>
-                        <td><span style="display:inline-block; width:14px; height:14px; background:${p.color}; border-radius:3px; border:1px solid #444"></span></td>
-                        <td><button class="btn btn-danger" style="padding:3px 8px; font-size:11px;" onclick="removePartFromList(${idx})">Eliminar</button></td>
+                        <td>${p.rotate ? 'Sí' : 'No'}</td>
+                        <td><span style="display:inline-block; width:12px; height:12px; background:${p.color}; border-radius:2px;"></span></td>
+                        <td><button class="btn btn-danger" style="padding:2px 6px; font-size:11px" onclick="deletePart(${i})">✕</button></td>
                     </tr>
                 `;
             });
         }
 
-        function removePartFromList(idx) {
-            partsArray.splice(idx, 1);
-            refreshPartsTable();
+        function deletePart(i) {
+            partsList.splice(i, 1);
+            renderPartsTable();
+            recalculateAllSections();
         }
 
-        function clearCurrentList() {
-            partsArray = [];
-            refreshPartsTable();
-            triggerToast("Lista de piezas vaciada por completo.");
-        }
-
-        function changeWorkspaceTab(e, tabId) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-            e.target.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-        }
-
-        // MOTOR DE OPTIMIZACIÓN 2D EMULADO (GEOMETRÍA Y RESTRICCIONES)
-        function processOptimization() {
-            const sLong = parseInt(document.getElementById('sheetLong').value);
-            const sWidth = parseInt(document.getElementById('sheetWidth').value);
-            const sPrice = parseFloat(document.getElementById('sheetPrice').value) || 0;
-            const blade = parseInt(document.getElementById('bladeThickness').value) || 0;
-
-            if (partsArray.length === 0) {
-                triggerToast("⚠️ Ingrese al menos una pieza para iniciar el algoritmo.");
-                return;
+        // MODELADO E INYECCIÓN AUTOMÁTICA DE PRESETS DE MUEBLES
+        function injectModularCabinet(type) {
+            if (type === 'base') {
+                partsList.push({ label: 'Lateral Base (Mueble Bajo)', long: 720, width: 560, qty: 2, color: '#2ecc71', rotate: true });
+                partsList.push({ label: 'Piso Base (Mueble Bajo)', long: 568, width: 560, qty: 1, color: '#3498db', rotate: true });
+                partsList.push({ label: 'Amarres Superiores', long: 568, width: 100, qty: 2, color: '#f1c40f', rotate: true });
+                popToast("🗄️ Mueble Base acoplado estructuralmente.");
+            } else if (type === 'aereo') {
+                partsList.push({ label: 'Lateral Superior Aéreo', long: 600, width: 320, qty: 2, color: '#e67e22', rotate: true });
+                partsList.push({ label: 'Techo/Piso Superior', long: 568, width: 320, qty: 2, color: '#1abc9c', rotate: true });
+                popToast("🔲 Mueble Aéreo Estándar acoplado estructuralmente.");
+            } else if (type === 'torre') {
+                partsList.push({ label: 'Costado Torre Alta', long: 2100, width: 560, qty: 2, color: '#e74c3c', rotate: true });
+                partsList.push({ label: 'Estante Columna', long: 568, width: 540, qty: 4, color: '#9b59b6', rotate: true });
+                popToast("🏛️ Columna Torre acoplada estructuralmente.");
             }
-
-            // Desglosar cantidades individuales
-            let totalItems = [];
-            partsArray.forEach(p => {
-                for (let i = 0; i < p.qty; i++) {
-                    totalItems.push({ ...p, qty: 1 });
-                }
-            });
-
-            // Ordenamiento técnico por área para empaquetado optimizado
-            totalItems.sort((a, b) => (b.long * b.width) - (a.long * a.width));
-
-            globalSheetsCalculated = [];
-            let currentSheet = { id: 1, spaces: [] };
-            globalSheetsCalculated.push(currentSheet);
-
-            let totalPlacedCount = 0;
-
-            totalItems.forEach(item => {
-                let placed = false;
-                let itemL = item.long;
-                let itemW = item.width;
-
-                for (let sheet of globalSheetsCalculated) {
-                    // Validar si cabe de forma directa o rotada
-                    if (itemL <= sLong && itemW <= sWidth) {
-                        sheet.spaces.push({ l: itemL, w: itemW, label: item.label, color: item.color });
-                        placed = true;
-                        totalPlacedCount++;
-                        break;
-                    } else if (item.rotate && itemW <= sLong && itemL <= sWidth) {
-                        sheet.spaces.push({ l: itemW, w: itemL, label: item.label, color: item.color });
-                        placed = true;
-                        totalPlacedCount++;
-                        break;
-                    }
-                }
-
-                if (!placed) {
-                    let newSheet = { id: globalSheetsCalculated.length + 1, spaces: [] };
-                    if (itemL <= sLong && itemW <= sWidth) {
-                        newSheet.spaces.push({ l: itemL, w: itemW, label: item.label, color: item.color });
-                        totalPlacedCount++;
-                    } else if (item.rotate && itemW <= sLong && itemL <= sWidth) {
-                        newSheet.spaces.push({ l: itemW, w: itemL, label: item.label, color: item.color });
-                        totalPlacedCount++;
-                    }
-                    globalSheetsCalculated.push(newSheet);
-                }
-            });
-
-            // Actualizar datos en UI de presupuestación
-            const sheetsTotal = globalSheetsCalculated.length;
-            document.getElementById('resSheets').textContent = sheetsTotal;
-            document.getElementById('resPlaced').textContent = `${totalPlacedCount}/${totalItems.length}`;
-            document.getElementById('resCostMat').textContent = `$${(sheetsTotal * sPrice).toFixed(2)}`;
-
-            let areaPiezas = totalItems.reduce((acc, p) => acc + (p.long * p.width), 0);
-            let areaTableros = sheetsTotal * sLong * sWidth;
-            let effRatio = Math.min(Math.round((areaPiezas / areaTableros) * 100), 95);
-            document.getElementById('resEfficiency').textContent = `${effRatio}%`;
-
-            renderBudgetGrid(sheetsTotal, sPrice);
-            executeCanvasDraw(sLong, sWidth);
-            
-            document.getElementById('canvasMetricsInfo').textContent = `Visualización del Tablero N° 1. Eficiencia calculada de la placa: ${effRatio}%`;
-            document.getElementById('cutPlanModal').style.display = 'flex';
+            renderPartsTable();
+            recalculateAllSections();
+            drawModularSimulation(type);
         }
 
-        function renderBudgetGrid(sheets, price) {
-            const body = document.getElementById('budgetTableBody');
-            const totalMaterialCost = sheets * price;
-            const operationalCuts = totalMaterialCost * 0.15; // Estimación de cantos y manipulación técnica
-            const globalTotal = totalMaterialCost + operationalCuts;
+        // CÓMPUTO GENERAL DE PRESUPUESTOS (RECALCULO MATRIZ)
+        function recalculateAllSections() {
+            const fDesign = parseFloat(document.getElementById('feeDesign').value) || 0;
+            const fLabor = parseFloat(document.getElementById('feeLabor').value) || 0;
+            const fCarpentry = parseFloat(document.getElementById('feeCarpentry').value) || 0;
 
-            body.innerHTML = `
-                <tr><td>Tableros de Materia Prima Estructural</td><td>${sheets} Unidades</td><td>$${price.toFixed(2)}</td><td>$${totalMaterialCost.toFixed(2)}</td></tr>
-                <tr><td>Hojas de Corte, Enchapado de Cantos y Merma Estimada</td><td>Cómputo Global</td><td>$${operationalCuts.toFixed(2)}</td><td>$${operationalCuts.toFixed(2)}</td></tr>
-                <tr style="font-weight:700; background:var(--panel2)"><td>INVERSIÓN TOTAL ESTIMADA</td><td>-</td><td>-</td><td>$${globalTotal.toFixed(2)}</td></tr>
-            `;
+            // Calcular costo acumulado del catálogo dinámico de materiales
+            let computedMaterialsTotal = 0;
+            materialsList.forEach(m => {
+                computedMaterialsTotal += (m.cost * m.qty);
+            });
+
+            const totalGeneral = fDesign + fLabor + fCarpentry + computedMaterialsTotal;
+
+            // Actualizar bloques superiores de visualización
+            document.getElementById('outDesign').textContent = `$${fDesign.toFixed(2)}`;
+            document.getElementById('outLabor').textContent = `$${fLabor.toFixed(2)}`;
+            document.getElementById('outCarpentry').textContent = `$${fCarpentry.toFixed(2)}`;
+            document.getElementById('outMaterial').textContent = `$${computedMaterialsTotal.toFixed(2)}`;
+            document.getElementById('outTotalText').textContent = `$${totalGeneral.toFixed(2)}`;
+
+            // Actualizar Matriz Comercial Analítica
+            document.getElementById('rowDesign').textContent = `$${fDesign.toFixed(2)}`;
+            document.getElementById('rowLabor').textContent = `$${fLabor.toFixed(2)}`;
+            document.getElementById('rowCarpentry').textContent = `$${fCarpentry.toFixed(2)}`;
+            document.getElementById('rowMaterials').textContent = `$${computedMaterialsTotal.toFixed(2)}`;
+            document.getElementById('rowTotal').textContent = `$${totalGeneral.toFixed(2)}`;
         }
 
-        function executeCanvasDraw(sLong, sWidth) {
-            const canvas = document.getElementById('optimizerCanvas');
+        // CANVAS PLANOS TÉCNICOS
+        function drawDefaultCanvas() {
+            const canvas = document.getElementById('blueprintCanvas');
             const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = '#1e1e1e';
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = '#888888';
+            ctx.font = '12px sans-serif';
+            ctx.fillText("Configura o selecciona un módulo preestablecido para proyectar la elevación arquitectónica.", 150, 170);
+        }
 
-            // Fondo del canvas
-            ctx.fillStyle = '#161616';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        function drawModularSimulation(type) {
+            const canvas = document.getElementById('blueprintCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0,0,canvas.width,canvas.height);
 
-            // Renderizar contorno del Tablero Base
-            ctx.fillStyle = '#222222';
-            ctx.fillRect(40, 40, 770, 380);
+            ctx.fillStyle = '#252526';
+            ctx.fillRect(0,0,canvas.width,canvas.height);
             ctx.strokeStyle = '#ba7517';
             ctx.lineWidth = 2;
-            ctx.strokeRect(40, 40, 770, 380);
 
-            // Simular el trazado geométrico en cascada ordenado
-            ctx.fillStyle = 'rgba(186, 117, 23, 0.35)';
-            ctx.fillRect(40, 40, 400, 380);
-            ctx.strokeStyle = '#ba7517';
-            ctx.strokeRect(40, 40, 400, 380);
-
-            ctx.fillStyle = 'rgba(46, 204, 113, 0.25)';
-            ctx.fillRect(440, 40, 370, 190);
-            ctx.strokeStyle = '#2ecc71';
-            ctx.strokeRect(440, 40, 370, 190);
-
-            ctx.fillStyle = 'rgba(52, 152, 219, 0.25)';
-            ctx.fillRect(440, 230, 200, 190);
-            ctx.strokeStyle = '#3498db';
-            ctx.strokeRect(440, 230, 200, 190);
-
-            // Texto descriptivo interno en Canvas
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 12px sans-serif';
-            ctx.fillText(`Dimensiones del Tablero Principal: ${sLong}mm x ${sWidth}mm`, 60, 70);
-            ctx.font = '11px sans-serif';
-            ctx.fillStyle = '#aaaaaa';
-            ctx.fillText("Sección de Cortes A1 (Optimizada)", 60, 95);
-            ctx.fillText("Sección de Cortes A2", 460, 70);
-        }
-
-        function closeOptimizationModal() {
-            document.getElementById('cutPlanModal').style.display = 'none';
-        }
-
-        function triggerToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 3000);
-        }
-
-        // CONTROLADORES CLOUD - ALMACENAMIENTO SUPABASE
-        async function saveProjectToCloud() {
-            const projName = document.getElementById('dbProjName').value.trim();
-            if (!projName) {
-                triggerToast("⚠️ Ingrese una denominación de proyecto válida.");
-                return;
+            if (type === 'base') {
+                ctx.strokeRect(320, 70, 180, 220);
+                ctx.fillStyle = 'rgba(186, 117, 23, 0.1)';
+                ctx.fillRect(320, 70, 180, 220);
+                ctx.strokeRect(320, 260, 180, 30); // Zócalo
+                ctx.strokeRect(320, 70, 90, 190);
+                ctx.strokeRect(410, 70, 90, 190);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText("MÓDULO BAJO BASE (VISTA FRONTAL ELEVACIÓN)", 270, 45);
+            } else if (type === 'aereo') {
+                ctx.strokeRect(330, 60, 160, 180);
+                ctx.fillStyle = 'rgba(52, 152, 219, 0.1)';
+                ctx.fillRect(330, 60, 160, 180);
+                ctx.strokeRect(330, 60, 80, 180);
+                ctx.strokeRect(410, 60, 80, 180);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText("MÓDULO AÉREO SUPERIOR (VISTA FRONTAL ELEVACIÓN)", 260, 40);
+            } else {
+                ctx.strokeRect(360, 40, 100, 270);
+                ctx.fillStyle = 'rgba(155, 89, 182, 0.1)';
+                ctx.fillRect(360, 40, 100, 270);
+                ctx.strokeRect(360, 40, 100, 80);
+                ctx.strokeRect(360, 120, 100, 190);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText("COLUMNA TORRE DE ALMACENAMIENTO", 300, 25);
             }
+            document.getElementById('canvasFeedback').textContent = `Geometría analítica de módulo lineal renderizada para: [Mueble ${type.toUpperCase()}].`;
+        }
 
-            const dataPayload = {
-                name: projName,
+        // PERSISTENCIA Y REGISTROS EN SUPABASE CLOUD
+        async function saveToSupabaseCloud() {
+            const name = document.getElementById('dbProjName').value.trim();
+            if (!name) { popToast("⚠️ Asigna una referencia de obra para guardar."); return; }
+
+            const payload = {
+                name: name,
+                parts: partsList,
+                materials: materialsList,
                 sheet_data: {
-                    long: document.getElementById('sheetLong').value,
-                    width: document.getElementById('sheetWidth').value,
-                    price: document.getElementById('sheetPrice').value
+                    design: document.getElementById('feeDesign').value,
+                    labor: document.getElementById('feeLabor').value,
+                    carpentry: document.getElementById('feeCarpentry').value
                 },
-                parts: partsArray,
                 updated_at: new Date()
             };
 
-            const { error } = await _supabase.from('proyectos').insert([dataPayload]);
-            
+            const { error } = await _supabase.from('proyectos').insert([payload]);
             if (error) {
-                triggerToast("❌ Error al guardar datos en la tabla remota.");
-                console.error(error);
+                popToast("❌ Detención crítica: Servidor no respondió.");
             } else {
-                triggerToast("💾 Fichero de modulación guardado con éxito.");
+                popToast("💾 Sincronización exitosa con la nube Supabase.");
                 document.getElementById('dbProjName').value = '';
-                loadProjectsGrid();
+                loadCloudGrid();
             }
         }
 
-        async function loadProjectsGrid() {
+        async function loadCloudGrid() {
             const grid = document.getElementById('dbGrid');
-            grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--text2)">Consultando base de datos cloud...</p>';
+            grid.innerHTML = '<p style="color:var(--text2)">Consultando registros...</p>';
 
-            try {
-                const { data, error } = await _supabase.from('proyectos').select('*').order('updated_at', { ascending: false });
-                
-                if (error || !data || data.length === 0) {
-                    grid.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text2); grid-column:1/-1">📁 El servidor remoto no registra proyectos aún.</div>';
-                    return;
-                }
-
-                grid.innerHTML = '';
-                data.forEach(p => {
-                    const stringParts = JSON.stringify(p.parts).replace(/'/g, "&apos;");
-                    grid.innerHTML += `
-                        <div class="db-card" onclick='restoreCloudProject(${stringParts})'>
-                            <div class="db-title">${p.name}</div>
-                            <div class="db-meta">Piezas totales: ${p.parts ? p.parts.length : 0} mod.</div>
-                            <button class="db-delete" onclick="event.stopPropagation(); executeProjectDelete(${p.id})">🗑</button>
-                        </div>
-                    `;
-                });
-            } catch (err) {
-                grid.innerHTML = '<div style="text-align:center; padding:40px; color:var(--error); grid-column:1/-1">Fallo de comunicación en rejilla.</div>';
+            const { data, error } = await _supabase.from('proyectos').select('*').order('updated_at', { ascending: false });
+            if (error || !data || data.length === 0) {
+                grid.innerHTML = '<p style="color:var(--text2); padding:10px;">No hay registros en la nube.</p>';
+                return;
             }
+
+            grid.innerHTML = '';
+            data.forEach(item => {
+                const partsStr = JSON.stringify(item.parts).replace(/'/g, "&apos;");
+                const matsStr = JSON.stringify(item.materials || []).replace(/'/g, "&apos;");
+                grid.innerHTML += `
+                    <div class="db-card" onclick='importCloudProject(${partsStr}, ${matsStr})'>
+                        <div class="db-title">${item.name}</div>
+                        <div style="font-size:11px; color:var(--text2)">Estructura: ${item.parts ? item.parts.length : 0} pz | Insumos: ${item.materials ? item.materials.length : 0}</div>
+                        <button class="db-delete" onclick="event.stopPropagation(); deleteCloudProject(${item.id})">🗑</button>
+                    </div>
+                `;
+            });
         }
 
-        function restoreCloudProject(loadedParts) {
-            if (loadedParts && Array.isArray(loadedParts)) {
-                partsArray = loadedParts;
-                refreshPartsTable();
-                triggerToast("✓ Proyecto restaurado en el panel.");
-                
-                // Forzar regreso visual a la pestaña 1
-                document.querySelector('.tab').click();
-            }
+        function importCloudProject(loadedParts, loadedMats) {
+            if (loadedParts) partsList = loadedParts;
+            if (loadedMats) materialsList = loadedMats;
+            renderPartsTable();
+            renderMaterialsTable();
+            recalculateAllSections();
+            popToast("✓ Fichero modular restaurado completamente.");
         }
 
-        async function executeProjectDelete(id) {
-            if (confirm("¿Desea eliminar de forma permanente esta modulación de la base de datos remota?")) {
+        async function deleteCloudProject(id) {
+            if (confirm("¿Desvincular este registro técnico del servidor permanentemente?")) {
                 await _supabase.from('proyectos').delete().eq('id', id);
-                loadProjectsGrid();
-                triggerToast("Registro removido del servidor cloud.");
+                loadCloudGrid();
+                popToast("Fichero purgado del sistema.");
             }
         }
 
-        // EXPORTADOR ANALÍTICO PDF
-        function generateAnalyticPDF() {
+        // EXPORTACIÓN A PDF ESTRUCTURADO
+        function exportStructuredPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            
             doc.setFont("Helvetica", "bold");
             doc.setFontSize(16);
-            doc.text("LINARO STUDIO — INFORME TÉCNICO DE COSTOS", 15, 20);
+            doc.text("LINARO PRO STUDIO — RESUMEN DE LIQUIDACIÓN Y SUMINISTROS", 14, 20);
             
             doc.setFont("Helvetica", "normal");
-            doc.setFontSize(10);
-            doc.text(`Tableros requeridos: ${document.getElementById('resSheets').textContent}`, 15, 32);
-            doc.text(`Porcentaje de optimización: ${document.getElementById('resEfficiency').textContent}`, 15, 40);
-            doc.text(`Costo estimado insumos: ${document.getElementById('resCostMat').textContent}`, 15, 48);
-            doc.text(`Fecha del Reporte: ${new Date().toLocaleString()}`, 15, 56);
+            doc.setFontSize(11);
+            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 28);
             
-            doc.save("Reporte_Modulacion_Linaro.pdf");
-            triggerToast("📄 Fichero PDF estructurado e iniciado.");
+            doc.text(`1.0 - Presupuesto de Diseño: ${document.getElementById('outDesign').textContent}`, 14, 40);
+            doc.text(`2.0 - Presupuesto de Mano de Obra: ${document.getElementById('outLabor').textContent}`, 14, 48);
+            doc.text(`3.0 - Presupuesto de Carpintería: ${document.getElementById('outCarpentry').textContent}`, 14, 56);
+            doc.text(`4.0 - Costo Acumulado Materiales: ${document.getElementById('outMaterial').textContent}`, 14, 64);
+            
+            doc.setFont("Helvetica", "bold");
+            doc.text(`PRECIO TOTAL DEL PROYECTO: ${document.getElementById('outTotalText').textContent}`, 14, 76);
+            
+            doc.save("Presupuesto_Estructurado_Linaro.pdf");
+            popToast("📄 Fichero comercial PDF generado.");
+        }
+
+        function popToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
         }
     </script>
 </body>
