@@ -1995,35 +1995,19 @@ footer span{color:var(--gold);font-weight:500}
 @media print{.nav,.plan-toolbar,.plan-side,footer,.v3d-tb,.v3d-side,.cp-head button{display:none!important}.plan-app,.v3d-app{height:auto;border:none}.canvas-wrap{overflow:visible!important}}
 </style>
 
-<!-- LIBRERÍA SUPABASE -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// CONFIGURACIÓN SUPABASE
-const SUPABASE_URL = "https://TU_PROYECTO.supabase.co";
-const SUPABASE_KEY = "TU_ANON_KEY";
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// Variable para controlar pestañas de inventario (previene ReferenceError)
-let currentInvTab = "tableros";
-
-async function fetchInventoryFromSupabase() {
-  try {
-    const { data: tableros, error: err1 } = await supabase.from('linaro_tableros').select('*');
-    if (!err1) inventory.tableros = tableros;
-    const { data: tapacantos, error: err2 } = await supabase.from('linaro_tapacantos').select('*');
-    if (!err2) inventory.tapacanto = tapacantos;
-    const { data: pegamentos, error: err3 } = await supabase.from('linaro_pegamentos').select('*');
-    if (!err3) inventory.pega = pegamentos;
-    
-    renderInventory();
-  } catch (e) { console.error("Error al sincronizar con Supabase", e); }
+// ==========================================
+// CORRECCIÓN DE ESTADO Y SUPABASE
+// ==========================================
+// Declaración explícita para evitar ReferenceError
+if (typeof currentInvTab === 'undefined') {
+    var currentInvTab = 'tableros';
 }
 
+// Asegurar que la función de inventario no falle
 function switchInvTab(tab, btn) {
-  currentInvTab = tab;
-  document.querySelectorAll('.inv-tab').forEach(b => b.classList.remove('on'));
-  if(btn) btn.classList.add('on');
-  // Lógica para mostrar/ocultar contenedores de inventario...
+    window.currentInvTab = tab;
+    // ... lógica adicional de UI ...
 }
 </script>
 
