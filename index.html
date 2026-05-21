@@ -5,9 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Linaro — Presupuestación Arquitectónica</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/%3E%3Crect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/%3E%3Cpath d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/%3E%3Crect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/%3E%3C/svg%3E">
+<!-- LIBRERÍA OFICIAL DE SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
+// =========================================================================
+// LINARO PRO STUDIO v3.1 — CONFIGURACIÓN DE CONEXIÓN A SUPABASE NUBE
+// =========================================================================
+// Coloca aquí tus credenciales de Supabase (las consigues en Settings -> API)
+const SUPABASE_URL = "https://TU_PROYECTO.supabase.co"; 
+const SUPABASE_KEY = "TU_ANON_KEY_DE_SUPABASE";
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 // ==========================================
-// 1. ESTADO GLOBAL DE LA APLICACIÓN
+// ESTADO GLOBAL DE LA APLICACIÓN
 // ==========================================
 let currentTab = 'budget';
 let currentCategory = 'cocina';
@@ -18,47 +29,38 @@ let projectData = {
   design: { m2: 0, rate: 6, desc: 'Honorarios de diseño', active: false }
 };
 
-// Inventario por defecto (Biblioteca de Materiales en Barquisimeto)
+// Inventario unificado sincronizado con las tablas de Supabase
 let inventory = {
-  tableros: [
-    { id: 1, nombre: 'MDF Blanco Hueso 18mm', color: 'Blanco', prov: 'Madetor', ancho: 2440, alto: 1220, espesor: 18, precio: 45, moneda: 'USD', stock: 1, notas: 'Tablero base' },
-    { id: 2, nombre: 'MDP Nogal Terra 18mm', color: 'Nogal', prov: 'Maderajara', ancho: 2440, alto: 1220, espesor: 18, precio: 65, moneda: 'USD', stock: 1, notas: 'Texturizado premium' }
-  ],
-  tapacanto: [
-    { id: 1, nombre: 'PVC 1mm Blanco', color: 'Blanco', mat: 'PVC', espesor: 1, ancho: 22, largo: 50, precio: 15, moneda: 'USD', stock: 1, prov: 'Madetor', notas: 'Canto delgado' }
-  ],
-  pega: [
-    { id: 1, tipo: 'amarilla', nombre: 'Pega Hércules de Contacto', desc: 'Para tapacanto manual', pres: '1L', rend: 8, precio: 12, moneda: 'USD', prov: 'Local', stock: 1, notas: 'Secado rápido' }
-  ]
+  tableros: [],
+  tapacanto: [],
+  pega: []
 };
 
-// Datos de Planos y 3D
+// CORRECCIÓN DEL REFERENCEERROR: Variable de control de pestañas de inventario declarada formalmente
+let currentInvTab = 'tableros'; 
+
+// Datos para Planos 2D y Escena 3D
 let planarRooms = [];
 let planarFurniture = [];
 let selectedElement = null;
-let svgScale = 50; // 1 metro = 50 píxeles
+let svgScale = 50; 
 
-// Variables de renderizado 3D (Simulado avanzado por Canvas)
 let v3dRooms = [];
 let v3dObjects = [];
 let v3dSettings = { showWalls: true, showCeil: false, viewMode: 'persp' };
-let cameraAngleX = -0.5; // Rotación horizontal
-let cameraAngleY = 0.6;  // Rotación vertical
-let cameraZoom = 1.0;
-let cameraPanX = 0;
-let cameraPanY = 0;
-let isDragging3d = false;
-let lastMouseX, lastMouseY;
+let cameraAngleX = -0.5; let cameraAngleY = 0.6; let cameraZoom = 1.0;
+let cameraPanX = 0; let cameraPanY = 0;
+let isDragging3d = false; let lastMouseX, lastMouseY;
 
 // ==========================================
-// 2. SISTEMA DE CONTROL DE ACCESO (LOGIN)
+// CONTROL DE ACCESO E INICIALIZACIÓN
 // ==========================================
 function doLogin() {
   const u = document.getElementById('loginUser').value;
   const p = document.getElementById('loginPass').value;
   if (u.trim() !== "" && p.trim() !== "") {
     document.getElementById('loginOverlay').style.display = 'none';
-    showToast("¡Bienvenido a Linaro!");
+    showToast("¡Sesión iniciada en Linaro Pro Studio!");
     initApp();
   } else {
     const err = document.getElementById('loginErr');
@@ -70,27 +72,12 @@ function doLogin() {
   }
 }
 
-// ==========================================
-// 3. NAVEGACIÓN Y FLUJO
-// ==========================================
-function goTab(tabId, btn) {
-  document.querySelectorAll('.nt').forEach(b => b.classList.remove('on'));
-  document.querySelectorAll('.module').forEach(m => m.classList.remove('on'));
-  
-  if(btn) btn.classList.add('on');
-  const mod = document.getElementById(tabId);
-  if(mod) mod.classList.add('on');
-  currentTab = tabId;
-
-  if (tabId === 'plans') { renderPlans(); }
-  if (tabId === 'vista3d') { init3DCanvas(); render3D(); }
-}
-
 function initApp() {
   const dInput = document.getElementById('pDate');
   if(dInput) dInput.value = projectData.date;
-  updateMatSelect();
-  renderInventory();
+  
+  // Descargar catálogo de la nube de forma automática al iniciar
+  fetchInventoryFromSupabase();
   recalc();
 }
 
@@ -104,7 +91,196 @@ function showToast(msg) {
 }
 
 // ==========================================
-// 4. MÓDULO: PRESUPUESTO
+// SINCRONIZACIÓN AUTOMÁTICA CON LA NUBE
+// ==========================================
+async function fetchInventoryFromSupabase() {
+  try {
+    // 1. Descargar Tableros
+    const { data: tableros, error: err1 } = await supabase.from('linaro_tableros').select('*');
+    if (err1) throw err1;
+    inventory.tableros = tableros || [];
+
+    // 2. Descargar Tapacantos
+    const { data: tapacantos, error: err2 } = await supabase.from('linaro_tapacantos').select('*');
+    if (err2) throw err2;
+    inventory.tapacanto = tapacantos || [];
+
+    // 3. Descargar Pegamentos
+    const { data: pegamentos, error: err3 } = await supabase.from('linaro_pegamentos').select('*');
+    if (err3) throw err3;
+    inventory.pega = pegamentos || [];
+
+    // Renderizar los datos actualizados sobre la interfaz
+    renderInventory();
+    updateMatSelect();
+  } catch (error) {
+    console.error("Error sincronizando catálogo con Supabase:", error.message);
+    showToast("Error consultando catálogo en la nube...");
+  }
+}
+
+// ==========================================
+// ENTRADAS DEL CATÁLOGO MAESTRO (POST)
+// ==========================================
+async function addMel() {
+  const name = document.getElementById('mNombre').value || 'Tablero';
+  const price = parseFloat(document.getElementById('mPrecio').value) || 0;
+
+  const dataInsert = {
+    nombre: name,
+    color: document.getElementById('mColor').value || '',
+    prov: document.getElementById('mProv').value || '', 
+    ancho: parseInt(document.getElementById('mAncho').value) || 2440,
+    alto: parseInt(document.getElementById('mAlto').value) || 1220, 
+    espesor: parseInt(document.getElementById('mEspesor').value) || 18,
+    precio: price, 
+    moneda: document.getElementById('mMoneda').value || 'USD', 
+    stock: parseInt(document.getElementById('mStock').value) || 1,
+    notas: document.getElementById('mNotas').value || ''
+  };
+
+  const { error } = await supabase.from('linaro_tableros').insert([dataInsert]);
+  
+  if (error) {
+    showToast("Error al registrar en linaro_tableros");
+    console.error(error);
+  } else {
+    showToast("¡Tablero guardado en Catálogo Nube!");
+    fetchInventoryFromSupabase();
+  }
+}
+
+async function addTc() {
+  const name = document.getElementById('tcNombre').value || 'Canto';
+  
+  const dataInsert = {
+    nombre: name, 
+    color: document.getElementById('tcColor').value || '',
+    mat: document.getElementById('tcMat').value || 'PVC', 
+    espesor: parseFloat(document.getElementById('tcEspesor').value) || 1,
+    ancho: parseInt(document.getElementById('tcAncho').value) || 22, 
+    largo: parseInt(document.getElementById('tcLargo').value) || 50,
+    precio: parseFloat(document.getElementById('tcPrecio').value) || 0, 
+    moneda: document.getElementById('tcMoneda').value || 'USD',
+    stock: parseInt(document.getElementById('tcStock').value) || 1, 
+    prov: document.getElementById('tcProv').value || '',
+    notas: document.getElementById('tcNotas').value || ''
+  };
+
+  const { error } = await supabase.from('linaro_tapacantos').insert([dataInsert]);
+  if (error) {
+    showToast("Error al registrar tapacanto");
+    console.error(error);
+  } else {
+    showToast("¡Tapacanto guardado en Catálogo Nube!");
+    fetchInventoryFromSupabase();
+  }
+}
+
+async function addPg() {
+  const name = document.getElementById('pgNombre').value || 'Pegamento';
+  const dataInsert = {
+    nombre: name,
+    tipo: document.getElementById('pgTipo').value || 'amarilla', 
+    descr: document.getElementById('pgDesc').value || '',
+    pres: document.getElementById('pgPres').value || '1L', 
+    rend: parseFloat(document.getElementById('pgRend').value) || 8,
+    precio: parseFloat(document.getElementById('pgPrecio').value) || 0, 
+    moneda: document.getElementById('pgMoneda').value || 'USD',
+    prov: document.getElementById('pgProv').value || '', 
+    stock: parseInt(document.getElementById('pgStock').value) || 1,
+    notas: document.getElementById('pgNotas').value || ''
+  };
+
+  const { error } = await supabase.from('linaro_pegamentos').insert([dataInsert]);
+  if (error) {
+    showToast("Error al registrar pegamento");
+    console.error(error);
+  } else {
+    showToast("¡Pegamento guardado en Catálogo Nube!");
+    fetchInventoryFromSupabase();
+  }
+}
+
+async function deleteInvItem(type, id) {
+  let table = type === 'tableros' ? 'linaro_tableros' : (type === 'tapacanto' ? 'linaro_tapacantos' : 'linaro_pegamentos');
+  const { error } = await supabase.from(table).delete().eq('id', id);
+  if (error) {
+    showToast("Error al remover de la nube");
+    console.error(error);
+  } else {
+    showToast("Material eliminado del catálogo global");
+    fetchInventoryFromSupabase();
+  }
+}
+
+// ==========================================
+// RENDERIZADO INTERNO DE COMPONENTES E INVENTARIO
+// ==========================================
+function renderInventory() {
+  if(document.getElementById('melCount')) document.getElementById('melCount').textContent = `${inventory.tableros.length} tableros`;
+  if(document.getElementById('melList')) {
+    document.getElementById('melList').innerHTML = inventory.tableros.map(m => `
+      <div class="card mb8 flexb">
+        <div><strong>${m.nombre}</strong> <span class="tag">${m.ancho}x${m.alto}x${m.espesor}mm</span><br><small class="muted">Proveedor: ${m.prov || 'S/R'}</small></div>
+        <div class="tr"><div class="tgold mono">${m.moneda} ${Number(m.precio).toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tableros', ${m.id})">×</button></div>
+      </div>
+    `).join('') || '<div class="empty card"><div class="empty-icon">☁️</div><p>Sin tableros en Supabase</p></div>';
+  }
+
+  if(document.getElementById('tcCount')) document.getElementById('tcCount').textContent = `${inventory.tapacanto.length} referencias`;
+  if(document.getElementById('tcList')) {
+    document.getElementById('tcList').innerHTML = inventory.tapacanto.map(t => `
+      <div class="card mb8 flexb">
+        <div><strong>${t.nombre}</strong> <span class="tag">${t.ancho}mm - E:${t.espesor}mm</span></div>
+        <div class="tr"><div class="tblue mono">${t.moneda} ${Number(t.precio).toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tapacanto', ${t.id})">×</button></div>
+      </div>
+    `).join('') || '<div class="empty card"><div class="empty-icon">📏</div><p>Sin tapacantos en Supabase</p></div>';
+  }
+
+  if(document.getElementById('pgCount')) document.getElementById('pgCount').textContent = `${inventory.pega.length} productos`;
+  if(document.getElementById('pgList')) {
+    document.getElementById('pgList').innerHTML = inventory.pega.map(p => `
+      <div class="card mb8 flexb">
+        <div><strong>${p.nombre}</strong> <small class="badge bgr">${p.tipo}</small></div>
+        <div class="tr"><div class="tgreen mono">${p.moneda || 'USD'} ${Number(p.precio).toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('pega', ${p.id})">×</button></div>
+      </div>
+    `).join('') || '<div class="empty card"><div class="empty-icon">🪣</div><p>Sin pegamentos en Supabase</p></div>';
+  }
+}
+
+function updateMatSelect() {
+  const sel = document.getElementById('pMat');
+  if(!sel) return;
+  sel.innerHTML = inventory.tableros.map(m => `<option value="${m.id}">${m.nombre} (${m.moneda} ${m.precio})</option>`).join('');
+}
+
+// ==========================================
+// MÓDULO PESTAÑAS
+// ==========================================
+function goTab(tabId, btn) {
+  document.querySelectorAll('.nt').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.module').forEach(m => m.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  const mod = document.getElementById(tabId);
+  if(mod) mod.classList.add('on');
+  currentTab = tabId;
+
+  if (tabId === 'plans') { renderPlans(); }
+  if (tabId === 'vista3d') { init3DCanvas(); render3D(); }
+}
+
+function switchInvTab(tab, btn) {
+  document.querySelectorAll('.inv-tab').forEach(b => b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  if(document.getElementById('invTableros')) document.getElementById('invTableros').style.display = tab === 'tableros' ? 'block' : 'none';
+  if(document.getElementById('invTapacanto')) document.getElementById('invTapacanto').style.display = tab === 'tapacanto' ? 'block' : 'none';
+  if(document.getElementById('invPega')) document.getElementById('invPega').style.display = tab === 'pega' ? 'block' : 'none';
+  currentInvTab = tab;
+}
+
+// ==========================================
+// MÓDULO: PRESUPUESTACIÓN COMERCIAL
 // ==========================================
 const templates = {
   cocina: [
@@ -170,7 +346,7 @@ function addDiseno() {
   if(sub <= 0) return showToast("El costo de diseño debe ser mayor a 0");
   projectData.design.active = true;
   recalc();
-  showToast("Honorarios vinculados al resumen");
+  showToast("Honorarios vinculados al presupuesto");
 }
 
 function renderBudgetTable() {
@@ -213,7 +389,6 @@ function recalc() {
   let montoIva = baseImponible * (projectData.iva / 100);
   let totalGeneral = baseImponible + montoIva;
 
-  // Actualizar UI de totales
   if(document.getElementById('subs')) document.getElementById('subs').textContent = `${projectData.currency} ${subtotalObra.toFixed(2)}`;
   if(document.getElementById('disLbl')) document.getElementById('disLbl').textContent = `Diseño (${projectData.design.m2} m²)`;
   if(document.getElementById('sDis')) document.getElementById('sDis').textContent = `${projectData.currency} ${subtotalDiseno.toFixed(2)}`;
@@ -223,7 +398,6 @@ function recalc() {
   if(document.getElementById('siva')) document.getElementById('siva').textContent = `${projectData.currency} ${montoIva.toFixed(2)}`;
   if(document.getElementById('stot')) document.getElementById('stot').textContent = `${projectData.currency} ${totalGeneral.toFixed(2)}`;
 
-  // Sincronizar totales de filas de la tabla de forma rápida
   const tbody = document.getElementById('tbody');
   if(tbody) {
     const rows = tbody.querySelectorAll('tr');
@@ -271,20 +445,8 @@ function exportPDF() {
 }
 
 // ==========================================
-// 5. MÓDULO: DESPIECE AUTOMÁTICO (CARPINTERÍA)
+// MÓDULO: DESPIECE AUTOMÁTICO (CARPINTERÍA)
 // ==========================================
-function showGolaInfo() {
-  const gola = document.getElementById('pGolaB').value;
-  const box = document.getElementById('golaInfo');
-  if(!box) return;
-  if (gola === 'none') {
-    box.style.display = 'none';
-  } else {
-    box.style.display = 'block';
-    box.innerHTML = `<strong>Aviso de descuento Gola (${gola}):</strong> Se descontarán automáticamente 35mm en la altura de las puertas/frentes para el alojamiento del perfil de aluminio huanal.`;
-  }
-}
-
 function calcCuts() {
   const name = document.getElementById('pN').value;
   const w = parseFloat(document.getElementById('pW').value);
@@ -296,12 +458,12 @@ function calcCuts() {
   const gola = document.getElementById('pGolaB').value;
 
   const matId = document.getElementById('pMat').value;
-  const selectedMat = inventory.tableros.find(m => m.id == matId) || inventory.tableros[0];
+  const selectedMat = inventory.tableros.find(m => m.id == matId);
+
+  if(!selectedMat) return showToast("Por favor selecciona un material del catálogo maestro");
 
   let cuts = [];
-  // Laterales estructurales (2 uds)
   cuts.push({ desc: 'Laterales estructurales', cant: 2, l: h, a: d - 20, mat: selectedMat.nombre });
-  // Base y Techo
   cuts.push({ desc: 'Base inferior', cant: 1, l: w - (2 * t), a: d - 20, mat: selectedMat.nombre });
   cuts.push({ desc: 'Amarres superiores', cant: 2, l: w - (2 * t), a: 100, mat: selectedMat.nombre });
 
@@ -311,14 +473,14 @@ function calcCuts() {
 
   if (doors > 0) {
     let doorH = h - 4;
-    if (gola !== 'none') doorH -= 35; // Reducción de perfil Gola
+    if (gola !== 'none') doorH -= 35; 
     let doorW = (w / doors) - 3;
     cuts.push({ desc: 'Puertas batientes', cant: doors, l: doorH, a: doorW, mat: selectedMat.nombre });
   }
 
   let totalArea = cuts.reduce((acc, c) => acc + ((c.l * c.a * c.cant) / 1000000), 0);
   let sheetArea = (selectedMat.ancho * selectedMat.alto) / 1000000;
-  let sheetsReq = Math.ceil(totalArea / (sheetArea * 0.8)); // Margen de optimización del 80%
+  let sheetsReq = Math.ceil(totalArea / (sheetArea * 0.8));
 
   let cutBox = document.getElementById('cutBox');
   if(!cutBox) return;
@@ -335,21 +497,20 @@ function calcCuts() {
 
   cutBox.innerHTML = `
     <div class="card">
-      <div class="sl">Resultados del despiece estructural: ${name}</div>
+      <div class="sl">Resultados del despiece: ${name}</div>
       <table class="mb12">
-        <thead><tr><th>#</th><th>Pieza</th><th>Medidas (mm)</th><th class="tr">Cant.</th><th class="tr">Área total</th></tr></thead>
+        <thead><tr><th>#</th><th>Pieza</th><th>Medidas (mm)</th><th class="tr">Cant.</th><th class="tr">Área</th></tr></thead>
         <tbody>${tableRows}</tbody>
       </table>
       <div class="g3">
         <div class="metric"><div class="mlabel">Área Útil</div><div class="mval">${totalArea.toFixed(2)} m²</div></div>
-        <div class="metric"><div class="mlabel">Láminas aprox (Merma 20%)</div><div class="mval tgold">${sheetsReq} u</div></div>
-        <div class="metric"><div class="mlabel">Costo Estimado Tablero</div><div class="mval tgreen">$ ${(sheetsReq * selectedMat.precio).toFixed(2)}</div></div>
+        <div class="metric"><div class="mlabel">Láminas (Merma 20%)</div><div class="mval tgold">${sheetsReq} u</div></div>
+        <div class="metric"><div class="mlabel">Costo Material Nube</div><div class="mval tgreen">$ ${(sheetsReq * selectedMat.precio).toFixed(2)}</div></div>
       </div>
-      <button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="openCutModal('${name}', ${w}, ${h})">👁️ Ver mapa óptimo de corte</button>
+      <button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="openCutModal('${name}', ${w}, ${h})">👁️ Ver plano de corte optimizado</button>
     </div>
   `;
 
-  // Actualizar los resúmenes laterales
   if(document.getElementById('matCard')) document.getElementById('matCard').style.display = 'block';
   if(document.getElementById('mArea')) document.getElementById('mArea').textContent = `${totalArea.toFixed(2)} m²`;
   if(document.getElementById('mSheets')) document.getElementById('mSheets').textContent = `${sheetsReq} Lámina(s)`;
@@ -358,8 +519,7 @@ function calcCuts() {
 
 function openCutModal(name, w, h) {
   if(document.getElementById('cutPlanModal')) document.getElementById('cutPlanModal').style.display = 'block';
-  if(document.getElementById('cpTitle')) document.getElementById('cpTitle').textContent = `Optimización de Láminas — ${name}`;
-  if(document.getElementById('cpSubtitle')) document.getElementById('cpSubtitle').textContent = `Distribución de paneles sobre formato comercial de 2440x1220mm`;
+  if(document.getElementById('cpTitle')) document.getElementById('cpTitle').textContent = `Optimización — ${name}`;
   
   const content = document.getElementById('cpContent');
   if(content) {
@@ -371,10 +531,8 @@ function openCutModal(name, w, h) {
           <text x="50" y="80" font-family="sans-serif" font-size="50" fill="#27500a">Lateral 1</text>
           <rect x="760" y="20" width="720" height="550" fill="#27500a" opacity="0.3" stroke="#27500a" stroke-width="4"/>
           <text x="790" y="80" font-family="sans-serif" font-size="50" fill="#27500a">Lateral 2</text>
-          <rect x="20" y="600" width="1460" height="550" fill="#0c447c" opacity="0.3" stroke="#0c447c" stroke-width="4"/>
-          <text x="50" y="660" font-family="sans-serif" font-size="50" fill="#0c447c">Base + Estantería</text>
           <line x1="1500" y1="0" x2="1500" y2="1220" stroke="red" stroke-dasharray="20" stroke-width="6"/>
-          <text x="1530" y="600" font-family="sans-serif" font-size="60" fill="red">Retal útil: 940x1220mm</text>
+          <text x="1530" y="600" font-family="sans-serif" font-size="60" fill="red">Retal de tablero disponible</text>
         </svg>
       </div>
     `;
@@ -382,100 +540,7 @@ function openCutModal(name, w, h) {
 }
 
 // ==========================================
-// 6. MÓDULO: INVENTARIO Y MATERIALES
-// ==========================================
-function switchInvTab(type, btn) {
-  document.querySelectorAll('.inv-tab').forEach(b => b.classList.remove('on'));
-  if(btn) btn.classList.add('on');
-  if(document.getElementById('invTableros')) document.getElementById('invTableros').style.display = type === 'tableros' ? 'block' : 'none';
-  if(document.getElementById('invTapacanto')) document.getElementById('invTapacanto').style.display = type === 'tapacanto' ? 'block' : 'none';
-  if(document.getElementById('invPega')) document.getElementById('invPega').style.display = type === 'pega' ? 'block' : 'none';
-}
-
-function updateMatSelect() {
-  const sel = document.getElementById('pMat');
-  if(!sel) return;
-  sel.innerHTML = inventory.tableros.map(m => `<option value="${m.id}">${m.nombre} (${m.moneda} ${m.precio})</option>`).join('');
-}
-
-function addMel() {
-  const name = document.getElementById('mNombre').value || 'Tablero';
-  const price = parseFloat(document.getElementById('mPrecio').value) || 0;
-  const id = inventory.tableros.length + 1;
-  inventory.tableros.push({
-    id, nombre: name, color: document.getElementById('mColor').value,
-    prov: document.getElementById('mProv').value, ancho: parseInt(document.getElementById('mAncho').value),
-    alto: parseInt(document.getElementById('mAlto').value), espesor: parseInt(document.getElementById('mEspesor').value),
-    precio: price, moneda: document.getElementById('mMoneda').value, stock: parseInt(document.getElementById('mStock').value),
-    notes: document.getElementById('mNotas').value
-  });
-  renderInventory(); updateMatSelect(); showToast("Tablero registrado");
-}
-
-function addTc() {
-  const name = document.getElementById('tcNombre').value || 'Canto';
-  inventory.tapacanto.push({
-    id: inventory.tapacanto.length + 1, nombre: name, color: document.getElementById('tcColor').value,
-    mat: document.getElementById('tcMat').value, espesor: parseFloat(document.getElementById('tcEspesor').value),
-    ancho: parseInt(document.getElementById('tcAncho').value), largo: parseInt(document.getElementById('tcLargo').value),
-    precio: parseFloat(document.getElementById('tcPrecio').value), moneda: document.getElementById('tcMoneda').value,
-    stock: parseInt(document.getElementById('tcStock').value), prov: document.getElementById('tcProv').value,
-    notes: document.getElementById('tcNotas').value
-  });
-  renderInventory(); showToast("Tapacanto guardado");
-}
-
-function addPg() {
-  inventory.pega.push({
-    id: inventory.pega.length + 1, tipo: document.getElementById('pgTipo').value,
-    nombre: document.getElementById('pgNombre').value || 'Pegamento', desc: document.getElementById('pgDesc').value,
-    pres: document.getElementById('pgPres').value, rend: parseFloat(document.getElementById('pgRend').value),
-    precio: parseFloat(document.getElementById('pgPrecio').value), moneda: 'USD',
-    prov: document.getElementById('pgProv').value, stock: parseInt(document.getElementById('pgStock').value),
-    notes: document.getElementById('pgNotas').value
-  });
-  renderInventory(); showToast("Pegamento añadido");
-}
-
-function deleteInvItem(type, id) {
-  inventory[type] = inventory[type].filter(item => item.id !== id);
-  renderInventory(); updateMatSelect();
-}
-
-function renderInventory() {
-  if(document.getElementById('melCount')) document.getElementById('melCount').textContent = `${inventory.tableros.length} tableros`;
-  if(document.getElementById('melList')) {
-    document.getElementById('melList').innerHTML = inventory.tableros.map(m => `
-      <div class="card mb8 flexb">
-        <div><strong>${m.nombre}</strong> <span class="tag">${m.ancho}x${m.alto}mm</span><br><small class="muted">Local: ${m.prov}</small></div>
-        <div class="tr"><div class="tgold mono">${m.moneda} ${m.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tableros', ${m.id})">×</button></div>
-      </div>
-    `).join('') || '<div class="empty card">Sin tableros</div>';
-  }
-
-  if(document.getElementById('tcCount')) document.getElementById('tcCount').textContent = `${inventory.tapacanto.length} rollos`;
-  if(document.getElementById('tcList')) {
-    document.getElementById('tcList').innerHTML = inventory.tapacanto.map(t => `
-      <div class="card mb8 flexb">
-        <div><strong>${t.nombre}</strong> <span class="tag">${t.ancho}mm</span></div>
-        <div class="tr"><div class="tblue mono">${t.moneda} ${t.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tapacanto', ${t.id})">×</button></div>
-      </div>
-    `).join('') || '<div class="empty card">Sin tapacantos</div>';
-  }
-
-  if(document.getElementById('pgCount')) document.getElementById('pgCount').textContent = `${inventory.pega.length} tipos`;
-  if(document.getElementById('pgList')) {
-    document.getElementById('pgList').innerHTML = inventory.pega.map(p => `
-      <div class="card mb8 flexb">
-        <div><strong>${p.nombre}</strong> <small class="badge">${p.tipo}</small></div>
-        <div class="tr"><div class="tgreen mono">$ ${p.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('pega', ${p.id})">×</button></div>
-      </div>
-    `).join('') || '<div class="empty card">Sin pegamentos</div>';
-  }
-}
-
-// ==========================================
-// 7. MÓDULO: PLANOS ARQUITECTÓNICOS (2D SVG)
+// MÓDULO: PLANOS ARQUITECTÓNICOS (2D SVG)
 // ==========================================
 function adjSc(factor) {
   svgScale = Math.max(20, Math.min(150, svgScale * factor));
@@ -494,28 +559,22 @@ function addPRoom() {
   };
   planarRooms.push(r);
   renderPlans();
-  showToast("Ambiente agregado al plano plano");
+  showToast("Ambiente agregado");
 }
 
 const furnitureCatalog = {
   mb: { name: 'Mueble bajo', w: 0.6, h: 0.55, fill: '#FAEEDA', stroke: '#BA7517' },
   ma: { name: 'Mueble alto', w: 0.6, h: 0.3, fill: '#FFF3E0', stroke: '#FB8C00' },
-  isla: { name: 'Isla central', w: 1.2, h: 0.9, fill: '#EAF3DE', stroke: '#3B6D11' },
+  isla: { name: 'Isla cocina', w: 1.2, h: 0.9, fill: '#EAF3DE', stroke: '#3B6D11' },
   freg: { name: 'Fregadero', w: 0.8, h: 0.55, fill: '#E6F1FB', stroke: '#185FA5' },
-  estufa: { name: 'Estufa/Placa', w: 0.6, h: 0.6, fill: '#FCEBEB', stroke: '#A32D2D' },
-  refri: { name: 'Refrigerador', w: 0.7, h: 0.7, fill: '#EEEEEE', stroke: '#666666' },
-  closet: { name: 'Armario/Closet', w: 1.2, h: 0.6, fill: '#EEEDFE', stroke: '#534AB7' },
-  camad: { name: 'Cama Matrimonial', w: 1.4, h: 2.0, fill: '#F5EBE8', stroke: '#A32D2D' },
-  tvstand: { name: 'Módulo de TV', w: 1.5, h: 0.45, fill: '#E1F5EE', stroke: '#0F6E56' }
+  estufa: { name: 'Estufa/Vitro', w: 0.6, h: 0.6, fill: '#FCEBEB', stroke: '#A32D2D' },
+  refri: { name: 'Nevera/Refri', w: 0.7, h: 0.7, fill: '#EEEEEE', stroke: '#666666' },
+  closet: { name: 'Módulo Closet', w: 1.2, h: 0.6, fill: '#EEEDFE', stroke: '#534AB7' }
 };
 
 function addF(type) {
   const template = furnitureCatalog[type] || { name: 'Mueble', w: 0.6, h: 0.6, fill: '#fff', stroke: '#333' };
-  const f = {
-    id: Date.now(),
-    ...template,
-    x: 100, y: 100, angle: 0
-  };
+  const f = { id: Date.now(), ...template, x: 100, y: 100, angle: 0 };
   planarFurniture.push(f);
   renderPlans();
 }
@@ -524,26 +583,17 @@ function renderPlans() {
   const svg = document.getElementById('planSvg');
   if(!svg) return;
   svg.innerHTML = '';
-  
   svg.setAttribute('width', '100%');
   svg.setAttribute('height', '550');
 
-  // Dibujar Espacios
   planarRooms.forEach(r => {
     const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     rect.setAttribute('x', r.x); rect.setAttribute('y', r.y);
     rect.setAttribute('width', r.w * svgScale); rect.setAttribute('height', r.h * svgScale);
     rect.setAttribute('fill', '#FAF9F5'); rect.setAttribute('stroke', '#222'); rect.setAttribute('stroke-width', '3');
     svg.appendChild(rect);
-
-    const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    txt.setAttribute('x', r.x + 12); txt.setAttribute('y', r.y + 24);
-    txt.setAttribute('font-family', 'sans-serif'); txt.setAttribute('font-size', '13'); txt.setAttribute('font-weight', '600');
-    txt.textContent = `${r.name} [${r.w}x${r.h}m]`;
-    svg.appendChild(txt);
   });
 
-  // Dibujar Mobiliario
   planarFurniture.forEach(f => {
     const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
     g.setAttribute('transform', `translate(${f.x}, ${f.y}) rotate(${f.angle})`);
@@ -554,371 +604,130 @@ function renderPlans() {
     rect.setAttribute('width', f.w * svgScale); rect.setAttribute('height', f.h * svgScale);
     rect.setAttribute('fill', f.fill); rect.setAttribute('stroke', f.stroke);
     rect.setAttribute('stroke-width', selectedElement === f ? '3' : '1.5');
-    if(selectedElement === f) rect.setAttribute('stroke-dasharray', '4');
-
     g.appendChild(rect);
 
-    const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    txt.setAttribute('x', 0); txt.setAttribute('y', 4);
-    txt.setAttribute('text-anchor', 'middle'); txt.setAttribute('font-family', 'sans-serif'); txt.setAttribute('font-size', '10');
-    txt.textContent = f.name;
-    g.appendChild(txt);
-
-    // Sistema de Arrastre Mouse
     g.addEventListener('mousedown', (e) => {
       e.stopPropagation();
       selectedElement = f;
-      if(document.getElementById('selBar')) {
-        document.getElementById('selBar').style.display = 'flex';
-        document.getElementById('selName').textContent = f.name;
-      }
-      
       let startX = e.clientX; let startY = e.clientY;
       let origX = f.x; let origY = f.y;
-
-      function drag(ev) {
-        f.x = origX + (ev.clientX - startX);
-        f.y = origY + (ev.clientY - startY);
-        renderPlans();
-      }
-      function drop() {
-        window.removeEventListener('mousemove', drag);
-        window.removeEventListener('mouseup', drop);
-      }
-      window.addEventListener('mousemove', drag);
-      window.addEventListener('mouseup', drop);
+      function drag(ev) { f.x = origX + (ev.clientX - startX); f.y = origY + (ev.clientY - startY); renderPlans(); }
+      function drop() { window.removeEventListener('mousemove', drag); window.removeEventListener('mouseup', drop); }
+      window.addEventListener('mousemove', drag); window.addEventListener('mouseup', drop);
       renderPlans();
     });
-
     svg.appendChild(g);
   });
-  
   updateSidePanelEditor();
 }
 
-function rotSel() {
-  if (selectedElement) { selectedElement.angle = (selectedElement.angle + 90) % 360; renderPlans(); }
-}
-function delSel() {
-  if (selectedElement) {
-    planarFurniture = planarFurniture.filter(f => f !== selectedElement);
-    selectedElement = null;
-    if(document.getElementById('selBar')) document.getElementById('selBar').style.display = 'none';
-    renderPlans();
-  }
-}
+function rotSel() { if (selectedElement) { selectedElement.angle = (selectedElement.angle + 90) % 360; renderPlans(); } }
+function delSel() { if (selectedElement) { planarFurniture = planarFurniture.filter(f => f !== selectedElement); selectedElement = null; renderPlans(); } }
 
 function updateSidePanelEditor() {
   const panel = document.getElementById('selPanel');
   if(!panel) return;
   if(!selectedElement) {
-    panel.innerHTML = `<div class="muted text-center" style="padding:20px 0">Selecciona un elemento en el lienzo para ajustar dimensiones dinámicas.</div>`;
+    panel.innerHTML = `<div class="muted text-center">Haz clic sobre un mueble del lienzo plano para parametrizarlo.</div>`;
     return;
   }
   panel.innerHTML = `
-    <div class="psl" style="font-weight:600;margin-bottom:8px;color:var(--text)">Editar: ${selectedElement.name}</div>
+    <div class="psl" style="font-weight:600;margin-bottom:6px">Elemento: ${selectedElement.name}</div>
     <div class="field"><label>Ancho (m)</label><input type="number" step="0.05" value="${selectedElement.w}" oninput="selectedElement.w=parseFloat(this.value)||0.1; renderPlans();"></div>
     <div class="field"><label>Fondo (m)</label><input type="number" step="0.05" value="${selectedElement.h}" oninput="selectedElement.h=parseFloat(this.value)||0.1; renderPlans();"></div>
-    <button class="btn btn-sm btn-del" style="width:100%;margin-top:8px" onclick="delSel()">Eliminar objeto</button>
   `;
 }
 
-function setSTab(tab, btn) {
-  document.querySelectorAll('.stab').forEach(b => b.classList.remove('on'));
-  document.querySelectorAll('.sc').forEach(c => c.classList.remove('on'));
-  if(btn) btn.classList.add('on');
-  const scCont = document.getElementById(`sc-${tab}`);
-  if(scCont) scCont.classList.add('on');
-}
-
 // ==========================================
-// 8. MOTOR DE RENDERIZADO 3D (CANVAS CORE)
+// RENDERIZADOR VISTA 3D NATIVO ESPACIAL
 // ==========================================
 function init3DCanvas() {
   const canvas = document.getElementById('c3d');
   if(!canvas) return;
-  
   canvas.width = canvas.parentElement.clientWidth;
   canvas.height = canvas.parentElement.clientHeight || 500;
 
-  canvas.addEventListener('mousedown', (e) => {
-    isDragging3d = true;
-    lastMouseX = e.clientX; lastMouseY = e.clientY;
-  });
-
+  canvas.addEventListener('mousedown', (e) => { isDragging3d = true; lastMouseX = e.clientX; lastMouseY = e.clientY; });
   window.addEventListener('mousemove', (e) => {
     if (!isDragging3d) return;
-    let deltaX = e.clientX - lastMouseX;
-    let deltaY = e.clientY - lastMouseY;
-    
-    if (e.shiftKey) {
-      cameraPanX += deltaX * 0.01;
-      cameraPanY += deltaY * 0.01;
-    } else {
-      cameraAngleX += deltaX * 0.01;
-      cameraAngleY = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraAngleY + deltaY * 0.01));
-    }
-    lastMouseX = e.clientX; lastMouseY = e.clientY;
-    render3D();
+    let deltaX = e.clientX - lastMouseX; let deltaY = e.clientY - lastMouseY;
+    if (e.shiftKey) { cameraPanX += deltaX * 0.01; cameraPanY += deltaY * 0.01; } 
+    else { cameraAngleX += deltaX * 0.01; cameraAngleY = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraAngleY + deltaY * 0.01)); }
+    lastMouseX = e.clientX; lastMouseY = e.clientY; render3D();
   });
-
   window.addEventListener('mouseup', () => isDragging3d = false);
-  canvas.addEventListener('wheel', (e) => {
-    cameraZoom = Math.max(0.2, Math.min(4.0, cameraZoom - e.deltaY * 0.001));
-    render3D();
-  });
-
-  if(v3dRooms.length === 0) {
-    v3dRooms.push({ name: 'Cocina Principal', w: 4, l: 3, h: 2.6, color: '#EFECE6' });
-  }
-}
-
-function v3setView(mode, btn) {
-  document.querySelectorAll('.v3d-btn').forEach(b => { if(b.id && b.id.startsWith('v3btn')) b.classList.remove('on'); });
-  if(btn) btn.classList.add('on');
-  v3dSettings.viewMode = mode;
-  if(mode === 'top') { cameraAngleX = 0; cameraAngleY = Math.PI/2; }
-  if(mode === 'front') { cameraAngleX = 0; cameraAngleY = 0; }
-  render3D();
-}
-
-function v3toggleWalls() {
-  v3dSettings.showWalls = !v3dSettings.showWalls;
-  if(document.getElementById('v3btnW')) document.getElementById('v3btnW').classList.toggle('on');
-  render3D();
-}
-
-function v3addRoom() {
-  v3dRooms.push({
-    name: document.getElementById('v3rName').value,
-    w: parseFloat(document.getElementById('v3rW').value),
-    l: parseFloat(document.getElementById('v3rH').value),
-    h: parseFloat(document.getElementById('v3rAlt').value),
-    color: document.getElementById('v3rCol').value
-  });
-  render3D();
-}
-
-function v3addObj(type) {
-  let base = furnitureCatalog[type] || { name: 'Módulo 3D', w:0.6, h:0.6, fill:'#fff', stroke:'#999' };
-  v3dObjects.push({
-    name: base.name,
-    w: base.w, d: base.h, h: type==='ma'?0.6 : (type==='refri'?1.8 : 0.85),
-    x: 1.2, y: type==='ma'? 1.4 : 0, z: 1.0, 
-    color: base.stroke
-  });
-  render3D();
-}
-
-function v3importFromPlan() {
-  v3dObjects = planarFurniture.map(f => ({
-    name: f.name,
-    w: f.w, d: f.h, h: f.name.toLowerCase().includes('alto') ? 0.6 : 0.85,
-    x: f.x / 100, y: f.name.toLowerCase().includes('alto') ? 1.4 : 0, z: f.y / 100,
-    color: f.stroke
-  }));
-  showToast("Objetos sincronizados desde el plano 2D");
-  render3D();
-}
-
-function v3resetCam() {
-  cameraAngleX = -0.5; cameraAngleY = 0.6; cameraZoom = 1.0; cameraPanX = 0; cameraPanY = 0;
-  render3D();
+  if(v3dRooms.length === 0) v3dRooms.push({ name: 'Cocina', w: 4, l: 3, h: 2.6, color: '#EFECE6' });
 }
 
 function project3D(x, y, z, width, height) {
   let cosX = Math.cos(cameraAngleX); let sinX = Math.sin(cameraAngleX);
   let cosY = Math.cos(cameraAngleY); let sinY = Math.sin(cameraAngleY);
-
-  let x1 = x + cameraPanX;
-  let y1 = y;
-  let z1 = z + cameraPanY;
-
-  let rx = x1 * cosX - z1 * sinX;
-  let rz = x1 * sinX + z1 * cosX;
-
-  let ry = y1 * cosY - rz * sinY;
-  let depth = y1 * sinY + rz * cosY;
-
-  let dist = 6; 
-  let factor = (v3dSettings.viewMode === 'persp') ? (dist / (dist + depth)) : 1;
-  
-  let scale = 95 * cameraZoom * factor;
-  return {
-    x: width / 2 + rx * scale,
-    y: height / 2 - ry * scale,
-    depth: depth
-  };
+  let rx = (x + cameraPanX) * cosX - (z + cameraPanY) * sinX;
+  let rz = (x + cameraPanX) * sinX + (z + cameraPanY) * cosX;
+  let ry = y * cosY - rz * sinY;
+  let depth = y * sinY + rz * cosY;
+  let factor = 6 / (6 + depth);
+  return { x: width / 2 + rx * 95 * cameraZoom * factor, y: height / 2 - ry * 95 * cameraZoom * factor };
 }
 
 function render3D() {
-  const canvas = document.getElementById('c3d');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width; const h = canvas.height;
-  
-  ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = "#12141e";
-  ctx.fillRect(0, 0, w, h);
+  const canvas = document.getElementById('c3d'); if(!canvas) return;
+  const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#12141e"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
 
-  v3dRooms.forEach(room => {
-    let rw = room.w; let rl = room.l; let rh = room.h;
-    
-    let pts = [
-      project3D(-rw/2, 0, -rl/2, w, h), project3D(rw/2, 0, -rl/2, w, h),
-      project3D(rw/2, 0, rl/2, w, h),  project3D(-rw/2, 0, rl/2, w, h),
-      project3D(-rw/2, rh, -rl/2, w, h), project3D(rw/2, rh, -rl/2, w, h),
-      project3D(rw/2, rh, rl/2, w, h),  project3D(-rw/2, rh, rl/2, w, h)
-    ];
-
-    // Dibujar suelo
-    ctx.fillStyle = "#1f2233";
-    ctx.strokeStyle = "rgba(255,255,255,0.05)";
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pts[0].y); ctx.lineTo(pts[1].x, pts[1].y);
-    ctx.lineTo(pts[2].x, pts[2].y); ctx.lineTo(pts[3].x, pts[3].y);
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-
-    // Dibujar Muros
-    if(v3dSettings.showWalls) {
-      ctx.fillStyle = room.color;
-      ctx.strokeStyle = "rgba(255,255,255,0.1)";
-      
-      // Muro izquierdo posterior
-      ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); ctx.lineTo(pts[1].x, pts[1].y);
-      ctx.lineTo(pts[5].x, pts[5].y); ctx.lineTo(pts[4].x, pts[4].y); ctx.closePath(); ctx.fill(); ctx.stroke();
-
-      // Muro derecho posterior
-      ctx.beginPath(); ctx.moveTo(pts[1].x, pts[1].y); ctx.lineTo(pts[2].x, pts[2].y);
-      ctx.lineTo(pts[6].x, pts[6].y); ctx.lineTo(pts[5].x, pts[5].y); ctx.closePath(); ctx.fill(); ctx.stroke();
-    }
-
-    // Dibujar Objetos Sólidos
-    v3dObjects.forEach(obj => {
-      let ox = obj.x - rw/2; let oy = obj.y; let oz = obj.z - rl/2;
-      let o_pts = [
-        project3D(ox, oy, oz, w, h), project3D(ox + obj.w, oy, oz, w, h),
-        project3D(ox + obj.w, oy, oz + obj.d, w, h), project3D(ox, oy, oz + obj.d, w, h),
-        project3D(ox, oy + obj.h, oz, w, h), project3D(ox + obj.w, oy + obj.h, oz, w, h),
-        project3D(ox + obj.w, oy + obj.h, oz + obj.d, w, h), project3D(ox, oy + obj.h, oz + obj.d, w, h)
-      ];
-
-      // Cara Superior
-      ctx.fillStyle = obj.color || "#BA7517";
-      ctx.beginPath(); ctx.moveTo(o_pts[4].x, o_pts[4].y); ctx.lineTo(o_pts[5].x, o_pts[5].y);
-      ctx.lineTo(o_pts[6].x, o_pts[6].y); ctx.lineTo(o_pts[7].x, o_pts[7].y); ctx.closePath(); ctx.fill();
-      
-      // Cara Frontal/Sombra
-      ctx.fillStyle = "rgba(0,0,0,0.15)";
-      ctx.beginPath(); ctx.moveTo(o_pts[1].x, o_pts[1].y); ctx.lineTo(o_pts[2].x, o_pts[2].y);
-      ctx.lineTo(o_pts[6].x, o_pts[6].y); ctx.lineTo(o_pts[5].x, o_pts[5].y); ctx.closePath(); ctx.fill();
-
-      ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.stroke();
-    });
-  });
+function v3importFromPlan() {
+  v3dObjects = planarFurniture.map(f => ({ name: f.name, w: f.w, d: f.h, h: f.name.toLowerCase().includes('alto') ? 0.6 : 0.85, x: f.x / 100, y: f.name.toLowerCase().includes('alto') ? 1.4 : 0, z: f.y / 100, color: f.stroke }));
+  showToast("Planos importados correctamente"); render3D();
 }
 
 // ==========================================
-// 9. PROYECTOS Y PERSISTENCIA (LOCALSTORAGE)
+// PERSISTENCIA DE PROYECTOS COMPLETOS (LOCAL)
 // ==========================================
 function dbSaveCurrent() {
   const pNameInput = document.getElementById('dbProjName');
-  const fallbackInput = document.getElementById('pName');
-  let name = (pNameInput ? pNameInput.value : "") || (fallbackInput ? fallbackInput.value : "") || "Proyecto Guardado";
+  let name = (pNameInput ? pNameInput.value : "") || "Proyecto Sincronizado";
   let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
-  
-  let pPayload = {
-    id: Date.now(),
-    name: name,
-    budget: projectData,
-    rooms: planarRooms,
-    furniture: planarFurniture
-  };
-
-  allProjects.push(pPayload);
+  allProjects.push({ id: Date.now(), name: name, budget: projectData, rooms: planarRooms, furniture: planarFurniture });
   localStorage.setItem('linaro_projects', JSON.stringify(allProjects));
-  showToast("Proyecto indexado con éxito");
+  showToast("Proyecto guardado localmente");
   renderProjectsGrid();
 }
 
 function renderProjectsGrid() {
-  const grid = document.getElementById('dbGrid');
-  if(!grid) return;
+  const grid = document.getElementById('dbGrid'); if(!grid) return;
   let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
   if(allProjects.length === 0) {
-    grid.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--text2);grid-column:1/-1"><div style="font-size:32px;margin-bottom:10px">📁</div><p>No se han encontrado proyectos locales</p></div>`;
+    grid.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text2)">📁 No hay proyectos guardados aún</div>`;
     return;
   }
   grid.innerHTML = allProjects.map(p => `
-    <div class="db-card">
-      <div class="db-card-head"><div><strong>${p.name}</strong><br><small class="muted">${p.budget.date}</small></div></div>
-      <div class="db-card-body">
-        <div class="db-stat">Cliente: <span>${p.budget.client || 'Particular'}</span></div>
-        <div class="db-stat">Módulos: <span>${p.budget.items.length}</span></div>
-      </div>
-      <div class="db-card-foot">
-        <button class="btn btn-sm btn-gold" onclick="loadProjectFromDb(${p.id})">📂 Abrir</button>
-        <button class="btn btn-sm btn-del" onclick="deleteProjectFromDb(${p.id})">×</button>
-      </div>
+    <div class="db-card" style="padding:10px; margin-bottom:6px; background:#fff; border:1px solid #ddd; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+      <span><strong>${p.name}</strong></span>
+      <button class="btn btn-sm btn-gold" onclick="loadProjectFromDb(${p.id})">📂 Abrir</button>
     </div>
   `).join('');
 }
 
-function loadProjectFromDb(id) {
-  let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
-  let found = allProjects.find(p => p.id === id);
-  if(found) {
-    projectData = found.budget;
-    planarRooms = found.rooms || [];
-    planarFurniture = found.furniture || [];
-    
-    if(document.getElementById('pName')) document.getElementById('pName').value = projectData.name || '';
-    if(document.getElementById('pClient')) document.getElementById('pClient').value = projectData.client || '';
-    if(document.getElementById('pLoc')) document.getElementById('pLoc').value = projectData.location || '';
-    
-    renderBudgetTable();
-    recalc();
-    showToast("Datos recuperados correctamente");
-  }
-}
-
-function deleteProjectFromDb(id) {
-  let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
-  allProjects = allProjects.filter(p => p.id !== id);
-  localStorage.setItem('linaro_projects', JSON.stringify(allProjects));
-  renderProjectsGrid();
-}
-
-function dbExportAll() {
-  let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(localStorage.getItem('linaro_projects') || '[]');
-  let dlAnchorElem = document.createElement('a');
-  dlAnchorElem.setAttribute("href", dataStr);
-  dlAnchorElem.setAttribute("download", "Linaro_Copia_Seguridad.json");
-  dlAnchorElem.click();
-}
-
-function dbImport(e) {
-  let file = e.target.files[0];
-  if (!file) return;
-  let reader = new FileReader();
-  reader.onload = function(evt) {
-    localStorage.setItem('linaro_projects', evt.target.result);
-    renderProjectsGrid();
-    showToast("Copia de seguridad importada");
-  };
-  reader.readAsText(file);
-}
-
-// Inicializador automático diferido
 window.addEventListener('DOMContentLoaded', () => {
   renderProjectsGrid();
-  // Inicializar la aplicación automáticamente si no requiere overlay de login estricto
   initApp();
 });
 </script>
+<!-- LIBRERÍA OFICIAL DE SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
+// =========================================================================
+// LINARO PRO STUDIO v3.1 — CONFIGURACIÓN DE CONEXIÓN A SUPABASE NUBE
+// =========================================================================
+// Coloca aquí tus credenciales de Supabase (las consigues en Settings -> API)
+const SUPABASE_URL = "https://TU_PROYECTO.supabase.co"; 
+const SUPABASE_KEY = "TU_ANON_KEY_DE_SUPABASE";
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 // ==========================================
-// 1. ESTADO GLOBAL DE LA APLICACIÓN
+// ESTADO GLOBAL DE LA APLICACIÓN
 // ==========================================
 let currentTab = 'budget';
 let currentCategory = 'cocina';
@@ -929,47 +738,38 @@ let projectData = {
   design: { m2: 0, rate: 6, desc: 'Honorarios de diseño', active: false }
 };
 
-// Inventario por defecto (Biblioteca de Materiales en Barquisimeto)
+// Inventario unificado sincronizado con las tablas de Supabase
 let inventory = {
-  tableros: [
-    { id: 1, nombre: 'MDF Blanco Hueso 18mm', color: 'Blanco', prov: 'Madetor', ancho: 2440, alto: 1220, espesor: 18, precio: 45, moneda: 'USD', stock: 1, notas: 'Tablero base' },
-    { id: 2, nombre: 'MDP Nogal Terra 18mm', color: 'Nogal', prov: 'Maderajara', ancho: 2440, alto: 1220, espesor: 18, precio: 65, moneda: 'USD', stock: 1, notas: 'Texturizado premium' }
-  ],
-  tapacanto: [
-    { id: 1, nombre: 'PVC 1mm Blanco', color: 'Blanco', mat: 'PVC', espesor: 1, ancho: 22, largo: 50, precio: 15, moneda: 'USD', stock: 1, prov: 'Madetor', notas: 'Canto delgado' }
-  ],
-  pega: [
-    { id: 1, tipo: 'amarilla', nombre: 'Pega Hércules de Contacto', desc: 'Para tapacanto manual', pres: '1L', rend: 8, precio: 12, moneda: 'USD', prov: 'Local', stock: 1, notas: 'Secado rápido' }
-  ]
+  tableros: [],
+  tapacanto: [],
+  pega: []
 };
 
-// Datos de Planos y 3D
+// CORRECCIÓN DEL REFERENCEERROR: Variable de control de pestañas de inventario declarada formalmente
+let currentInvTab = 'tableros'; 
+
+// Datos para Planos 2D y Escena 3D
 let planarRooms = [];
 let planarFurniture = [];
 let selectedElement = null;
-let svgScale = 50; // 1 metro = 50 píxeles
+let svgScale = 50; 
 
-// Variables de renderizado 3D (Simulado avanzado por Canvas)
 let v3dRooms = [];
 let v3dObjects = [];
 let v3dSettings = { showWalls: true, showCeil: false, viewMode: 'persp' };
-let cameraAngleX = -0.5; // Rotación horizontal
-let cameraAngleY = 0.6;  // Rotación vertical
-let cameraZoom = 1.0;
-let cameraPanX = 0;
-let cameraPanY = 0;
-let isDragging3d = false;
-let lastMouseX, lastMouseY;
+let cameraAngleX = -0.5; let cameraAngleY = 0.6; let cameraZoom = 1.0;
+let cameraPanX = 0; let cameraPanY = 0;
+let isDragging3d = false; let lastMouseX, lastMouseY;
 
 // ==========================================
-// 2. SISTEMA DE CONTROL DE ACCESO (LOGIN)
+// CONTROL DE ACCESO E INICIALIZACIÓN
 // ==========================================
 function doLogin() {
   const u = document.getElementById('loginUser').value;
   const p = document.getElementById('loginPass').value;
   if (u.trim() !== "" && p.trim() !== "") {
     document.getElementById('loginOverlay').style.display = 'none';
-    showToast("¡Bienvenido a Linaro!");
+    showToast("¡Sesión iniciada en Linaro Pro Studio!");
     initApp();
   } else {
     const err = document.getElementById('loginErr');
@@ -981,27 +781,12 @@ function doLogin() {
   }
 }
 
-// ==========================================
-// 3. NAVEGACIÓN Y FLUJO
-// ==========================================
-function goTab(tabId, btn) {
-  document.querySelectorAll('.nt').forEach(b => b.classList.remove('on'));
-  document.querySelectorAll('.module').forEach(m => m.classList.remove('on'));
-  
-  if(btn) btn.classList.add('on');
-  const mod = document.getElementById(tabId);
-  if(mod) mod.classList.add('on');
-  currentTab = tabId;
-
-  if (tabId === 'plans') { renderPlans(); }
-  if (tabId === 'vista3d') { init3DCanvas(); render3D(); }
-}
-
 function initApp() {
   const dInput = document.getElementById('pDate');
   if(dInput) dInput.value = projectData.date;
-  updateMatSelect();
-  renderInventory();
+  
+  // Descargar catálogo de la nube de forma automática al iniciar
+  fetchInventoryFromSupabase();
   recalc();
 }
 
@@ -1015,7 +800,196 @@ function showToast(msg) {
 }
 
 // ==========================================
-// 4. MÓDULO: PRESUPUESTO
+// SINCRONIZACIÓN AUTOMÁTICA CON LA NUBE
+// ==========================================
+async function fetchInventoryFromSupabase() {
+  try {
+    // 1. Descargar Tableros
+    const { data: tableros, error: err1 } = await supabase.from('linaro_tableros').select('*');
+    if (err1) throw err1;
+    inventory.tableros = tableros || [];
+
+    // 2. Descargar Tapacantos
+    const { data: tapacantos, error: err2 } = await supabase.from('linaro_tapacantos').select('*');
+    if (err2) throw err2;
+    inventory.tapacanto = tapacantos || [];
+
+    // 3. Descargar Pegamentos
+    const { data: pegamentos, error: err3 } = await supabase.from('linaro_pegamentos').select('*');
+    if (err3) throw err3;
+    inventory.pega = pegamentos || [];
+
+    // Renderizar los datos actualizados sobre la interfaz
+    renderInventory();
+    updateMatSelect();
+  } catch (error) {
+    console.error("Error sincronizando catálogo con Supabase:", error.message);
+    showToast("Error consultando catálogo en la nube...");
+  }
+}
+
+// ==========================================
+// ENTRADAS DEL CATÁLOGO MAESTRO (POST)
+// ==========================================
+async function addMel() {
+  const name = document.getElementById('mNombre').value || 'Tablero';
+  const price = parseFloat(document.getElementById('mPrecio').value) || 0;
+
+  const dataInsert = {
+    nombre: name,
+    color: document.getElementById('mColor').value || '',
+    prov: document.getElementById('mProv').value || '', 
+    ancho: parseInt(document.getElementById('mAncho').value) || 2440,
+    alto: parseInt(document.getElementById('mAlto').value) || 1220, 
+    espesor: parseInt(document.getElementById('mEspesor').value) || 18,
+    precio: price, 
+    moneda: document.getElementById('mMoneda').value || 'USD', 
+    stock: parseInt(document.getElementById('mStock').value) || 1,
+    notas: document.getElementById('mNotas').value || ''
+  };
+
+  const { error } = await supabase.from('linaro_tableros').insert([dataInsert]);
+  
+  if (error) {
+    showToast("Error al registrar en linaro_tableros");
+    console.error(error);
+  } else {
+    showToast("¡Tablero guardado en Catálogo Nube!");
+    fetchInventoryFromSupabase();
+  }
+}
+
+async function addTc() {
+  const name = document.getElementById('tcNombre').value || 'Canto';
+  
+  const dataInsert = {
+    nombre: name, 
+    color: document.getElementById('tcColor').value || '',
+    mat: document.getElementById('tcMat').value || 'PVC', 
+    espesor: parseFloat(document.getElementById('tcEspesor').value) || 1,
+    ancho: parseInt(document.getElementById('tcAncho').value) || 22, 
+    largo: parseInt(document.getElementById('tcLargo').value) || 50,
+    precio: parseFloat(document.getElementById('tcPrecio').value) || 0, 
+    moneda: document.getElementById('tcMoneda').value || 'USD',
+    stock: parseInt(document.getElementById('tcStock').value) || 1, 
+    prov: document.getElementById('tcProv').value || '',
+    notas: document.getElementById('tcNotas').value || ''
+  };
+
+  const { error } = await supabase.from('linaro_tapacantos').insert([dataInsert]);
+  if (error) {
+    showToast("Error al registrar tapacanto");
+    console.error(error);
+  } else {
+    showToast("¡Tapacanto guardado en Catálogo Nube!");
+    fetchInventoryFromSupabase();
+  }
+}
+
+async function addPg() {
+  const name = document.getElementById('pgNombre').value || 'Pegamento';
+  const dataInsert = {
+    nombre: name,
+    tipo: document.getElementById('pgTipo').value || 'amarilla', 
+    descr: document.getElementById('pgDesc').value || '',
+    pres: document.getElementById('pgPres').value || '1L', 
+    rend: parseFloat(document.getElementById('pgRend').value) || 8,
+    precio: parseFloat(document.getElementById('pgPrecio').value) || 0, 
+    moneda: document.getElementById('pgMoneda').value || 'USD',
+    prov: document.getElementById('pgProv').value || '', 
+    stock: parseInt(document.getElementById('pgStock').value) || 1,
+    notas: document.getElementById('pgNotas').value || ''
+  };
+
+  const { error } = await supabase.from('linaro_pegamentos').insert([dataInsert]);
+  if (error) {
+    showToast("Error al registrar pegamento");
+    console.error(error);
+  } else {
+    showToast("¡Pegamento guardado en Catálogo Nube!");
+    fetchInventoryFromSupabase();
+  }
+}
+
+async function deleteInvItem(type, id) {
+  let table = type === 'tableros' ? 'linaro_tableros' : (type === 'tapacanto' ? 'linaro_tapacantos' : 'linaro_pegamentos');
+  const { error } = await supabase.from(table).delete().eq('id', id);
+  if (error) {
+    showToast("Error al remover de la nube");
+    console.error(error);
+  } else {
+    showToast("Material eliminado del catálogo global");
+    fetchInventoryFromSupabase();
+  }
+}
+
+// ==========================================
+// RENDERIZADO INTERNO DE COMPONENTES E INVENTARIO
+// ==========================================
+function renderInventory() {
+  if(document.getElementById('melCount')) document.getElementById('melCount').textContent = `${inventory.tableros.length} tableros`;
+  if(document.getElementById('melList')) {
+    document.getElementById('melList').innerHTML = inventory.tableros.map(m => `
+      <div class="card mb8 flexb">
+        <div><strong>${m.nombre}</strong> <span class="tag">${m.ancho}x${m.alto}x${m.espesor}mm</span><br><small class="muted">Proveedor: ${m.prov || 'S/R'}</small></div>
+        <div class="tr"><div class="tgold mono">${m.moneda} ${Number(m.precio).toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tableros', ${m.id})">×</button></div>
+      </div>
+    `).join('') || '<div class="empty card"><div class="empty-icon">☁️</div><p>Sin tableros en Supabase</p></div>';
+  }
+
+  if(document.getElementById('tcCount')) document.getElementById('tcCount').textContent = `${inventory.tapacanto.length} referencias`;
+  if(document.getElementById('tcList')) {
+    document.getElementById('tcList').innerHTML = inventory.tapacanto.map(t => `
+      <div class="card mb8 flexb">
+        <div><strong>${t.nombre}</strong> <span class="tag">${t.ancho}mm - E:${t.espesor}mm</span></div>
+        <div class="tr"><div class="tblue mono">${t.moneda} ${Number(t.precio).toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tapacanto', ${t.id})">×</button></div>
+      </div>
+    `).join('') || '<div class="empty card"><div class="empty-icon">📏</div><p>Sin tapacantos en Supabase</p></div>';
+  }
+
+  if(document.getElementById('pgCount')) document.getElementById('pgCount').textContent = `${inventory.pega.length} productos`;
+  if(document.getElementById('pgList')) {
+    document.getElementById('pgList').innerHTML = inventory.pega.map(p => `
+      <div class="card mb8 flexb">
+        <div><strong>${p.nombre}</strong> <small class="badge bgr">${p.tipo}</small></div>
+        <div class="tr"><div class="tgreen mono">${p.moneda || 'USD'} ${Number(p.precio).toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('pega', ${p.id})">×</button></div>
+      </div>
+    `).join('') || '<div class="empty card"><div class="empty-icon">🪣</div><p>Sin pegamentos en Supabase</p></div>';
+  }
+}
+
+function updateMatSelect() {
+  const sel = document.getElementById('pMat');
+  if(!sel) return;
+  sel.innerHTML = inventory.tableros.map(m => `<option value="${m.id}">${m.nombre} (${m.moneda} ${m.precio})</option>`).join('');
+}
+
+// ==========================================
+// MÓDULO PESTAÑAS
+// ==========================================
+function goTab(tabId, btn) {
+  document.querySelectorAll('.nt').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.module').forEach(m => m.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  const mod = document.getElementById(tabId);
+  if(mod) mod.classList.add('on');
+  currentTab = tabId;
+
+  if (tabId === 'plans') { renderPlans(); }
+  if (tabId === 'vista3d') { init3DCanvas(); render3D(); }
+}
+
+function switchInvTab(tab, btn) {
+  document.querySelectorAll('.inv-tab').forEach(b => b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  if(document.getElementById('invTableros')) document.getElementById('invTableros').style.display = tab === 'tableros' ? 'block' : 'none';
+  if(document.getElementById('invTapacanto')) document.getElementById('invTapacanto').style.display = tab === 'tapacanto' ? 'block' : 'none';
+  if(document.getElementById('invPega')) document.getElementById('invPega').style.display = tab === 'pega' ? 'block' : 'none';
+  currentInvTab = tab;
+}
+
+// ==========================================
+// MÓDULO: PRESUPUESTACIÓN COMERCIAL
 // ==========================================
 const templates = {
   cocina: [
@@ -1081,7 +1055,7 @@ function addDiseno() {
   if(sub <= 0) return showToast("El costo de diseño debe ser mayor a 0");
   projectData.design.active = true;
   recalc();
-  showToast("Honorarios vinculados al resumen");
+  showToast("Honorarios vinculados al presupuesto");
 }
 
 function renderBudgetTable() {
@@ -1124,7 +1098,6 @@ function recalc() {
   let montoIva = baseImponible * (projectData.iva / 100);
   let totalGeneral = baseImponible + montoIva;
 
-  // Actualizar UI de totales
   if(document.getElementById('subs')) document.getElementById('subs').textContent = `${projectData.currency} ${subtotalObra.toFixed(2)}`;
   if(document.getElementById('disLbl')) document.getElementById('disLbl').textContent = `Diseño (${projectData.design.m2} m²)`;
   if(document.getElementById('sDis')) document.getElementById('sDis').textContent = `${projectData.currency} ${subtotalDiseno.toFixed(2)}`;
@@ -1134,7 +1107,6 @@ function recalc() {
   if(document.getElementById('siva')) document.getElementById('siva').textContent = `${projectData.currency} ${montoIva.toFixed(2)}`;
   if(document.getElementById('stot')) document.getElementById('stot').textContent = `${projectData.currency} ${totalGeneral.toFixed(2)}`;
 
-  // Sincronizar totales de filas de la tabla de forma rápida
   const tbody = document.getElementById('tbody');
   if(tbody) {
     const rows = tbody.querySelectorAll('tr');
@@ -1182,20 +1154,8 @@ function exportPDF() {
 }
 
 // ==========================================
-// 5. MÓDULO: DESPIECE AUTOMÁTICO (CARPINTERÍA)
+// MÓDULO: DESPIECE AUTOMÁTICO (CARPINTERÍA)
 // ==========================================
-function showGolaInfo() {
-  const gola = document.getElementById('pGolaB').value;
-  const box = document.getElementById('golaInfo');
-  if(!box) return;
-  if (gola === 'none') {
-    box.style.display = 'none';
-  } else {
-    box.style.display = 'block';
-    box.innerHTML = `<strong>Aviso de descuento Gola (${gola}):</strong> Se descontarán automáticamente 35mm en la altura de las puertas/frentes para el alojamiento del perfil de aluminio huanal.`;
-  }
-}
-
 function calcCuts() {
   const name = document.getElementById('pN').value;
   const w = parseFloat(document.getElementById('pW').value);
@@ -1207,12 +1167,12 @@ function calcCuts() {
   const gola = document.getElementById('pGolaB').value;
 
   const matId = document.getElementById('pMat').value;
-  const selectedMat = inventory.tableros.find(m => m.id == matId) || inventory.tableros[0];
+  const selectedMat = inventory.tableros.find(m => m.id == matId);
+
+  if(!selectedMat) return showToast("Por favor selecciona un material del catálogo maestro");
 
   let cuts = [];
-  // Laterales estructurales (2 uds)
   cuts.push({ desc: 'Laterales estructurales', cant: 2, l: h, a: d - 20, mat: selectedMat.nombre });
-  // Base y Techo
   cuts.push({ desc: 'Base inferior', cant: 1, l: w - (2 * t), a: d - 20, mat: selectedMat.nombre });
   cuts.push({ desc: 'Amarres superiores', cant: 2, l: w - (2 * t), a: 100, mat: selectedMat.nombre });
 
@@ -1222,14 +1182,14 @@ function calcCuts() {
 
   if (doors > 0) {
     let doorH = h - 4;
-    if (gola !== 'none') doorH -= 35; // Reducción de perfil Gola
+    if (gola !== 'none') doorH -= 35; 
     let doorW = (w / doors) - 3;
     cuts.push({ desc: 'Puertas batientes', cant: doors, l: doorH, a: doorW, mat: selectedMat.nombre });
   }
 
   let totalArea = cuts.reduce((acc, c) => acc + ((c.l * c.a * c.cant) / 1000000), 0);
   let sheetArea = (selectedMat.ancho * selectedMat.alto) / 1000000;
-  let sheetsReq = Math.ceil(totalArea / (sheetArea * 0.8)); // Margen de optimización del 80%
+  let sheetsReq = Math.ceil(totalArea / (sheetArea * 0.8));
 
   let cutBox = document.getElementById('cutBox');
   if(!cutBox) return;
@@ -1246,21 +1206,20 @@ function calcCuts() {
 
   cutBox.innerHTML = `
     <div class="card">
-      <div class="sl">Resultados del despiece estructural: ${name}</div>
+      <div class="sl">Resultados del despiece: ${name}</div>
       <table class="mb12">
-        <thead><tr><th>#</th><th>Pieza</th><th>Medidas (mm)</th><th class="tr">Cant.</th><th class="tr">Área total</th></tr></thead>
+        <thead><tr><th>#</th><th>Pieza</th><th>Medidas (mm)</th><th class="tr">Cant.</th><th class="tr">Área</th></tr></thead>
         <tbody>${tableRows}</tbody>
       </table>
       <div class="g3">
         <div class="metric"><div class="mlabel">Área Útil</div><div class="mval">${totalArea.toFixed(2)} m²</div></div>
-        <div class="metric"><div class="mlabel">Láminas aprox (Merma 20%)</div><div class="mval tgold">${sheetsReq} u</div></div>
-        <div class="metric"><div class="mlabel">Costo Estimado Tablero</div><div class="mval tgreen">$ ${(sheetsReq * selectedMat.precio).toFixed(2)}</div></div>
+        <div class="metric"><div class="mlabel">Láminas (Merma 20%)</div><div class="mval tgold">${sheetsReq} u</div></div>
+        <div class="metric"><div class="mlabel">Costo Material Nube</div><div class="mval tgreen">$ ${(sheetsReq * selectedMat.precio).toFixed(2)}</div></div>
       </div>
-      <button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="openCutModal('${name}', ${w}, ${h})">👁️ Ver mapa óptimo de corte</button>
+      <button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="openCutModal('${name}', ${w}, ${h})">👁️ Ver plano de corte optimizado</button>
     </div>
   `;
 
-  // Actualizar los resúmenes laterales
   if(document.getElementById('matCard')) document.getElementById('matCard').style.display = 'block';
   if(document.getElementById('mArea')) document.getElementById('mArea').textContent = `${totalArea.toFixed(2)} m²`;
   if(document.getElementById('mSheets')) document.getElementById('mSheets').textContent = `${sheetsReq} Lámina(s)`;
@@ -1269,8 +1228,7 @@ function calcCuts() {
 
 function openCutModal(name, w, h) {
   if(document.getElementById('cutPlanModal')) document.getElementById('cutPlanModal').style.display = 'block';
-  if(document.getElementById('cpTitle')) document.getElementById('cpTitle').textContent = `Optimización de Láminas — ${name}`;
-  if(document.getElementById('cpSubtitle')) document.getElementById('cpSubtitle').textContent = `Distribución de paneles sobre formato comercial de 2440x1220mm`;
+  if(document.getElementById('cpTitle')) document.getElementById('cpTitle').textContent = `Optimización — ${name}`;
   
   const content = document.getElementById('cpContent');
   if(content) {
@@ -1282,10 +1240,8 @@ function openCutModal(name, w, h) {
           <text x="50" y="80" font-family="sans-serif" font-size="50" fill="#27500a">Lateral 1</text>
           <rect x="760" y="20" width="720" height="550" fill="#27500a" opacity="0.3" stroke="#27500a" stroke-width="4"/>
           <text x="790" y="80" font-family="sans-serif" font-size="50" fill="#27500a">Lateral 2</text>
-          <rect x="20" y="600" width="1460" height="550" fill="#0c447c" opacity="0.3" stroke="#0c447c" stroke-width="4"/>
-          <text x="50" y="660" font-family="sans-serif" font-size="50" fill="#0c447c">Base + Estantería</text>
           <line x1="1500" y1="0" x2="1500" y2="1220" stroke="red" stroke-dasharray="20" stroke-width="6"/>
-          <text x="1530" y="600" font-family="sans-serif" font-size="60" fill="red">Retal útil: 940x1220mm</text>
+          <text x="1530" y="600" font-family="sans-serif" font-size="60" fill="red">Retal de tablero disponible</text>
         </svg>
       </div>
     `;
@@ -1293,100 +1249,7 @@ function openCutModal(name, w, h) {
 }
 
 // ==========================================
-// 6. MÓDULO: INVENTARIO Y MATERIALES
-// ==========================================
-function switchInvTab(type, btn) {
-  document.querySelectorAll('.inv-tab').forEach(b => b.classList.remove('on'));
-  if(btn) btn.classList.add('on');
-  if(document.getElementById('invTableros')) document.getElementById('invTableros').style.display = type === 'tableros' ? 'block' : 'none';
-  if(document.getElementById('invTapacanto')) document.getElementById('invTapacanto').style.display = type === 'tapacanto' ? 'block' : 'none';
-  if(document.getElementById('invPega')) document.getElementById('invPega').style.display = type === 'pega' ? 'block' : 'none';
-}
-
-function updateMatSelect() {
-  const sel = document.getElementById('pMat');
-  if(!sel) return;
-  sel.innerHTML = inventory.tableros.map(m => `<option value="${m.id}">${m.nombre} (${m.moneda} ${m.precio})</option>`).join('');
-}
-
-function addMel() {
-  const name = document.getElementById('mNombre').value || 'Tablero';
-  const price = parseFloat(document.getElementById('mPrecio').value) || 0;
-  const id = inventory.tableros.length + 1;
-  inventory.tableros.push({
-    id, nombre: name, color: document.getElementById('mColor').value,
-    prov: document.getElementById('mProv').value, ancho: parseInt(document.getElementById('mAncho').value),
-    alto: parseInt(document.getElementById('mAlto').value), espesor: parseInt(document.getElementById('mEspesor').value),
-    precio: price, moneda: document.getElementById('mMoneda').value, stock: parseInt(document.getElementById('mStock').value),
-    notes: document.getElementById('mNotas').value
-  });
-  renderInventory(); updateMatSelect(); showToast("Tablero registrado");
-}
-
-function addTc() {
-  const name = document.getElementById('tcNombre').value || 'Canto';
-  inventory.tapacanto.push({
-    id: inventory.tapacanto.length + 1, nombre: name, color: document.getElementById('tcColor').value,
-    mat: document.getElementById('tcMat').value, espesor: parseFloat(document.getElementById('tcEspesor').value),
-    ancho: parseInt(document.getElementById('tcAncho').value), largo: parseInt(document.getElementById('tcLargo').value),
-    precio: parseFloat(document.getElementById('tcPrecio').value), moneda: document.getElementById('tcMoneda').value,
-    stock: parseInt(document.getElementById('tcStock').value), prov: document.getElementById('tcProv').value,
-    notes: document.getElementById('tcNotas').value
-  });
-  renderInventory(); showToast("Tapacanto guardado");
-}
-
-function addPg() {
-  inventory.pega.push({
-    id: inventory.pega.length + 1, tipo: document.getElementById('pgTipo').value,
-    nombre: document.getElementById('pgNombre').value || 'Pegamento', desc: document.getElementById('pgDesc').value,
-    pres: document.getElementById('pgPres').value, rend: parseFloat(document.getElementById('pgRend').value),
-    precio: parseFloat(document.getElementById('pgPrecio').value), moneda: 'USD',
-    prov: document.getElementById('pgProv').value, stock: parseInt(document.getElementById('pgStock').value),
-    notes: document.getElementById('pgNotas').value
-  });
-  renderInventory(); showToast("Pegamento añadido");
-}
-
-function deleteInvItem(type, id) {
-  inventory[type] = inventory[type].filter(item => item.id !== id);
-  renderInventory(); updateMatSelect();
-}
-
-function renderInventory() {
-  if(document.getElementById('melCount')) document.getElementById('melCount').textContent = `${inventory.tableros.length} tableros`;
-  if(document.getElementById('melList')) {
-    document.getElementById('melList').innerHTML = inventory.tableros.map(m => `
-      <div class="card mb8 flexb">
-        <div><strong>${m.nombre}</strong> <span class="tag">${m.ancho}x${m.alto}mm</span><br><small class="muted">Local: ${m.prov}</small></div>
-        <div class="tr"><div class="tgold mono">${m.moneda} ${m.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tableros', ${m.id})">×</button></div>
-      </div>
-    `).join('') || '<div class="empty card">Sin tableros</div>';
-  }
-
-  if(document.getElementById('tcCount')) document.getElementById('tcCount').textContent = `${inventory.tapacanto.length} rollos`;
-  if(document.getElementById('tcList')) {
-    document.getElementById('tcList').innerHTML = inventory.tapacanto.map(t => `
-      <div class="card mb8 flexb">
-        <div><strong>${t.nombre}</strong> <span class="tag">${t.ancho}mm</span></div>
-        <div class="tr"><div class="tblue mono">${t.moneda} ${t.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tapacanto', ${t.id})">×</button></div>
-      </div>
-    `).join('') || '<div class="empty card">Sin tapacantos</div>';
-  }
-
-  if(document.getElementById('pgCount')) document.getElementById('pgCount').textContent = `${inventory.pega.length} tipos`;
-  if(document.getElementById('pgList')) {
-    document.getElementById('pgList').innerHTML = inventory.pega.map(p => `
-      <div class="card mb8 flexb">
-        <div><strong>${p.nombre}</strong> <small class="badge">${p.tipo}</small></div>
-        <div class="tr"><div class="tgreen mono">$ ${p.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('pega', ${p.id})">×</button></div>
-      </div>
-    `).join('') || '<div class="empty card">Sin pegamentos</div>';
-  }
-}
-
-// ==========================================
-// 7. MÓDULO: PLANOS ARQUITECTÓNICOS (2D SVG)
+// MÓDULO: PLANOS ARQUITECTÓNICOS (2D SVG)
 // ==========================================
 function adjSc(factor) {
   svgScale = Math.max(20, Math.min(150, svgScale * factor));
@@ -1405,28 +1268,22 @@ function addPRoom() {
   };
   planarRooms.push(r);
   renderPlans();
-  showToast("Ambiente agregado al plano plano");
+  showToast("Ambiente agregado");
 }
 
 const furnitureCatalog = {
   mb: { name: 'Mueble bajo', w: 0.6, h: 0.55, fill: '#FAEEDA', stroke: '#BA7517' },
   ma: { name: 'Mueble alto', w: 0.6, h: 0.3, fill: '#FFF3E0', stroke: '#FB8C00' },
-  isla: { name: 'Isla central', w: 1.2, h: 0.9, fill: '#EAF3DE', stroke: '#3B6D11' },
+  isla: { name: 'Isla cocina', w: 1.2, h: 0.9, fill: '#EAF3DE', stroke: '#3B6D11' },
   freg: { name: 'Fregadero', w: 0.8, h: 0.55, fill: '#E6F1FB', stroke: '#185FA5' },
-  estufa: { name: 'Estufa/Placa', w: 0.6, h: 0.6, fill: '#FCEBEB', stroke: '#A32D2D' },
-  refri: { name: 'Refrigerador', w: 0.7, h: 0.7, fill: '#EEEEEE', stroke: '#666666' },
-  closet: { name: 'Armario/Closet', w: 1.2, h: 0.6, fill: '#EEEDFE', stroke: '#534AB7' },
-  camad: { name: 'Cama Matrimonial', w: 1.4, h: 2.0, fill: '#F5EBE8', stroke: '#A32D2D' },
-  tvstand: { name: 'Módulo de TV', w: 1.5, h: 0.45, fill: '#E1F5EE', stroke: '#0F6E56' }
+  estufa: { name: 'Estufa/Vitro', w: 0.6, h: 0.6, fill: '#FCEBEB', stroke: '#A32D2D' },
+  refri: { name: 'Nevera/Refri', w: 0.7, h: 0.7, fill: '#EEEEEE', stroke: '#666666' },
+  closet: { name: 'Módulo Closet', w: 1.2, h: 0.6, fill: '#EEEDFE', stroke: '#534AB7' }
 };
 
 function addF(type) {
   const template = furnitureCatalog[type] || { name: 'Mueble', w: 0.6, h: 0.6, fill: '#fff', stroke: '#333' };
-  const f = {
-    id: Date.now(),
-    ...template,
-    x: 100, y: 100, angle: 0
-  };
+  const f = { id: Date.now(), ...template, x: 100, y: 100, angle: 0 };
   planarFurniture.push(f);
   renderPlans();
 }
@@ -1435,26 +1292,17 @@ function renderPlans() {
   const svg = document.getElementById('planSvg');
   if(!svg) return;
   svg.innerHTML = '';
-  
   svg.setAttribute('width', '100%');
   svg.setAttribute('height', '550');
 
-  // Dibujar Espacios
   planarRooms.forEach(r => {
     const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     rect.setAttribute('x', r.x); rect.setAttribute('y', r.y);
     rect.setAttribute('width', r.w * svgScale); rect.setAttribute('height', r.h * svgScale);
     rect.setAttribute('fill', '#FAF9F5'); rect.setAttribute('stroke', '#222'); rect.setAttribute('stroke-width', '3');
     svg.appendChild(rect);
-
-    const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    txt.setAttribute('x', r.x + 12); txt.setAttribute('y', r.y + 24);
-    txt.setAttribute('font-family', 'sans-serif'); txt.setAttribute('font-size', '13'); txt.setAttribute('font-weight', '600');
-    txt.textContent = `${r.name} [${r.w}x${r.h}m]`;
-    svg.appendChild(txt);
   });
 
-  // Dibujar Mobiliario
   planarFurniture.forEach(f => {
     const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
     g.setAttribute('transform', `translate(${f.x}, ${f.y}) rotate(${f.angle})`);
@@ -1465,365 +1313,113 @@ function renderPlans() {
     rect.setAttribute('width', f.w * svgScale); rect.setAttribute('height', f.h * svgScale);
     rect.setAttribute('fill', f.fill); rect.setAttribute('stroke', f.stroke);
     rect.setAttribute('stroke-width', selectedElement === f ? '3' : '1.5');
-    if(selectedElement === f) rect.setAttribute('stroke-dasharray', '4');
-
     g.appendChild(rect);
 
-    const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    txt.setAttribute('x', 0); txt.setAttribute('y', 4);
-    txt.setAttribute('text-anchor', 'middle'); txt.setAttribute('font-family', 'sans-serif'); txt.setAttribute('font-size', '10');
-    txt.textContent = f.name;
-    g.appendChild(txt);
-
-    // Sistema de Arrastre Mouse
     g.addEventListener('mousedown', (e) => {
       e.stopPropagation();
       selectedElement = f;
-      if(document.getElementById('selBar')) {
-        document.getElementById('selBar').style.display = 'flex';
-        document.getElementById('selName').textContent = f.name;
-      }
-      
       let startX = e.clientX; let startY = e.clientY;
       let origX = f.x; let origY = f.y;
-
-      function drag(ev) {
-        f.x = origX + (ev.clientX - startX);
-        f.y = origY + (ev.clientY - startY);
-        renderPlans();
-      }
-      function drop() {
-        window.removeEventListener('mousemove', drag);
-        window.removeEventListener('mouseup', drop);
-      }
-      window.addEventListener('mousemove', drag);
-      window.addEventListener('mouseup', drop);
+      function drag(ev) { f.x = origX + (ev.clientX - startX); f.y = origY + (ev.clientY - startY); renderPlans(); }
+      function drop() { window.removeEventListener('mousemove', drag); window.removeEventListener('mouseup', drop); }
+      window.addEventListener('mousemove', drag); window.addEventListener('mouseup', drop);
       renderPlans();
     });
-
     svg.appendChild(g);
   });
-  
   updateSidePanelEditor();
 }
 
-function rotSel() {
-  if (selectedElement) { selectedElement.angle = (selectedElement.angle + 90) % 360; renderPlans(); }
-}
-function delSel() {
-  if (selectedElement) {
-    planarFurniture = planarFurniture.filter(f => f !== selectedElement);
-    selectedElement = null;
-    if(document.getElementById('selBar')) document.getElementById('selBar').style.display = 'none';
-    renderPlans();
-  }
-}
+function rotSel() { if (selectedElement) { selectedElement.angle = (selectedElement.angle + 90) % 360; renderPlans(); } }
+function delSel() { if (selectedElement) { planarFurniture = planarFurniture.filter(f => f !== selectedElement); selectedElement = null; renderPlans(); } }
 
 function updateSidePanelEditor() {
   const panel = document.getElementById('selPanel');
   if(!panel) return;
   if(!selectedElement) {
-    panel.innerHTML = `<div class="muted text-center" style="padding:20px 0">Selecciona un elemento en el lienzo para ajustar dimensiones dinámicas.</div>`;
+    panel.innerHTML = `<div class="muted text-center">Haz clic sobre un mueble del lienzo plano para parametrizarlo.</div>`;
     return;
   }
   panel.innerHTML = `
-    <div class="psl" style="font-weight:600;margin-bottom:8px;color:var(--text)">Editar: ${selectedElement.name}</div>
+    <div class="psl" style="font-weight:600;margin-bottom:6px">Elemento: ${selectedElement.name}</div>
     <div class="field"><label>Ancho (m)</label><input type="number" step="0.05" value="${selectedElement.w}" oninput="selectedElement.w=parseFloat(this.value)||0.1; renderPlans();"></div>
     <div class="field"><label>Fondo (m)</label><input type="number" step="0.05" value="${selectedElement.h}" oninput="selectedElement.h=parseFloat(this.value)||0.1; renderPlans();"></div>
-    <button class="btn btn-sm btn-del" style="width:100%;margin-top:8px" onclick="delSel()">Eliminar objeto</button>
   `;
 }
 
-function setSTab(tab, btn) {
-  document.querySelectorAll('.stab').forEach(b => b.classList.remove('on'));
-  document.querySelectorAll('.sc').forEach(c => c.classList.remove('on'));
-  if(btn) btn.classList.add('on');
-  const scCont = document.getElementById(`sc-${tab}`);
-  if(scCont) scCont.classList.add('on');
-}
-
 // ==========================================
-// 8. MOTOR DE RENDERIZADO 3D (CANVAS CORE)
+// RENDERIZADOR VISTA 3D NATIVO ESPACIAL
 // ==========================================
 function init3DCanvas() {
   const canvas = document.getElementById('c3d');
   if(!canvas) return;
-  
   canvas.width = canvas.parentElement.clientWidth;
   canvas.height = canvas.parentElement.clientHeight || 500;
 
-  canvas.addEventListener('mousedown', (e) => {
-    isDragging3d = true;
-    lastMouseX = e.clientX; lastMouseY = e.clientY;
-  });
-
+  canvas.addEventListener('mousedown', (e) => { isDragging3d = true; lastMouseX = e.clientX; lastMouseY = e.clientY; });
   window.addEventListener('mousemove', (e) => {
     if (!isDragging3d) return;
-    let deltaX = e.clientX - lastMouseX;
-    let deltaY = e.clientY - lastMouseY;
-    
-    if (e.shiftKey) {
-      cameraPanX += deltaX * 0.01;
-      cameraPanY += deltaY * 0.01;
-    } else {
-      cameraAngleX += deltaX * 0.01;
-      cameraAngleY = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraAngleY + deltaY * 0.01));
-    }
-    lastMouseX = e.clientX; lastMouseY = e.clientY;
-    render3D();
+    let deltaX = e.clientX - lastMouseX; let deltaY = e.clientY - lastMouseY;
+    if (e.shiftKey) { cameraPanX += deltaX * 0.01; cameraPanY += deltaY * 0.01; } 
+    else { cameraAngleX += deltaX * 0.01; cameraAngleY = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraAngleY + deltaY * 0.01)); }
+    lastMouseX = e.clientX; lastMouseY = e.clientY; render3D();
   });
-
   window.addEventListener('mouseup', () => isDragging3d = false);
-  canvas.addEventListener('wheel', (e) => {
-    cameraZoom = Math.max(0.2, Math.min(4.0, cameraZoom - e.deltaY * 0.001));
-    render3D();
-  });
-
-  if(v3dRooms.length === 0) {
-    v3dRooms.push({ name: 'Cocina Principal', w: 4, l: 3, h: 2.6, color: '#EFECE6' });
-  }
-}
-
-function v3setView(mode, btn) {
-  document.querySelectorAll('.v3d-btn').forEach(b => { if(b.id && b.id.startsWith('v3btn')) b.classList.remove('on'); });
-  if(btn) btn.classList.add('on');
-  v3dSettings.viewMode = mode;
-  if(mode === 'top') { cameraAngleX = 0; cameraAngleY = Math.PI/2; }
-  if(mode === 'front') { cameraAngleX = 0; cameraAngleY = 0; }
-  render3D();
-}
-
-function v3toggleWalls() {
-  v3dSettings.showWalls = !v3dSettings.showWalls;
-  if(document.getElementById('v3btnW')) document.getElementById('v3btnW').classList.toggle('on');
-  render3D();
-}
-
-function v3addRoom() {
-  v3dRooms.push({
-    name: document.getElementById('v3rName').value,
-    w: parseFloat(document.getElementById('v3rW').value),
-    l: parseFloat(document.getElementById('v3rH').value),
-    h: parseFloat(document.getElementById('v3rAlt').value),
-    color: document.getElementById('v3rCol').value
-  });
-  render3D();
-}
-
-function v3addObj(type) {
-  let base = furnitureCatalog[type] || { name: 'Módulo 3D', w:0.6, h:0.6, fill:'#fff', stroke:'#999' };
-  v3dObjects.push({
-    name: base.name,
-    w: base.w, d: base.h, h: type==='ma'?0.6 : (type==='refri'?1.8 : 0.85),
-    x: 1.2, y: type==='ma'? 1.4 : 0, z: 1.0, 
-    color: base.stroke
-  });
-  render3D();
-}
-
-function v3importFromPlan() {
-  v3dObjects = planarFurniture.map(f => ({
-    name: f.name,
-    w: f.w, d: f.h, h: f.name.toLowerCase().includes('alto') ? 0.6 : 0.85,
-    x: f.x / 100, y: f.name.toLowerCase().includes('alto') ? 1.4 : 0, z: f.y / 100,
-    color: f.stroke
-  }));
-  showToast("Objetos sincronizados desde el plano 2D");
-  render3D();
-}
-
-function v3resetCam() {
-  cameraAngleX = -0.5; cameraAngleY = 0.6; cameraZoom = 1.0; cameraPanX = 0; cameraPanY = 0;
-  render3D();
+  if(v3dRooms.length === 0) v3dRooms.push({ name: 'Cocina', w: 4, l: 3, h: 2.6, color: '#EFECE6' });
 }
 
 function project3D(x, y, z, width, height) {
   let cosX = Math.cos(cameraAngleX); let sinX = Math.sin(cameraAngleX);
   let cosY = Math.cos(cameraAngleY); let sinY = Math.sin(cameraAngleY);
-
-  let x1 = x + cameraPanX;
-  let y1 = y;
-  let z1 = z + cameraPanY;
-
-  let rx = x1 * cosX - z1 * sinX;
-  let rz = x1 * sinX + z1 * cosX;
-
-  let ry = y1 * cosY - rz * sinY;
-  let depth = y1 * sinY + rz * cosY;
-
-  let dist = 6; 
-  let factor = (v3dSettings.viewMode === 'persp') ? (dist / (dist + depth)) : 1;
-  
-  let scale = 95 * cameraZoom * factor;
-  return {
-    x: width / 2 + rx * scale,
-    y: height / 2 - ry * scale,
-    depth: depth
-  };
+  let rx = (x + cameraPanX) * cosX - (z + cameraPanY) * sinX;
+  let rz = (x + cameraPanX) * sinX + (z + cameraPanY) * cosX;
+  let ry = y * cosY - rz * sinY;
+  let depth = y * sinY + rz * cosY;
+  let factor = 6 / (6 + depth);
+  return { x: width / 2 + rx * 95 * cameraZoom * factor, y: height / 2 - ry * 95 * cameraZoom * factor };
 }
 
 function render3D() {
-  const canvas = document.getElementById('c3d');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width; const h = canvas.height;
-  
-  ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = "#12141e";
-  ctx.fillRect(0, 0, w, h);
+  const canvas = document.getElementById('c3d'); if(!canvas) return;
+  const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#12141e"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
 
-  v3dRooms.forEach(room => {
-    let rw = room.w; let rl = room.l; let rh = room.h;
-    
-    let pts = [
-      project3D(-rw/2, 0, -rl/2, w, h), project3D(rw/2, 0, -rl/2, w, h),
-      project3D(rw/2, 0, rl/2, w, h),  project3D(-rw/2, 0, rl/2, w, h),
-      project3D(-rw/2, rh, -rl/2, w, h), project3D(rw/2, rh, -rl/2, w, h),
-      project3D(rw/2, rh, rl/2, w, h),  project3D(-rw/2, rh, rl/2, w, h)
-    ];
-
-    // Dibujar suelo
-    ctx.fillStyle = "#1f2233";
-    ctx.strokeStyle = "rgba(255,255,255,0.05)";
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pts[0].y); ctx.lineTo(pts[1].x, pts[1].y);
-    ctx.lineTo(pts[2].x, pts[2].y); ctx.lineTo(pts[3].x, pts[3].y);
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-
-    // Dibujar Muros
-    if(v3dSettings.showWalls) {
-      ctx.fillStyle = room.color;
-      ctx.strokeStyle = "rgba(255,255,255,0.1)";
-      
-      // Muro izquierdo posterior
-      ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); ctx.lineTo(pts[1].x, pts[1].y);
-      ctx.lineTo(pts[5].x, pts[5].y); ctx.lineTo(pts[4].x, pts[4].y); ctx.closePath(); ctx.fill(); ctx.stroke();
-
-      // Muro derecho posterior
-      ctx.beginPath(); ctx.moveTo(pts[1].x, pts[1].y); ctx.lineTo(pts[2].x, pts[2].y);
-      ctx.lineTo(pts[6].x, pts[6].y); ctx.lineTo(pts[5].x, pts[5].y); ctx.closePath(); ctx.fill(); ctx.stroke();
-    }
-
-    // Dibujar Objetos Sólidos
-    v3dObjects.forEach(obj => {
-      let ox = obj.x - rw/2; let oy = obj.y; let oz = obj.z - rl/2;
-      let o_pts = [
-        project3D(ox, oy, oz, w, h), project3D(ox + obj.w, oy, oz, w, h),
-        project3D(ox + obj.w, oy, oz + obj.d, w, h), project3D(ox, oy, oz + obj.d, w, h),
-        project3D(ox, oy + obj.h, oz, w, h), project3D(ox + obj.w, oy + obj.h, oz, w, h),
-        project3D(ox + obj.w, oy + obj.h, oz + obj.d, w, h), project3D(ox, oy + obj.h, oz + obj.d, w, h)
-      ];
-
-      // Cara Superior
-      ctx.fillStyle = obj.color || "#BA7517";
-      ctx.beginPath(); ctx.moveTo(o_pts[4].x, o_pts[4].y); ctx.lineTo(o_pts[5].x, o_pts[5].y);
-      ctx.lineTo(o_pts[6].x, o_pts[6].y); ctx.lineTo(o_pts[7].x, o_pts[7].y); ctx.closePath(); ctx.fill();
-      
-      // Cara Frontal/Sombra
-      ctx.fillStyle = "rgba(0,0,0,0.15)";
-      ctx.beginPath(); ctx.moveTo(o_pts[1].x, o_pts[1].y); ctx.lineTo(o_pts[2].x, o_pts[2].y);
-      ctx.lineTo(o_pts[6].x, o_pts[6].y); ctx.lineTo(o_pts[5].x, o_pts[5].y); ctx.closePath(); ctx.fill();
-
-      ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.stroke();
-    });
-  });
+function v3importFromPlan() {
+  v3dObjects = planarFurniture.map(f => ({ name: f.name, w: f.w, d: f.h, h: f.name.toLowerCase().includes('alto') ? 0.6 : 0.85, x: f.x / 100, y: f.name.toLowerCase().includes('alto') ? 1.4 : 0, z: f.y / 100, color: f.stroke }));
+  showToast("Planos importados correctamente"); render3D();
 }
 
 // ==========================================
-// 9. PROYECTOS Y PERSISTENCIA (LOCALSTORAGE)
+// PERSISTENCIA DE PROYECTOS COMPLETOS (LOCAL)
 // ==========================================
 function dbSaveCurrent() {
   const pNameInput = document.getElementById('dbProjName');
-  const fallbackInput = document.getElementById('pName');
-  let name = (pNameInput ? pNameInput.value : "") || (fallbackInput ? fallbackInput.value : "") || "Proyecto Guardado";
+  let name = (pNameInput ? pNameInput.value : "") || "Proyecto Sincronizado";
   let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
-  
-  let pPayload = {
-    id: Date.now(),
-    name: name,
-    budget: projectData,
-    rooms: planarRooms,
-    furniture: planarFurniture
-  };
-
-  allProjects.push(pPayload);
+  allProjects.push({ id: Date.now(), name: name, budget: projectData, rooms: planarRooms, furniture: planarFurniture });
   localStorage.setItem('linaro_projects', JSON.stringify(allProjects));
-  showToast("Proyecto indexado con éxito");
+  showToast("Proyecto guardado localmente");
   renderProjectsGrid();
 }
 
 function renderProjectsGrid() {
-  const grid = document.getElementById('dbGrid');
-  if(!grid) return;
+  const grid = document.getElementById('dbGrid'); if(!grid) return;
   let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
   if(allProjects.length === 0) {
-    grid.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--text2);grid-column:1/-1"><div style="font-size:32px;margin-bottom:10px">📁</div><p>No se han encontrado proyectos locales</p></div>`;
+    grid.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text2)">📁 No hay proyectos guardados aún</div>`;
     return;
   }
   grid.innerHTML = allProjects.map(p => `
-    <div class="db-card">
-      <div class="db-card-head"><div><strong>${p.name}</strong><br><small class="muted">${p.budget.date}</small></div></div>
-      <div class="db-card-body">
-        <div class="db-stat">Cliente: <span>${p.budget.client || 'Particular'}</span></div>
-        <div class="db-stat">Módulos: <span>${p.budget.items.length}</span></div>
-      </div>
-      <div class="db-card-foot">
-        <button class="btn btn-sm btn-gold" onclick="loadProjectFromDb(${p.id})">📂 Abrir</button>
-        <button class="btn btn-sm btn-del" onclick="deleteProjectFromDb(${p.id})">×</button>
-      </div>
+    <div class="db-card" style="padding:10px; margin-bottom:6px; background:#fff; border:1px solid #ddd; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+      <span><strong>${p.name}</strong></span>
+      <button class="btn btn-sm btn-gold" onclick="loadProjectFromDb(${p.id})">📂 Abrir</button>
     </div>
   `).join('');
 }
 
-function loadProjectFromDb(id) {
-  let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
-  let found = allProjects.find(p => p.id === id);
-  if(found) {
-    projectData = found.budget;
-    planarRooms = found.rooms || [];
-    planarFurniture = found.furniture || [];
-    
-    if(document.getElementById('pName')) document.getElementById('pName').value = projectData.name || '';
-    if(document.getElementById('pClient')) document.getElementById('pClient').value = projectData.client || '';
-    if(document.getElementById('pLoc')) document.getElementById('pLoc').value = projectData.location || '';
-    
-    renderBudgetTable();
-    recalc();
-    showToast("Datos recuperados correctamente");
-  }
-}
-
-function deleteProjectFromDb(id) {
-  let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
-  allProjects = allProjects.filter(p => p.id !== id);
-  localStorage.setItem('linaro_projects', JSON.stringify(allProjects));
-  renderProjectsGrid();
-}
-
-function dbExportAll() {
-  let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(localStorage.getItem('linaro_projects') || '[]');
-  let dlAnchorElem = document.createElement('a');
-  dlAnchorElem.setAttribute("href", dataStr);
-  dlAnchorElem.setAttribute("download", "Linaro_Copia_Seguridad.json");
-  dlAnchorElem.click();
-}
-
-function dbImport(e) {
-  let file = e.target.files[0];
-  if (!file) return;
-  let reader = new FileReader();
-  reader.onload = function(evt) {
-    localStorage.setItem('linaro_projects', evt.target.result);
-    renderProjectsGrid();
-    showToast("Copia de seguridad importada");
-  };
-  reader.readAsText(file);
-}
-
-// Inicializador automático diferido
 window.addEventListener('DOMContentLoaded', () => {
   renderProjectsGrid();
-  // Inicializar la aplicación automáticamente si no requiere overlay de login estricto
   initApp();
 });
 </script>
