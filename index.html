@@ -114,6 +114,7 @@
       var overlay = document.getElementById('loginOverlay');
       if (overlay) overlay.style.display = 'none';
       if (typeof initApp === 'function') initApp();
+      if (typeof loadInventory === 'function') loadInventory();
       if (typeof renderProjectsGrid === 'function') renderProjectsGrid();
     }
   });
@@ -201,6 +202,7 @@ async function doLogin() {
     document.getElementById('loginOverlay').style.display = 'none';
     showToast(`¡Bienvenido a Linaro, ${window.currentUser.email}!`);
     initApp();
+    loadInventory();
     renderProjectsGrid();
   } catch (e) {
     if (err) {
@@ -1365,10 +1367,6 @@ if (typeof currentInvTab === 'undefined') {
 }
 
 // Asegurar que la función de inventario no falle
-function switchInvTab(tab, btn) {
-    window.currentInvTab = tab;
-    // ... lógica adicional de UI ...
-}
 </script>
 
 </head>
