@@ -76,30 +76,20 @@
           if (!r.ok) { var e = await r.json(); return { error: { message: e.message || 'Error al insertar' } }; }
           return { error: null };
         },
-        update: function(payload) { q._update = payload; return q; },
         delete: function() { q._delete = true; return q; },
         eq: function(col, val) { _filters.push(col + '=eq.' + val); return q; },
-        order: function(col, opts) { _order = col + '=' + ((opts && opts.ascending === false) ? 'desc' : 'asc'); return q; },
+        order: function(col, opts) { _order = col + '.' + ((opts && opts.ascending === false) ? 'desc' : 'asc'); return q; },
         single: function() { _single = true; return q; },
         then: async function(resolve, reject) {
           try {
-            var qs = _filters.join('&');
-            if (_order) qs += (qs ? '&' : '') + 'order=' + _order;
+            var qs = 'select=' + (q._cols || '*');
+            qs += (_filters.length ? '&' + _filters.join('&') : '');
+            if (_order) qs += '&order=' + _order;
             var endpoint = URL + '/rest/v1/' + _table + (qs ? '?' + qs : '');
 
             if (q._delete) {
               var r = await fetch(endpoint, { method: 'DELETE', headers: authHeaders(window.supabaseClient._token) });
               if (!r.ok) { var e = await r.json(); return resolve({ data: null, error: { message: e.message } }); }
-              return resolve({ data: null, error: null });
-            }
-
-            if (q._update) {
-              var r = await fetch(endpoint, {
-                method: 'PATCH',
-                headers: Object.assign(authHeaders(window.supabaseClient._token), { 'Prefer': 'return=minimal' }),
-                body: JSON.stringify(q._update)
-              });
-              if (!r.ok) { var e = await r.json(); return resolve({ data: null, error: { message: e.message || 'Error al actualizar' } }); }
               return resolve({ data: null, error: null });
             }
 
@@ -635,10 +625,13 @@ async function loadInventory() {
   if (!window.currentUser) return;
   const uid = window.currentUser.id;
   const [rt, rtc, rp] = await Promise.all([
-    window.supabaseClient.from('inv_tableros').select('*').eq('user_id', uid).order('created_at', { ascending: true }),
-    window.supabaseClient.from('inv_tapacanto').select('*').eq('user_id', uid).order('created_at', { ascending: true }),
-    window.supabaseClient.from('inv_pega').select('*').eq('user_id', uid).order('created_at', { ascending: true })
+    window.supabaseClient.from('inv_tableros').select('*').eq('user_id', uid).order('id', { ascending: true }),
+    window.supabaseClient.from('inv_tapacanto').select('*').eq('user_id', uid).order('id', { ascending: true }),
+    window.supabaseClient.from('inv_pega').select('*').eq('user_id', uid).order('id', { ascending: true })
   ]);
+  if (rt.error)  console.error('inv_tableros error:', rt.error.message);
+  if (rtc.error) console.error('inv_tapacanto error:', rtc.error.message);
+  if (rp.error)  console.error('inv_pega error:', rp.error.message);
   inventory.tableros  = (rt.data  || []).map(r => ({ ...r, precio: parseFloat(r.precio) || 0 }));
   inventory.tapacanto = (rtc.data || []).map(r => ({ ...r, precio: parseFloat(r.precio) || 0 }));
   inventory.pega      = (rp.data  || []).map(r => ({ ...r, precio: parseFloat(r.precio) || 0 }));
@@ -647,82 +640,151 @@ async function loadInventory() {
 }
 
 function renderInventory() {
-  // ── Tableros ──────────────────────────────────────────────
+  // ── helpers ─────────────────────────────────────────────
+  const emptyRow = (cols, icon, msg) =>
+    `<tr><td colspan="${cols}" style="text-align:center;padding:32px;color:var(--text2)">
+       <div style="font-size:28px;margin-bottom:6px">${icon}</div><div>${msg}</div>
+     </td></tr>`;
+
+  const tblWrap = (html) =>
+    `<div style="overflow-x:auto;border-radius:8px;border:1px solid var(--border)">${html}</div>`;
+
+  const tblStyle = `style="width:100%;border-collapse:collapse;font-size:13px"`;
+  const thStyle  = `style="padding:8px 12px;background:var(--bg2);color:var(--text2);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap"`;
+  const tdStyle  = `style="padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle"`;
+  const tdR      = `style="padding:8px 10px;border-bottom:1px solid var(--border);text-align:right;vertical-align:middle;white-space:nowrap"`;
+
+  // ── TABLEROS ─────────────────────────────────────────────
   if(document.getElementById('melCount'))
     document.getElementById('melCount').textContent = `${inventory.tableros.length} tableros`;
+
   if(document.getElementById('melList')) {
-    document.getElementById('melList').innerHTML = inventory.tableros.length ? inventory.tableros.map(m => `
-      <div class="card mb8" style="padding:10px 14px">
-        <div class="flexb" style="gap:8px;flex-wrap:wrap">
-          <div style="flex:1;min-width:140px">
-            <strong>${m.nombre}</strong>
-            <span class="tag" style="margin-left:4px">${m.ancho}×${m.alto}×${m.espesor}mm</span><br>
-            <small class="muted">Proveedor: ${m.prov || '—'} · Stock: ${m.stock ?? '—'} lám.</small>
-          </div>
-          <div class="flex gap8" style="align-items:center;flex-shrink:0">
-            <span class="muted" style="font-size:11px">${m.moneda}</span>
+    const rows = inventory.tableros.length
+      ? inventory.tableros.map(m => `
+        <tr>
+          <td ${tdStyle}><strong style="color:var(--text1)">${m.nombre}</strong>
+            ${m.notas ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">📝 ${m.notas}</div>` : ''}
+          </td>
+          <td ${tdStyle}>${m.color || '—'}</td>
+          <td ${tdStyle}>${m.prov || '—'}</td>
+          <td ${tdStyle} style="text-align:center">${m.ancho}×${m.alto}</td>
+          <td ${tdStyle} style="text-align:center">${m.espesor}mm</td>
+          <td ${tdStyle} style="text-align:center">${m.stock ?? '—'}</td>
+          <td ${tdR}>
+            <span style="font-size:11px;color:var(--text3);margin-right:3px">${m.moneda}</span>
             <input type="number" id="pr-t-${m.id}" value="${m.precio.toFixed(2)}" min="0" step="0.01"
-              style="width:80px;text-align:right;font-weight:600;color:var(--gold);background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-size:13px"
-              onkeydown="if(event.key==='Enter') updateInvPrice('tableros','inv_tableros',${m.id},this.value)">
-            <button class="btn btn-sm btn-gold" onclick="updateInvPrice('tableros','inv_tableros',${m.id},document.getElementById('pr-t-${m.id}').value)" title="Guardar precio">✓</button>
-            <button class="btn btn-sm btn-del" onclick="deleteInvItem('tableros',${m.id})" title="Eliminar">×</button>
-          </div>
-        </div>
-        ${m.notas ? `<div style="margin-top:5px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);padding-top:4px">📝 ${m.notas}</div>` : ''}
-      </div>
-    `).join('') : '<div class="empty card"><div class="empty-icon">🗂️</div><p>Sin tableros registrados</p></div>';
+              style="width:76px;text-align:right;font-weight:600;color:var(--gold);background:var(--bg);border:1.5px solid var(--border);border-radius:6px;padding:3px 6px;font-size:13px"
+              onkeydown="if(event.key==='Enter') updateInvPrice('tableros','inv_tableros','${m.id}',this.value)">
+            <button class="btn btn-sm btn-gold" style="padding:3px 8px;margin-left:4px"
+              onclick="updateInvPrice('tableros','inv_tableros','${m.id}',document.getElementById('pr-t-${m.id}').value)">✓</button>
+            <button class="btn btn-sm btn-del" style="padding:3px 8px;margin-left:2px"
+              onclick="deleteInvItem('tableros','${m.id}')">×</button>
+          </td>
+        </tr>`).join('')
+      : emptyRow(7, '🗂️', 'Sin tableros registrados');
+
+    document.getElementById('melList').innerHTML = tblWrap(`
+      <table ${tblStyle}>
+        <thead><tr>
+          <th ${thStyle}>Nombre / referencia</th>
+          <th ${thStyle}>Color</th>
+          <th ${thStyle}>Proveedor</th>
+          <th ${thStyle} style="text-align:center">Tamaño (mm)</th>
+          <th ${thStyle} style="text-align:center">Espesor</th>
+          <th ${thStyle} style="text-align:center">Stock</th>
+          <th ${thStyle} style="text-align:right">Precio / lám.</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`);
   }
 
-  // ── Tapacanto ─────────────────────────────────────────────
+  // ── TAPACANTO ─────────────────────────────────────────────
   if(document.getElementById('tcCount'))
     document.getElementById('tcCount').textContent = `${inventory.tapacanto.length} rollos`;
+
   if(document.getElementById('tcList')) {
-    document.getElementById('tcList').innerHTML = inventory.tapacanto.length ? inventory.tapacanto.map(t => `
-      <div class="card mb8" style="padding:10px 14px">
-        <div class="flexb" style="gap:8px;flex-wrap:wrap">
-          <div style="flex:1;min-width:140px">
-            <strong>${t.nombre}</strong>
-            <span class="tag" style="margin-left:4px">${t.ancho}mm · ${t.espesor}mm esp.</span><br>
-            <small class="muted">Mat: ${t.mat || '—'} · ${t.largo ?? '—'}m largo · Stock: ${t.stock ?? '—'} rol.</small>
-          </div>
-          <div class="flex gap8" style="align-items:center;flex-shrink:0">
-            <span class="muted" style="font-size:11px">${t.moneda}</span>
+    const rows = inventory.tapacanto.length
+      ? inventory.tapacanto.map(t => `
+        <tr>
+          <td ${tdStyle}><strong style="color:var(--text1)">${t.nombre}</strong>
+            ${t.notas ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">📝 ${t.notas}</div>` : ''}
+          </td>
+          <td ${tdStyle}>${t.color || '—'}</td>
+          <td ${tdStyle}>${t.mat || '—'}</td>
+          <td ${tdStyle} style="text-align:center">${t.ancho}mm</td>
+          <td ${tdStyle} style="text-align:center">${t.espesor}mm</td>
+          <td ${tdStyle} style="text-align:center">${t.largo ?? '—'}m</td>
+          <td ${tdStyle} style="text-align:center">${t.stock ?? '—'}</td>
+          <td ${tdR}>
+            <span style="font-size:11px;color:var(--text3);margin-right:3px">${t.moneda}</span>
             <input type="number" id="pr-tc-${t.id}" value="${t.precio.toFixed(2)}" min="0" step="0.01"
-              style="width:80px;text-align:right;font-weight:600;color:var(--blue);background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-size:13px"
-              onkeydown="if(event.key==='Enter') updateInvPrice('tapacanto','inv_tapacanto',${t.id},this.value)">
-            <button class="btn btn-sm btn-blue" onclick="updateInvPrice('tapacanto','inv_tapacanto',${t.id},document.getElementById('pr-tc-${t.id}').value)" title="Guardar precio">✓</button>
-            <button class="btn btn-sm btn-del" onclick="deleteInvItem('tapacanto',${t.id})" title="Eliminar">×</button>
-          </div>
-        </div>
-        ${t.notas ? `<div style="margin-top:5px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);padding-top:4px">📝 ${t.notas}</div>` : ''}
-      </div>
-    `).join('') : '<div class="empty card"><div class="empty-icon">📏</div><p>Sin tapacantos registrados</p></div>';
+              style="width:76px;text-align:right;font-weight:600;color:var(--blue);background:var(--bg);border:1.5px solid var(--border);border-radius:6px;padding:3px 6px;font-size:13px"
+              onkeydown="if(event.key==='Enter') updateInvPrice('tapacanto','inv_tapacanto','${t.id}',this.value)">
+            <button class="btn btn-sm btn-blue" style="padding:3px 8px;margin-left:4px"
+              onclick="updateInvPrice('tapacanto','inv_tapacanto','${t.id}',document.getElementById('pr-tc-${t.id}').value)">✓</button>
+            <button class="btn btn-sm btn-del" style="padding:3px 8px;margin-left:2px"
+              onclick="deleteInvItem('tapacanto','${t.id}')">×</button>
+          </td>
+        </tr>`).join('')
+      : emptyRow(8, '📏', 'Sin tapacantos registrados');
+
+    document.getElementById('tcList').innerHTML = tblWrap(`
+      <table ${tblStyle}>
+        <thead><tr>
+          <th ${thStyle}>Nombre</th>
+          <th ${thStyle}>Color</th>
+          <th ${thStyle}>Material</th>
+          <th ${thStyle} style="text-align:center">Ancho</th>
+          <th ${thStyle} style="text-align:center">Espesor</th>
+          <th ${thStyle} style="text-align:center">Largo</th>
+          <th ${thStyle} style="text-align:center">Stock</th>
+          <th ${thStyle} style="text-align:right">Precio / rollo</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`);
   }
 
-  // ── Pegamentos ────────────────────────────────────────────
+  // ── PEGAMENTOS ────────────────────────────────────────────
   if(document.getElementById('pgCount'))
     document.getElementById('pgCount').textContent = `${inventory.pega.length} tipos`;
+
   if(document.getElementById('pgList')) {
-    document.getElementById('pgList').innerHTML = inventory.pega.length ? inventory.pega.map(p => `
-      <div class="card mb8" style="padding:10px 14px">
-        <div class="flexb" style="gap:8px;flex-wrap:wrap">
-          <div style="flex:1;min-width:140px">
-            <strong>${p.nombre}</strong>
-            <small class="badge" style="margin-left:4px">${p.tipo}</small><br>
-            <small class="muted">Pres: ${p.presentacion || p.pres || '—'} · Rend: ${p.rendimiento ?? p.rend ?? '—'} m²/L · Stock: ${p.stock ?? '—'}</small>
-          </div>
-          <div class="flex gap8" style="align-items:center;flex-shrink:0">
-            <span class="muted" style="font-size:11px">USD</span>
+    const rows = inventory.pega.length
+      ? inventory.pega.map(p => `
+        <tr>
+          <td ${tdStyle}><strong style="color:var(--text1)">${p.nombre}</strong>
+            <small class="badge" style="margin-left:5px">${p.tipo}</small>
+            ${(p.notas||p.descripcion) ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">📝 ${p.notas||p.descripcion}</div>` : ''}
+          </td>
+          <td ${tdStyle}>${p.presentacion || p.pres || '—'}</td>
+          <td ${tdStyle} style="text-align:center">${p.rendimiento ?? p.rend ?? '—'} m²/L</td>
+          <td ${tdStyle}>${p.prov || '—'}</td>
+          <td ${tdStyle} style="text-align:center">${p.stock ?? '—'}</td>
+          <td ${tdR}>
+            <span style="font-size:11px;color:var(--text3);margin-right:3px">USD</span>
             <input type="number" id="pr-pg-${p.id}" value="${p.precio.toFixed(2)}" min="0" step="0.01"
-              style="width:80px;text-align:right;font-weight:600;color:var(--green);background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-size:13px"
-              onkeydown="if(event.key==='Enter') updateInvPrice('pega','inv_pega',${p.id},this.value)">
-            <button class="btn btn-sm btn-green" onclick="updateInvPrice('pega','inv_pega',${p.id},document.getElementById('pr-pg-${p.id}').value)" title="Guardar precio">✓</button>
-            <button class="btn btn-sm btn-del" onclick="deleteInvItem('pega',${p.id})" title="Eliminar">×</button>
-          </div>
-        </div>
-        ${(p.notas || p.descripcion) ? `<div style="margin-top:5px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);padding-top:4px">📝 ${p.notas || p.descripcion}</div>` : ''}
-      </div>
-    `).join('') : '<div class="empty card"><div class="empty-icon">🪣</div><p>Sin pegamentos registrados</p></div>';
+              style="width:76px;text-align:right;font-weight:600;color:var(--green);background:var(--bg);border:1.5px solid var(--border);border-radius:6px;padding:3px 6px;font-size:13px"
+              onkeydown="if(event.key==='Enter') updateInvPrice('pega','inv_pega','${p.id}',this.value)">
+            <button class="btn btn-sm btn-green" style="padding:3px 8px;margin-left:4px"
+              onclick="updateInvPrice('pega','inv_pega','${p.id}',document.getElementById('pr-pg-${p.id}').value)">✓</button>
+            <button class="btn btn-sm btn-del" style="padding:3px 8px;margin-left:2px"
+              onclick="deleteInvItem('pega','${p.id}')">×</button>
+          </td>
+        </tr>`).join('')
+      : emptyRow(6, '🪣', 'Sin pegamentos registrados');
+
+    document.getElementById('pgList').innerHTML = tblWrap(`
+      <table ${tblStyle}>
+        <thead><tr>
+          <th ${thStyle}>Nombre</th>
+          <th ${thStyle}>Presentación</th>
+          <th ${thStyle} style="text-align:center">Rendimiento</th>
+          <th ${thStyle}>Proveedor</th>
+          <th ${thStyle} style="text-align:center">Stock</th>
+          <th ${thStyle} style="text-align:right">Precio</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`);
   }
 }
 
@@ -731,37 +793,13 @@ async function updateInvPrice(localKey, table, id, rawValue) {
   const precio = parseFloat(rawValue);
   if (isNaN(precio) || precio < 0) return showToast('⚠️ Precio inválido');
   if (!window.currentUser) return showToast('Inicia sesión para guardar.');
-
   const { error } = await window.supabaseClient.from(table).update({ precio }).eq('id', id);
   if (error) return showToast('❌ Error al actualizar: ' + error.message);
-
-  // Actualizar cache local sin recargar toda la lista
-  const item = inventory[localKey].find(i => i.id == id);
+  const item = inventory[localKey].find(i => String(i.id) === String(id));
   if (item) item.precio = precio;
   updateMatSelect();
   showToast('💰 Precio actualizado ✓');
 }
-
-// ── Tiempo real: refresca inventario cada 30s y al volver al tab ──
-(function startInventoryRealtime() {
-  let _invPollTimer = null;
-
-  function scheduleRefresh() {
-    clearInterval(_invPollTimer);
-    _invPollTimer = setInterval(() => {
-      if (window.currentUser && document.getElementById('inventario')?.classList.contains('on')) {
-        loadInventory();
-      }
-    }, 30000);
-  }
-
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && window.currentUser) loadInventory();
-  });
-
-  // Arrancar el polling después de que initApp() haya corrido
-  window.addEventListener('DOMContentLoaded', scheduleRefresh);
-})();
 
 // ==========================================
 // 7. MÓDULO: PLANOS ARQUITECTÓNICOS (2D SVG)
