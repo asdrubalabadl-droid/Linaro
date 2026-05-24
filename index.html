@@ -38,7 +38,7 @@ let inventory = {
 // ==========================================
 const SUPABASE_URL = 'https://iufichpykfkhjednfljy.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZmljaHB5a2ZraGplZG5mbGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDI3NzMsImV4cCI6MjA5NDYxODc3M30.0OG0e2Oj_5-uJckF-a0duPDgBmgyYr-3VLJm3HvQRVM';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
 
 // Datos de Planos y 3D
@@ -81,7 +81,7 @@ async function doLogin() {
   if (btn) { btn.textContent = 'Ingresando…'; btn.disabled = true; }
 
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({ email: u, password: p });
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email: u, password: p });
 
     if (error) throw error;
 
@@ -866,7 +866,7 @@ async function dbSaveCurrent() {
   if (msg) msg.textContent = 'Guardando…';
 
   try {
-    const { error } = await supabase.from('linaro_projects').insert({
+    const { error } = await supabaseClient.from('linaro_projects').insert({
       user_id: currentUser.id,
       name,
       budget: projectData,
@@ -896,7 +896,7 @@ async function renderProjectsGrid() {
   grid.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text2);grid-column:1/-1">Cargando proyectos…</div>`;
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('linaro_projects')
       .select('*')
       .eq('user_id', currentUser.id)
@@ -931,7 +931,7 @@ async function loadProjectFromDb(id) {
   if (!currentUser) return;
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('linaro_projects')
       .select('*')
       .eq('id', id)
@@ -961,7 +961,7 @@ async function deleteProjectFromDb(id) {
   if (!confirm('¿Eliminar este proyecto? Esta acción no se puede deshacer.')) return;
 
   try {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('linaro_projects')
       .delete()
       .eq('id', id)
@@ -979,7 +979,7 @@ async function dbExportAll() {
   if (!currentUser) return showToast('Inicia sesión para exportar.');
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('linaro_projects')
       .select('*')
       .eq('user_id', currentUser.id);
@@ -1012,7 +1012,7 @@ function dbImport(e) {
         furniture: p.furniture || [],
         created_at: new Date().toISOString()
       }));
-      const { error } = await supabase.from('linaro_projects').insert(toInsert);
+      const { error } = await supabaseClient.from('linaro_projects').insert(toInsert);
       if (error) throw error;
       await renderProjectsGrid();
       showToast(`${toInsert.length} proyecto(s) importado(s) ✓`);
@@ -1026,7 +1026,7 @@ function dbImport(e) {
 // Inicializador automático diferido
 window.addEventListener('DOMContentLoaded', async () => {
   // Verificar si ya hay una sesión activa de Supabase
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
     currentUser = session.user;
     const overlay = document.getElementById('loginOverlay');
