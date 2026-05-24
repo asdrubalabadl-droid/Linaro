@@ -76,6 +76,7 @@
           if (!r.ok) { var e = await r.json(); return { error: { message: e.message || 'Error al insertar' } }; }
           return { error: null };
         },
+        update: function(payload) { q._update = payload; return q; },
         delete: function() { q._delete = true; return q; },
         eq: function(col, val) { _filters.push(col + '=eq.' + val); return q; },
         order: function(col, opts) { _order = col + '=' + ((opts && opts.ascending === false) ? 'desc' : 'asc'); return q; },
@@ -89,6 +90,16 @@
             if (q._delete) {
               var r = await fetch(endpoint, { method: 'DELETE', headers: authHeaders(window.supabaseClient._token) });
               if (!r.ok) { var e = await r.json(); return resolve({ data: null, error: { message: e.message } }); }
+              return resolve({ data: null, error: null });
+            }
+
+            if (q._update) {
+              var r = await fetch(endpoint, {
+                method: 'PATCH',
+                headers: Object.assign(authHeaders(window.supabaseClient._token), { 'Prefer': 'return=minimal' }),
+                body: JSON.stringify(q._update)
+              });
+              if (!r.ok) { var e = await r.json(); return resolve({ data: null, error: { message: e.message || 'Error al actualizar' } }); }
               return resolve({ data: null, error: null });
             }
 
@@ -636,36 +647,121 @@ async function loadInventory() {
 }
 
 function renderInventory() {
-  if(document.getElementById('melCount')) document.getElementById('melCount').textContent = `${inventory.tableros.length} tableros`;
+  // ── Tableros ──────────────────────────────────────────────
+  if(document.getElementById('melCount'))
+    document.getElementById('melCount').textContent = `${inventory.tableros.length} tableros`;
   if(document.getElementById('melList')) {
-    document.getElementById('melList').innerHTML = inventory.tableros.map(m => `
-      <div class="card mb8 flexb">
-        <div><strong>${m.nombre}</strong> <span class="tag">${m.ancho}x${m.alto}mm</span><br><small class="muted">Local: ${m.prov}</small></div>
-        <div class="tr"><div class="tgold mono">${m.moneda} ${m.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tableros', ${m.id})">×</button></div>
+    document.getElementById('melList').innerHTML = inventory.tableros.length ? inventory.tableros.map(m => `
+      <div class="card mb8" style="padding:10px 14px">
+        <div class="flexb" style="gap:8px;flex-wrap:wrap">
+          <div style="flex:1;min-width:140px">
+            <strong>${m.nombre}</strong>
+            <span class="tag" style="margin-left:4px">${m.ancho}×${m.alto}×${m.espesor}mm</span><br>
+            <small class="muted">Proveedor: ${m.prov || '—'} · Stock: ${m.stock ?? '—'} lám.</small>
+          </div>
+          <div class="flex gap8" style="align-items:center;flex-shrink:0">
+            <span class="muted" style="font-size:11px">${m.moneda}</span>
+            <input type="number" id="pr-t-${m.id}" value="${m.precio.toFixed(2)}" min="0" step="0.01"
+              style="width:80px;text-align:right;font-weight:600;color:var(--gold);background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-size:13px"
+              onkeydown="if(event.key==='Enter') updateInvPrice('tableros','inv_tableros',${m.id},this.value)">
+            <button class="btn btn-sm btn-gold" onclick="updateInvPrice('tableros','inv_tableros',${m.id},document.getElementById('pr-t-${m.id}').value)" title="Guardar precio">✓</button>
+            <button class="btn btn-sm btn-del" onclick="deleteInvItem('tableros',${m.id})" title="Eliminar">×</button>
+          </div>
+        </div>
+        ${m.notas ? `<div style="margin-top:5px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);padding-top:4px">📝 ${m.notas}</div>` : ''}
       </div>
-    `).join('') || '<div class="empty card">Sin tableros</div>';
+    `).join('') : '<div class="empty card"><div class="empty-icon">🗂️</div><p>Sin tableros registrados</p></div>';
   }
 
-  if(document.getElementById('tcCount')) document.getElementById('tcCount').textContent = `${inventory.tapacanto.length} rollos`;
+  // ── Tapacanto ─────────────────────────────────────────────
+  if(document.getElementById('tcCount'))
+    document.getElementById('tcCount').textContent = `${inventory.tapacanto.length} rollos`;
   if(document.getElementById('tcList')) {
-    document.getElementById('tcList').innerHTML = inventory.tapacanto.map(t => `
-      <div class="card mb8 flexb">
-        <div><strong>${t.nombre}</strong> <span class="tag">${t.ancho}mm</span></div>
-        <div class="tr"><div class="tblue mono">${t.moneda} ${t.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tapacanto', ${t.id})">×</button></div>
+    document.getElementById('tcList').innerHTML = inventory.tapacanto.length ? inventory.tapacanto.map(t => `
+      <div class="card mb8" style="padding:10px 14px">
+        <div class="flexb" style="gap:8px;flex-wrap:wrap">
+          <div style="flex:1;min-width:140px">
+            <strong>${t.nombre}</strong>
+            <span class="tag" style="margin-left:4px">${t.ancho}mm · ${t.espesor}mm esp.</span><br>
+            <small class="muted">Mat: ${t.mat || '—'} · ${t.largo ?? '—'}m largo · Stock: ${t.stock ?? '—'} rol.</small>
+          </div>
+          <div class="flex gap8" style="align-items:center;flex-shrink:0">
+            <span class="muted" style="font-size:11px">${t.moneda}</span>
+            <input type="number" id="pr-tc-${t.id}" value="${t.precio.toFixed(2)}" min="0" step="0.01"
+              style="width:80px;text-align:right;font-weight:600;color:var(--blue);background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-size:13px"
+              onkeydown="if(event.key==='Enter') updateInvPrice('tapacanto','inv_tapacanto',${t.id},this.value)">
+            <button class="btn btn-sm btn-blue" onclick="updateInvPrice('tapacanto','inv_tapacanto',${t.id},document.getElementById('pr-tc-${t.id}').value)" title="Guardar precio">✓</button>
+            <button class="btn btn-sm btn-del" onclick="deleteInvItem('tapacanto',${t.id})" title="Eliminar">×</button>
+          </div>
+        </div>
+        ${t.notas ? `<div style="margin-top:5px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);padding-top:4px">📝 ${t.notas}</div>` : ''}
       </div>
-    `).join('') || '<div class="empty card">Sin tapacantos</div>';
+    `).join('') : '<div class="empty card"><div class="empty-icon">📏</div><p>Sin tapacantos registrados</p></div>';
   }
 
-  if(document.getElementById('pgCount')) document.getElementById('pgCount').textContent = `${inventory.pega.length} tipos`;
+  // ── Pegamentos ────────────────────────────────────────────
+  if(document.getElementById('pgCount'))
+    document.getElementById('pgCount').textContent = `${inventory.pega.length} tipos`;
   if(document.getElementById('pgList')) {
-    document.getElementById('pgList').innerHTML = inventory.pega.map(p => `
-      <div class="card mb8 flexb">
-        <div><strong>${p.nombre}</strong> <small class="badge">${p.tipo}</small></div>
-        <div class="tr"><div class="tgreen mono">$ ${p.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('pega', ${p.id})">×</button></div>
+    document.getElementById('pgList').innerHTML = inventory.pega.length ? inventory.pega.map(p => `
+      <div class="card mb8" style="padding:10px 14px">
+        <div class="flexb" style="gap:8px;flex-wrap:wrap">
+          <div style="flex:1;min-width:140px">
+            <strong>${p.nombre}</strong>
+            <small class="badge" style="margin-left:4px">${p.tipo}</small><br>
+            <small class="muted">Pres: ${p.presentacion || p.pres || '—'} · Rend: ${p.rendimiento ?? p.rend ?? '—'} m²/L · Stock: ${p.stock ?? '—'}</small>
+          </div>
+          <div class="flex gap8" style="align-items:center;flex-shrink:0">
+            <span class="muted" style="font-size:11px">USD</span>
+            <input type="number" id="pr-pg-${p.id}" value="${p.precio.toFixed(2)}" min="0" step="0.01"
+              style="width:80px;text-align:right;font-weight:600;color:var(--green);background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-size:13px"
+              onkeydown="if(event.key==='Enter') updateInvPrice('pega','inv_pega',${p.id},this.value)">
+            <button class="btn btn-sm btn-green" onclick="updateInvPrice('pega','inv_pega',${p.id},document.getElementById('pr-pg-${p.id}').value)" title="Guardar precio">✓</button>
+            <button class="btn btn-sm btn-del" onclick="deleteInvItem('pega',${p.id})" title="Eliminar">×</button>
+          </div>
+        </div>
+        ${(p.notas || p.descripcion) ? `<div style="margin-top:5px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);padding-top:4px">📝 ${p.notas || p.descripcion}</div>` : ''}
       </div>
-    `).join('') || '<div class="empty card">Sin pegamentos</div>';
+    `).join('') : '<div class="empty card"><div class="empty-icon">🪣</div><p>Sin pegamentos registrados</p></div>';
   }
 }
+
+// ── Actualizar precio en Supabase ─────────────────────────
+async function updateInvPrice(localKey, table, id, rawValue) {
+  const precio = parseFloat(rawValue);
+  if (isNaN(precio) || precio < 0) return showToast('⚠️ Precio inválido');
+  if (!window.currentUser) return showToast('Inicia sesión para guardar.');
+
+  const { error } = await window.supabaseClient.from(table).update({ precio }).eq('id', id);
+  if (error) return showToast('❌ Error al actualizar: ' + error.message);
+
+  // Actualizar cache local sin recargar toda la lista
+  const item = inventory[localKey].find(i => i.id == id);
+  if (item) item.precio = precio;
+  updateMatSelect();
+  showToast('💰 Precio actualizado ✓');
+}
+
+// ── Tiempo real: refresca inventario cada 30s y al volver al tab ──
+(function startInventoryRealtime() {
+  let _invPollTimer = null;
+
+  function scheduleRefresh() {
+    clearInterval(_invPollTimer);
+    _invPollTimer = setInterval(() => {
+      if (window.currentUser && document.getElementById('inventario')?.classList.contains('on')) {
+        loadInventory();
+      }
+    }, 30000);
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && window.currentUser) loadInventory();
+  });
+
+  // Arrancar el polling después de que initApp() haya corrido
+  window.addEventListener('DOMContentLoaded', scheduleRefresh);
+})();
 
 // ==========================================
 // 7. MÓDULO: PLANOS ARQUITECTÓNICOS (2D SVG)
