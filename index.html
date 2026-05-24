@@ -643,7 +643,7 @@ function renderInventory() {
     document.getElementById('melList').innerHTML = inventory.tableros.map(m => `
       <div class="card mb8 flexb">
         <div><strong>${m.nombre}</strong> <span class="tag">${m.ancho}x${m.alto}mm</span><br><small class="muted">Local: ${m.prov}</small></div>
-        <div class="tr"><div class="tgold mono">${m.moneda} ${m.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tableros', '${m.id}')">×</button></div>
+        <div class="tr"><div class="tgold mono">${m.moneda} ${m.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" data-inv-del="tableros" data-inv-id="${m.id}">×</button></div>
       </div>
     `).join('') || '<div class="empty card">Sin tableros</div>';
   }
@@ -653,7 +653,7 @@ function renderInventory() {
     document.getElementById('tcList').innerHTML = inventory.tapacanto.map(t => `
       <div class="card mb8 flexb">
         <div><strong>${t.nombre}</strong> <span class="tag">${t.ancho}mm</span></div>
-        <div class="tr"><div class="tblue mono">${t.moneda} ${t.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tapacanto', '${t.id}')">×</button></div>
+        <div class="tr"><div class="tblue mono">${t.moneda} ${t.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" data-inv-del="tapacanto" data-inv-id="${t.id}">×</button></div>
       </div>
     `).join('') || '<div class="empty card">Sin tapacantos</div>';
   }
@@ -663,7 +663,7 @@ function renderInventory() {
     document.getElementById('pgList').innerHTML = inventory.pega.map(p => `
       <div class="card mb8 flexb">
         <div><strong>${p.nombre}</strong> <small class="badge">${p.tipo}</small></div>
-        <div class="tr"><div class="tgreen mono">$ ${p.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('pega', '${p.id}')">×</button></div>
+        <div class="tr"><div class="tgreen mono">$ ${p.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" data-inv-del="pega" data-inv-id="${p.id}">×</button></div>
       </div>
     `).join('') || '<div class="empty card">Sin pegamentos</div>';
   }
@@ -714,11 +714,11 @@ function renderInventory() {
                     <span style="font-size:11px;color:var(--text3);margin-right:3px">${s.moneda||'USD'}</span>
                     <input type="number" id="pr-sis-${s.id}" value="${s.precio.toFixed(2)}" min="0" step="0.01"
                       style="width:76px;text-align:right;font-weight:600;color:${tipoColor[tipo]||'var(--gold)'};background:var(--bg);border:1.5px solid var(--border);border-radius:6px;padding:3px 6px;font-size:13px"
-                      onkeydown="if(event.key==='Enter') updateInvPrice('sistemas','inv_sistemas','${s.id}',this.value)">
+                      data-inv-enter="sistemas" data-inv-table="inv_sistemas" data-inv-id="${s.id}">
                     <button class="btn btn-sm btn-gold" style="padding:3px 8px;margin-left:4px"
-                      onclick="updateInvPrice('sistemas','inv_sistemas','${s.id}',document.getElementById('pr-sis-${s.id}').value)">✓</button>
+                      data-inv-save="sistemas" data-inv-table="inv_sistemas" data-inv-id="${s.id}" data-inv-field="pr-sis-${s.id}">✓</button>
                     <button class="btn btn-sm btn-del" style="padding:3px 8px;margin-left:2px"
-                      onclick="deleteInvItem('sistemas','${s.id}')">×</button>
+                      data-inv-del="sistemas" data-inv-id="${s.id}">×</button>
                   </td>
                 </tr>`).join('')}
               </tbody>
@@ -2027,3 +2027,24 @@ if (typeof currentInvTab === 'undefined') {
 </div>
 
 <script>
+// ── Event delegation seguro para inventario (evita UUID en inline JS) ──
+document.addEventListener('click', async function(e) {
+  const btn = e.target.closest('button[data-inv-del], button[data-inv-save]');
+  if (!btn) return;
+  if (btn.dataset.invDel) {
+    await deleteInvItem(btn.dataset.invDel, btn.dataset.invId);
+    return;
+  }
+  if (btn.dataset.invSave) {
+    const input = document.getElementById(btn.dataset.invField);
+    if (input) await updateInvPrice(btn.dataset.invSave, btn.dataset.invTable, btn.dataset.invId, input.value);
+    return;
+  }
+});
+document.addEventListener('keydown', async function(e) {
+  if (e.key !== 'Enter') return;
+  const input = e.target.closest('input[data-inv-enter]');
+  if (!input) return;
+  await updateInvPrice(input.dataset.invEnter, input.dataset.invTable, input.dataset.invId, input.value);
+});
+</script>
