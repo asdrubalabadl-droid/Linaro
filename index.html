@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Linaro — Presupuestación Arquitectónica</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/%3E%3Crect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/%3E%3Cpath d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/%3E%3Crect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/%3E%3C/svg%3E">
 <script>
 // ==========================================
@@ -32,6 +33,14 @@ let inventory = {
   ]
 };
 
+// ==========================================
+// SUPABASE — Cliente y usuario activo
+// ==========================================
+const SUPABASE_URL = 'https://iufichpykfkhjednfljy.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZmljaHB5a2ZraGplZG5mbGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDI3NzMsImV4cCI6MjA5NDYxODc3M30.0OG0e2Oj_5-uJckF-a0duPDgBmgyYr-3VLJm3HvQRVM';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+
 // Datos de Planos y 3D
 let planarRooms = [];
 let planarFurniture = [];
@@ -51,22 +60,45 @@ let isDragging3d = false;
 let lastMouseX, lastMouseY;
 
 // ==========================================
-// 2. SISTEMA DE CONTROL DE ACCESO (LOGIN)
+// 2. SISTEMA DE CONTROL DE ACCESO (LOGIN — Supabase Auth)
 // ==========================================
-function doLogin() {
-  const u = document.getElementById('loginUser').value;
-  const p = document.getElementById('loginPass').value;
-  if (u.trim() !== "" && p.trim() !== "") {
-    document.getElementById('loginOverlay').style.display = 'none';
-    showToast("¡Bienvenido a Linaro!");
-    initApp();
-  } else {
-    const err = document.getElementById('loginErr');
-    if(err) {
+async function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  const err = document.getElementById('loginErr');
+  const btn = document.querySelector('.login-btn');
+
+  if (!u || !p) {
+    if (err) {
+      err.textContent = 'Completa tu correo y contraseña.';
       err.style.display = 'block';
       err.style.animation = 'shake 0.3s ease';
       setTimeout(() => err.style.animation = '', 300);
     }
+    return;
+  }
+
+  if (btn) { btn.textContent = 'Ingresando…'; btn.disabled = true; }
+
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email: u, password: p });
+
+    if (error) throw error;
+
+    currentUser = data.user;
+    document.getElementById('loginOverlay').style.display = 'none';
+    showToast(`¡Bienvenido a Linaro, ${currentUser.email}!`);
+    initApp();
+    renderProjectsGrid();
+  } catch (e) {
+    if (err) {
+      err.textContent = e.message || 'Credenciales incorrectas. Intenta de nuevo.';
+      err.style.display = 'block';
+      err.style.animation = 'shake 0.3s ease';
+      setTimeout(() => err.style.animation = '', 300);
+    }
+  } finally {
+    if (btn) { btn.textContent = 'Ingresar'; btn.disabled = false; }
   }
 }
 
@@ -819,1012 +851,190 @@ function render3D() {
 }
 
 // ==========================================
-// 9. PROYECTOS Y PERSISTENCIA (LOCALSTORAGE)
+// 9. PROYECTOS Y PERSISTENCIA (Supabase Database)
 // ==========================================
-function dbSaveCurrent() {
+async function dbSaveCurrent() {
+  if (!currentUser) return showToast('Debes iniciar sesión para guardar.');
+
   const pNameInput = document.getElementById('dbProjName');
   const fallbackInput = document.getElementById('pName');
-  let name = (pNameInput ? pNameInput.value : "") || (fallbackInput ? fallbackInput.value : "") || "Proyecto Guardado";
-  let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
-  
-  let pPayload = {
-    id: Date.now(),
-    name: name,
-    budget: projectData,
-    rooms: planarRooms,
-    furniture: planarFurniture
-  };
+  const name = (pNameInput?.value.trim()) || (fallbackInput?.value.trim()) || 'Proyecto Guardado';
 
-  allProjects.push(pPayload);
-  localStorage.setItem('linaro_projects', JSON.stringify(allProjects));
-  showToast("Proyecto indexado con éxito");
-  renderProjectsGrid();
+  const bar = document.getElementById('autosaveBar');
+  const msg = document.getElementById('autosaveMsg');
+  if (bar) bar.style.display = 'block';
+  if (msg) msg.textContent = 'Guardando…';
+
+  try {
+    const { error } = await supabase.from('linaro_projects').insert({
+      user_id: currentUser.id,
+      name,
+      budget: projectData,
+      rooms: planarRooms,
+      furniture: planarFurniture,
+      created_at: new Date().toISOString()
+    });
+    if (error) throw error;
+    showToast('Proyecto guardado en la nube ✓');
+    if (msg) msg.textContent = 'Guardado en Supabase';
+    await renderProjectsGrid();
+  } catch (e) {
+    showToast('Error al guardar: ' + e.message);
+    if (bar) bar.style.display = 'none';
+  }
 }
 
-function renderProjectsGrid() {
+async function renderProjectsGrid() {
   const grid = document.getElementById('dbGrid');
-  if(!grid) return;
-  let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
-  if(allProjects.length === 0) {
-    grid.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--text2);grid-column:1/-1"><div style="font-size:32px;margin-bottom:10px">📁</div><p>No se han encontrado proyectos locales</p></div>`;
+  if (!grid) return;
+
+  if (!currentUser) {
+    grid.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--text2);grid-column:1/-1"><div style="font-size:32px;margin-bottom:10px">🔒</div><p>Inicia sesión para ver tus proyectos</p></div>`;
     return;
   }
-  grid.innerHTML = allProjects.map(p => `
-    <div class="db-card">
-      <div class="db-card-head"><div><strong>${p.name}</strong><br><small class="muted">${p.budget.date}</small></div></div>
-      <div class="db-card-body">
-        <div class="db-stat">Cliente: <span>${p.budget.client || 'Particular'}</span></div>
-        <div class="db-stat">Módulos: <span>${p.budget.items.length}</span></div>
-      </div>
-      <div class="db-card-foot">
-        <button class="btn btn-sm btn-gold" onclick="loadProjectFromDb(${p.id})">📂 Abrir</button>
-        <button class="btn btn-sm btn-del" onclick="deleteProjectFromDb(${p.id})">×</button>
-      </div>
-    </div>
-  `).join('');
-}
 
-function loadProjectFromDb(id) {
-  let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
-  let found = allProjects.find(p => p.id === id);
-  if(found) {
-    projectData = found.budget;
-    planarRooms = found.rooms || [];
-    planarFurniture = found.furniture || [];
-    
-    if(document.getElementById('pName')) document.getElementById('pName').value = projectData.name || '';
-    if(document.getElementById('pClient')) document.getElementById('pClient').value = projectData.client || '';
-    if(document.getElementById('pLoc')) document.getElementById('pLoc').value = projectData.location || '';
-    
-    renderBudgetTable();
-    recalc();
-    showToast("Datos recuperados correctamente");
+  grid.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text2);grid-column:1/-1">Cargando proyectos…</div>`;
+
+  try {
+    const { data, error } = await supabase
+      .from('linaro_projects')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      grid.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--text2);grid-column:1/-1"><div style="font-size:32px;margin-bottom:10px">📁</div><p>No hay proyectos guardados aún</p></div>`;
+      return;
+    }
+
+    grid.innerHTML = data.map(p => `
+      <div class="db-card">
+        <div class="db-card-head"><div><strong>${p.name}</strong><br><small class="muted">${p.budget?.date || ''}</small></div></div>
+        <div class="db-card-body">
+          <div class="db-stat">Cliente: <span>${p.budget?.client || 'Particular'}</span></div>
+          <div class="db-stat">Módulos: <span>${p.budget?.items?.length ?? 0}</span></div>
+        </div>
+        <div class="db-card-foot">
+          <button class="btn btn-sm btn-gold" onclick="loadProjectFromDb('${p.id}')">📂 Abrir</button>
+          <button class="btn btn-sm btn-del" onclick="deleteProjectFromDb('${p.id}')">×</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    grid.innerHTML = `<div style="text-align:center;padding:40px;color:var(--red);grid-column:1/-1">Error al cargar: ${e.message}</div>`;
   }
 }
 
-function deleteProjectFromDb(id) {
-  let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
-  allProjects = allProjects.filter(p => p.id !== id);
-  localStorage.setItem('linaro_projects', JSON.stringify(allProjects));
-  renderProjectsGrid();
+async function loadProjectFromDb(id) {
+  if (!currentUser) return;
+
+  try {
+    const { data, error } = await supabase
+      .from('linaro_projects')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', currentUser.id)
+      .single();
+
+    if (error) throw error;
+
+    projectData = data.budget;
+    planarRooms = data.rooms || [];
+    planarFurniture = data.furniture || [];
+
+    if (document.getElementById('pName')) document.getElementById('pName').value = projectData.name || '';
+    if (document.getElementById('pClient')) document.getElementById('pClient').value = projectData.client || '';
+    if (document.getElementById('pLoc')) document.getElementById('pLoc').value = projectData.location || '';
+
+    renderBudgetTable();
+    recalc();
+    showToast('Proyecto cargado correctamente ✓');
+  } catch (e) {
+    showToast('Error al cargar: ' + e.message);
+  }
 }
 
-function dbExportAll() {
-  let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(localStorage.getItem('linaro_projects') || '[]');
-  let dlAnchorElem = document.createElement('a');
-  dlAnchorElem.setAttribute("href", dataStr);
-  dlAnchorElem.setAttribute("download", "Linaro_Copia_Seguridad.json");
-  dlAnchorElem.click();
+async function deleteProjectFromDb(id) {
+  if (!currentUser) return;
+  if (!confirm('¿Eliminar este proyecto? Esta acción no se puede deshacer.')) return;
+
+  try {
+    const { error } = await supabase
+      .from('linaro_projects')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', currentUser.id);
+
+    if (error) throw error;
+    showToast('Proyecto eliminado');
+    await renderProjectsGrid();
+  } catch (e) {
+    showToast('Error al eliminar: ' + e.message);
+  }
+}
+
+async function dbExportAll() {
+  if (!currentUser) return showToast('Inicia sesión para exportar.');
+
+  try {
+    const { data, error } = await supabase
+      .from('linaro_projects')
+      .select('*')
+      .eq('user_id', currentUser.id);
+
+    if (error) throw error;
+
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+    const dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", "Linaro_Copia_Seguridad.json");
+    dlAnchorElem.click();
+  } catch (e) {
+    showToast('Error al exportar: ' + e.message);
+  }
 }
 
 function dbImport(e) {
+  if (!currentUser) return showToast('Inicia sesión para importar.');
   let file = e.target.files[0];
   if (!file) return;
   let reader = new FileReader();
-  reader.onload = function(evt) {
-    localStorage.setItem('linaro_projects', evt.target.result);
-    renderProjectsGrid();
-    showToast("Copia de seguridad importada");
+  reader.onload = async function(evt) {
+    try {
+      const projects = JSON.parse(evt.target.result);
+      const toInsert = (Array.isArray(projects) ? projects : [projects]).map(p => ({
+        user_id: currentUser.id,
+        name: p.name || 'Importado',
+        budget: p.budget || p,
+        rooms: p.rooms || [],
+        furniture: p.furniture || [],
+        created_at: new Date().toISOString()
+      }));
+      const { error } = await supabase.from('linaro_projects').insert(toInsert);
+      if (error) throw error;
+      await renderProjectsGrid();
+      showToast(`${toInsert.length} proyecto(s) importado(s) ✓`);
+    } catch (e) {
+      showToast('Error al importar: ' + e.message);
+    }
   };
   reader.readAsText(file);
 }
 
 // Inicializador automático diferido
-window.addEventListener('DOMContentLoaded', () => {
-  renderProjectsGrid();
-  // Inicializar la aplicación automáticamente si no requiere overlay de login estricto
-  initApp();
-});
-</script>
-<script>
-// ==========================================
-// 1. ESTADO GLOBAL DE LA APLICACIÓN
-// ==========================================
-let currentTab = 'budget';
-let currentCategory = 'cocina';
-let projectData = {
-  name: '', client: '', location: '', date: new Date().toISOString().split('T')[0],
-  currency: 'USD', iva: 16, utility: 0,
-  items: [],
-  design: { m2: 0, rate: 6, desc: 'Honorarios de diseño', active: false }
-};
-
-// Inventario por defecto (Biblioteca de Materiales en Barquisimeto)
-let inventory = {
-  tableros: [
-    { id: 1, nombre: 'MDF Blanco Hueso 18mm', color: 'Blanco', prov: 'Madetor', ancho: 2440, alto: 1220, espesor: 18, precio: 45, moneda: 'USD', stock: 1, notas: 'Tablero base' },
-    { id: 2, nombre: 'MDP Nogal Terra 18mm', color: 'Nogal', prov: 'Maderajara', ancho: 2440, alto: 1220, espesor: 18, precio: 65, moneda: 'USD', stock: 1, notas: 'Texturizado premium' }
-  ],
-  tapacanto: [
-    { id: 1, nombre: 'PVC 1mm Blanco', color: 'Blanco', mat: 'PVC', espesor: 1, ancho: 22, largo: 50, precio: 15, moneda: 'USD', stock: 1, prov: 'Madetor', notas: 'Canto delgado' }
-  ],
-  pega: [
-    { id: 1, tipo: 'amarilla', nombre: 'Pega Hércules de Contacto', desc: 'Para tapacanto manual', pres: '1L', rend: 8, precio: 12, moneda: 'USD', prov: 'Local', stock: 1, notas: 'Secado rápido' }
-  ]
-};
-
-// Datos de Planos y 3D
-let planarRooms = [];
-let planarFurniture = [];
-let selectedElement = null;
-let svgScale = 50; // 1 metro = 50 píxeles
-
-// Variables de renderizado 3D (Simulado avanzado por Canvas)
-let v3dRooms = [];
-let v3dObjects = [];
-let v3dSettings = { showWalls: true, showCeil: false, viewMode: 'persp' };
-let cameraAngleX = -0.5; // Rotación horizontal
-let cameraAngleY = 0.6;  // Rotación vertical
-let cameraZoom = 1.0;
-let cameraPanX = 0;
-let cameraPanY = 0;
-let isDragging3d = false;
-let lastMouseX, lastMouseY;
-
-// ==========================================
-// 2. SISTEMA DE CONTROL DE ACCESO (LOGIN)
-// ==========================================
-function doLogin() {
-  const u = document.getElementById('loginUser').value;
-  const p = document.getElementById('loginPass').value;
-  if (u.trim() !== "" && p.trim() !== "") {
-    document.getElementById('loginOverlay').style.display = 'none';
-    showToast("¡Bienvenido a Linaro!");
+window.addEventListener('DOMContentLoaded', async () => {
+  // Verificar si ya hay una sesión activa de Supabase
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    const overlay = document.getElementById('loginOverlay');
+    if (overlay) overlay.style.display = 'none';
     initApp();
-  } else {
-    const err = document.getElementById('loginErr');
-    if(err) {
-      err.style.display = 'block';
-      err.style.animation = 'shake 0.3s ease';
-      setTimeout(() => err.style.animation = '', 300);
-    }
-  }
-}
-
-// ==========================================
-// 3. NAVEGACIÓN Y FLUJO
-// ==========================================
-function goTab(tabId, btn) {
-  document.querySelectorAll('.nt').forEach(b => b.classList.remove('on'));
-  document.querySelectorAll('.module').forEach(m => m.classList.remove('on'));
-  
-  if(btn) btn.classList.add('on');
-  const mod = document.getElementById(tabId);
-  if(mod) mod.classList.add('on');
-  currentTab = tabId;
-
-  if (tabId === 'plans') { renderPlans(); }
-  if (tabId === 'vista3d') { init3DCanvas(); render3D(); }
-}
-
-function initApp() {
-  const dInput = document.getElementById('pDate');
-  if(dInput) dInput.value = projectData.date;
-  updateMatSelect();
-  renderInventory();
-  recalc();
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  if(t) {
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-  }
-}
-
-// ==========================================
-// 4. MÓDULO: PRESUPUESTO
-// ==========================================
-const templates = {
-  cocina: [
-    { desc: 'Mueble Bajo de Cocina en MDF 18mm con herrajes de freno', unid: 'ml', cant: 3.4, precio: 180 },
-    { desc: 'Mueble Alto de Cocina superior a juego', unid: 'ml', cant: 3.4, precio: 140 },
-    { desc: 'Tope de Granito Natural pulido instalado', unid: 'ml', cant: 3.4, precio: 220 }
-  ],
-  closet: [
-    { desc: 'Vestier modular abierto en melamina de 18mm', unid: 'm²', cant: 6.5, precio: 95 },
-    { desc: 'Puertas corredizas con riel de aluminio superior', unid: 'unid', cant: 2, precio: 150 }
-  ],
-  civil: [
-    { desc: 'Demolición de mesón antiguo y remoción de escombros', unid: 'global', cant: 1, precio: 120 },
-    { desc: 'Adecuación de puntos de agua, gas y electricidad', unid: 'global', cant: 1, precio: 250 }
-  ]
-};
-
-function setCat(cat, btn) {
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('on'));
-  if(btn) btn.classList.add('on');
-  currentCategory = cat;
-}
-
-function loadTpl() {
-  projectData.items = JSON.parse(JSON.stringify(templates[currentCategory] || []));
-  renderBudgetTable();
-  recalc();
-}
-
-function addRow() {
-  projectData.items.push({ desc: 'Nuevo ítem constructivo', unid: 'unid', cant: 1, precio: 0 });
-  renderBudgetTable();
-  recalc();
-}
-
-function removeRow(idx) {
-  projectData.items.splice(idx, 1);
-  renderBudgetTable();
-  recalc();
-}
-
-function updateItem(idx, field, value) {
-  projectData.items[idx][field] = field === 'desc' || field === 'unid' ? value : parseFloat(value) || 0;
-  recalc();
-}
-
-function recalcDis() {
-  const m2 = parseFloat(document.getElementById('disM2').value) || 0;
-  const rate = parseFloat(document.getElementById('disTarifa').value) || 0;
-  projectData.design.m2 = m2;
-  projectData.design.rate = rate;
-  projectData.design.desc = document.getElementById('disDesc').value;
-  
-  const sub = m2 * rate;
-  const conIva = sub * (1 + (parseFloat(document.getElementById('iva').value) / 100));
-  
-  document.getElementById('disSubtotal').textContent = `${projectData.currency} ${sub.toFixed(2)}`;
-  document.getElementById('disConIva').textContent = `${projectData.currency} ${conIva.toFixed(2)}`;
-}
-
-function addDiseno() {
-  const sub = projectData.design.m2 * projectData.design.rate;
-  if(sub <= 0) return showToast("El costo de diseño debe ser mayor a 0");
-  projectData.design.active = true;
-  recalc();
-  showToast("Honorarios vinculados al resumen");
-}
-
-function renderBudgetTable() {
-  const tbody = document.getElementById('tbody');
-  if(!tbody) return;
-  if (projectData.items.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><p>Carga una plantilla o agrega ítems</p></div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = '';
-  projectData.items.forEach((item, i) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${i + 1}</td>
-      <td><input type="text" value="${item.desc}" oninput="updateItem(${i}, 'desc', this.value)"></td>
-      <td><input type="text" value="${item.unid}" oninput="updateItem(${i}, 'unid', this.value)"></td>
-      <td><input type="number" class="tr" value="${item.cant}" step="any" oninput="updateItem(${i}, 'cant', this.value)"></td>
-      <td><input type="number" class="tr" value="${item.precio}" step="any" oninput="updateItem(${i}, 'precio', this.value)"></td>
-      <td class="tr mono">${(item.cant * item.precio).toFixed(2)}</td>
-      <td><button class="btn btn-sm btn-del" onclick="removeRow(${i})">×</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function recalc() {
-  const curEl = document.getElementById('cur');
-  const ivaEl = document.getElementById('iva');
-  const utilEl = document.getElementById('util');
-  
-  if(curEl) projectData.currency = curEl.value;
-  if(ivaEl) projectData.iva = parseFloat(ivaEl.value) || 0;
-  if(utilEl) projectData.utility = parseFloat(utilEl.value) || 0;
-
-  let subtotalObra = projectData.items.reduce((acc, item) => acc + (item.cant * item.precio), 0);
-  let subtotalDiseno = projectData.design.active ? (projectData.design.m2 * projectData.design.rate) : 0;
-  
-  let montoUtilidad = subtotalObra * (projectData.utility / 100);
-  let baseImponible = subtotalObra + montoUtilidad + subtotalDiseno;
-  let montoIva = baseImponible * (projectData.iva / 100);
-  let totalGeneral = baseImponible + montoIva;
-
-  // Actualizar UI de totales
-  if(document.getElementById('subs')) document.getElementById('subs').textContent = `${projectData.currency} ${subtotalObra.toFixed(2)}`;
-  if(document.getElementById('disLbl')) document.getElementById('disLbl').textContent = `Diseño (${projectData.design.m2} m²)`;
-  if(document.getElementById('sDis')) document.getElementById('sDis').textContent = `${projectData.currency} ${subtotalDiseno.toFixed(2)}`;
-  if(document.getElementById('ulbl')) document.getElementById('ulbl').textContent = `Utilidad (${projectData.utility}%)`;
-  if(document.getElementById('sutil')) document.getElementById('sutil').textContent = `${projectData.currency} ${montoUtilidad.toFixed(2)}`;
-  if(document.getElementById('ilbl')) document.getElementById('ilbl').textContent = `IVA (${projectData.iva}%)`;
-  if(document.getElementById('siva')) document.getElementById('siva').textContent = `${projectData.currency} ${montoIva.toFixed(2)}`;
-  if(document.getElementById('stot')) document.getElementById('stot').textContent = `${projectData.currency} ${totalGeneral.toFixed(2)}`;
-
-  // Sincronizar totales de filas de la tabla de forma rápida
-  const tbody = document.getElementById('tbody');
-  if(tbody) {
-    const rows = tbody.querySelectorAll('tr');
-    if(rows.length > 0 && projectData.items.length > 0) {
-      projectData.items.forEach((item, i) => {
-        if(rows[i] && rows[i].cells[5]) rows[i].cells[5].textContent = (item.cant * item.precio).toFixed(2);
-      });
-    }
-  }
-}
-
-function exportPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(20);
-  doc.text("Presupuesto Arquitectónico — Linaro", 14, 20);
-  doc.setFontSize(10);
-  doc.setFont("Helvetica", "normal");
-  
-  const pName = document.getElementById('pName') ? document.getElementById('pName').value : 'S/N';
-  const pClient = document.getElementById('pClient') ? document.getElementById('pClient').value : 'S/N';
-  const pDate = document.getElementById('pDate') ? document.getElementById('pDate').value : projectData.date;
-  
-  doc.text(`Proyecto: ${pName}`, 14, 28);
-  doc.text(`Cliente: ${pClient}`, 14, 34);
-  doc.text(`Fecha: ${pDate}`, 14, 40);
-
-  let resData = [
-    ["Subtotal Carpintería/Obra", document.getElementById('subs') ? document.getElementById('subs').textContent : '0.00'],
-    [document.getElementById('disLbl') ? document.getElementById('disLbl').textContent : 'Diseño', document.getElementById('sDis') ? document.getElementById('sDis').textContent : '0.00'],
-    [document.getElementById('ulbl') ? document.getElementById('ulbl').textContent : 'Utilidad', document.getElementById('sutil') ? document.getElementById('sutil').textContent : '0.00'],
-    [document.getElementById('ilbl') ? document.getElementById('ilbl').textContent : 'IVA', document.getElementById('siva') ? document.getElementById('siva').textContent : '0.00'],
-    ["Total Final", document.getElementById('stot') ? document.getElementById('stot').textContent : '0.00']
-  ];
-
-  doc.autoTable({
-    startY: 48,
-    head: [['Concepto', 'Total']],
-    body: resData,
-    theme: 'striped'
-  });
-
-  doc.save("Presupuesto_Linaro.pdf");
-}
-
-// ==========================================
-// 5. MÓDULO: DESPIECE AUTOMÁTICO (CARPINTERÍA)
-// ==========================================
-function showGolaInfo() {
-  const gola = document.getElementById('pGolaB').value;
-  const box = document.getElementById('golaInfo');
-  if(!box) return;
-  if (gola === 'none') {
-    box.style.display = 'none';
-  } else {
-    box.style.display = 'block';
-    box.innerHTML = `<strong>Aviso de descuento Gola (${gola}):</strong> Se descontarán automáticamente 35mm en la altura de las puertas/frentes para el alojamiento del perfil de aluminio huanal.`;
-  }
-}
-
-function calcCuts() {
-  const name = document.getElementById('pN').value;
-  const w = parseFloat(document.getElementById('pW').value);
-  const h = parseFloat(document.getElementById('pH').value);
-  const d = parseFloat(document.getElementById('pD').value);
-  const t = parseFloat(document.getElementById('pT').value);
-  const shelves = parseInt(document.getElementById('pS').value) || 0;
-  const doors = parseInt(document.getElementById('pDr').value) || 0;
-  const gola = document.getElementById('pGolaB').value;
-
-  const matId = document.getElementById('pMat').value;
-  const selectedMat = inventory.tableros.find(m => m.id == matId) || inventory.tableros[0];
-
-  let cuts = [];
-  // Laterales estructurales (2 uds)
-  cuts.push({ desc: 'Laterales estructurales', cant: 2, l: h, a: d - 20, mat: selectedMat.nombre });
-  // Base y Techo
-  cuts.push({ desc: 'Base inferior', cant: 1, l: w - (2 * t), a: d - 20, mat: selectedMat.nombre });
-  cuts.push({ desc: 'Amarres superiores', cant: 2, l: w - (2 * t), a: 100, mat: selectedMat.nombre });
-
-  if (shelves > 0) {
-    cuts.push({ desc: 'Entrepaños internos', cant: shelves, l: w - (2 * t) - 2, a: d - 40, mat: selectedMat.nombre });
-  }
-
-  if (doors > 0) {
-    let doorH = h - 4;
-    if (gola !== 'none') doorH -= 35; // Reducción de perfil Gola
-    let doorW = (w / doors) - 3;
-    cuts.push({ desc: 'Puertas batientes', cant: doors, l: doorH, a: doorW, mat: selectedMat.nombre });
-  }
-
-  let totalArea = cuts.reduce((acc, c) => acc + ((c.l * c.a * c.cant) / 1000000), 0);
-  let sheetArea = (selectedMat.ancho * selectedMat.alto) / 1000000;
-  let sheetsReq = Math.ceil(totalArea / (sheetArea * 0.8)); // Margen de optimización del 80%
-
-  let cutBox = document.getElementById('cutBox');
-  if(!cutBox) return;
-  
-  let tableRows = cuts.map((c, idx) => `
-    <tr>
-      <td>${idx+1}</td>
-      <td><strong>${c.desc}</strong></td>
-      <td class="mono">${c.l} x ${c.a}</td>
-      <td class="tr mono">${c.cant}</td>
-      <td class="tr mono">${((c.l*c.a*c.cant)/1000000).toFixed(2)} m²</td>
-    </tr>
-  `).join('');
-
-  cutBox.innerHTML = `
-    <div class="card">
-      <div class="sl">Resultados del despiece estructural: ${name}</div>
-      <table class="mb12">
-        <thead><tr><th>#</th><th>Pieza</th><th>Medidas (mm)</th><th class="tr">Cant.</th><th class="tr">Área total</th></tr></thead>
-        <tbody>${tableRows}</tbody>
-      </table>
-      <div class="g3">
-        <div class="metric"><div class="mlabel">Área Útil</div><div class="mval">${totalArea.toFixed(2)} m²</div></div>
-        <div class="metric"><div class="mlabel">Láminas aprox (Merma 20%)</div><div class="mval tgold">${sheetsReq} u</div></div>
-        <div class="metric"><div class="mlabel">Costo Estimado Tablero</div><div class="mval tgreen">$ ${(sheetsReq * selectedMat.precio).toFixed(2)}</div></div>
-      </div>
-      <button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="openCutModal('${name}', ${w}, ${h})">👁️ Ver mapa óptimo de corte</button>
-    </div>
-  `;
-
-  // Actualizar los resúmenes laterales
-  if(document.getElementById('matCard')) document.getElementById('matCard').style.display = 'block';
-  if(document.getElementById('mArea')) document.getElementById('mArea').textContent = `${totalArea.toFixed(2)} m²`;
-  if(document.getElementById('mSheets')) document.getElementById('mSheets').textContent = `${sheetsReq} Lámina(s)`;
-  if(document.getElementById('mCost')) document.getElementById('mCost').textContent = `${selectedMat.moneda} ${(sheetsReq * selectedMat.precio).toFixed(2)}`;
-}
-
-function openCutModal(name, w, h) {
-  if(document.getElementById('cutPlanModal')) document.getElementById('cutPlanModal').style.display = 'block';
-  if(document.getElementById('cpTitle')) document.getElementById('cpTitle').textContent = `Optimización de Láminas — ${name}`;
-  if(document.getElementById('cpSubtitle')) document.getElementById('cpSubtitle').textContent = `Distribución de paneles sobre formato comercial de 2440x1220mm`;
-  
-  const content = document.getElementById('cpContent');
-  if(content) {
-    content.innerHTML = `
-      <div style="background:#e0dfdb; padding:20px; border-radius:8px; text-align:center">
-        <svg width="100%" height="300" viewBox="0 0 2440 1220" style="background:#fff; border:1px solid #999">
-          <rect x="0" y="0" width="2440" height="1220" fill="#f4eedf" stroke="#ba7517" stroke-width="10"/>
-          <rect x="20" y="20" width="720" height="550" fill="#27500a" opacity="0.3" stroke="#27500a" stroke-width="4"/>
-          <text x="50" y="80" font-family="sans-serif" font-size="50" fill="#27500a">Lateral 1</text>
-          <rect x="760" y="20" width="720" height="550" fill="#27500a" opacity="0.3" stroke="#27500a" stroke-width="4"/>
-          <text x="790" y="80" font-family="sans-serif" font-size="50" fill="#27500a">Lateral 2</text>
-          <rect x="20" y="600" width="1460" height="550" fill="#0c447c" opacity="0.3" stroke="#0c447c" stroke-width="4"/>
-          <text x="50" y="660" font-family="sans-serif" font-size="50" fill="#0c447c">Base + Estantería</text>
-          <line x1="1500" y1="0" x2="1500" y2="1220" stroke="red" stroke-dasharray="20" stroke-width="6"/>
-          <text x="1530" y="600" font-family="sans-serif" font-size="60" fill="red">Retal útil: 940x1220mm</text>
-        </svg>
-      </div>
-    `;
-  }
-}
-
-// ==========================================
-// 6. MÓDULO: INVENTARIO Y MATERIALES
-// ==========================================
-function switchInvTab(type, btn) {
-  document.querySelectorAll('.inv-tab').forEach(b => b.classList.remove('on'));
-  if(btn) btn.classList.add('on');
-  if(document.getElementById('invTableros')) document.getElementById('invTableros').style.display = type === 'tableros' ? 'block' : 'none';
-  if(document.getElementById('invTapacanto')) document.getElementById('invTapacanto').style.display = type === 'tapacanto' ? 'block' : 'none';
-  if(document.getElementById('invPega')) document.getElementById('invPega').style.display = type === 'pega' ? 'block' : 'none';
-}
-
-function updateMatSelect() {
-  const sel = document.getElementById('pMat');
-  if(!sel) return;
-  sel.innerHTML = inventory.tableros.map(m => `<option value="${m.id}">${m.nombre} (${m.moneda} ${m.precio})</option>`).join('');
-}
-
-function addMel() {
-  const name = document.getElementById('mNombre').value || 'Tablero';
-  const price = parseFloat(document.getElementById('mPrecio').value) || 0;
-  const id = inventory.tableros.length + 1;
-  inventory.tableros.push({
-    id, nombre: name, color: document.getElementById('mColor').value,
-    prov: document.getElementById('mProv').value, ancho: parseInt(document.getElementById('mAncho').value),
-    alto: parseInt(document.getElementById('mAlto').value), espesor: parseInt(document.getElementById('mEspesor').value),
-    precio: price, moneda: document.getElementById('mMoneda').value, stock: parseInt(document.getElementById('mStock').value),
-    notes: document.getElementById('mNotas').value
-  });
-  renderInventory(); updateMatSelect(); showToast("Tablero registrado");
-}
-
-function addTc() {
-  const name = document.getElementById('tcNombre').value || 'Canto';
-  inventory.tapacanto.push({
-    id: inventory.tapacanto.length + 1, nombre: name, color: document.getElementById('tcColor').value,
-    mat: document.getElementById('tcMat').value, espesor: parseFloat(document.getElementById('tcEspesor').value),
-    ancho: parseInt(document.getElementById('tcAncho').value), largo: parseInt(document.getElementById('tcLargo').value),
-    precio: parseFloat(document.getElementById('tcPrecio').value), moneda: document.getElementById('tcMoneda').value,
-    stock: parseInt(document.getElementById('tcStock').value), prov: document.getElementById('tcProv').value,
-    notes: document.getElementById('tcNotas').value
-  });
-  renderInventory(); showToast("Tapacanto guardado");
-}
-
-function addPg() {
-  inventory.pega.push({
-    id: inventory.pega.length + 1, tipo: document.getElementById('pgTipo').value,
-    nombre: document.getElementById('pgNombre').value || 'Pegamento', desc: document.getElementById('pgDesc').value,
-    pres: document.getElementById('pgPres').value, rend: parseFloat(document.getElementById('pgRend').value),
-    precio: parseFloat(document.getElementById('pgPrecio').value), moneda: 'USD',
-    prov: document.getElementById('pgProv').value, stock: parseInt(document.getElementById('pgStock').value),
-    notes: document.getElementById('pgNotas').value
-  });
-  renderInventory(); showToast("Pegamento añadido");
-}
-
-function deleteInvItem(type, id) {
-  inventory[type] = inventory[type].filter(item => item.id !== id);
-  renderInventory(); updateMatSelect();
-}
-
-function renderInventory() {
-  if(document.getElementById('melCount')) document.getElementById('melCount').textContent = `${inventory.tableros.length} tableros`;
-  if(document.getElementById('melList')) {
-    document.getElementById('melList').innerHTML = inventory.tableros.map(m => `
-      <div class="card mb8 flexb">
-        <div><strong>${m.nombre}</strong> <span class="tag">${m.ancho}x${m.alto}mm</span><br><small class="muted">Local: ${m.prov}</small></div>
-        <div class="tr"><div class="tgold mono">${m.moneda} ${m.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tableros', ${m.id})">×</button></div>
-      </div>
-    `).join('') || '<div class="empty card">Sin tableros</div>';
-  }
-
-  if(document.getElementById('tcCount')) document.getElementById('tcCount').textContent = `${inventory.tapacanto.length} rollos`;
-  if(document.getElementById('tcList')) {
-    document.getElementById('tcList').innerHTML = inventory.tapacanto.map(t => `
-      <div class="card mb8 flexb">
-        <div><strong>${t.nombre}</strong> <span class="tag">${t.ancho}mm</span></div>
-        <div class="tr"><div class="tblue mono">${t.moneda} ${t.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tapacanto', ${t.id})">×</button></div>
-      </div>
-    `).join('') || '<div class="empty card">Sin tapacantos</div>';
-  }
-
-  if(document.getElementById('pgCount')) document.getElementById('pgCount').textContent = `${inventory.pega.length} tipos`;
-  if(document.getElementById('pgList')) {
-    document.getElementById('pgList').innerHTML = inventory.pega.map(p => `
-      <div class="card mb8 flexb">
-        <div><strong>${p.nombre}</strong> <small class="badge">${p.tipo}</small></div>
-        <div class="tr"><div class="tgreen mono">$ ${p.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('pega', ${p.id})">×</button></div>
-      </div>
-    `).join('') || '<div class="empty card">Sin pegamentos</div>';
-  }
-}
-
-// ==========================================
-// 7. MÓDULO: PLANOS ARQUITECTÓNICOS (2D SVG)
-// ==========================================
-function adjSc(factor) {
-  svgScale = Math.max(20, Math.min(150, svgScale * factor));
-  if(document.getElementById('scBadge')) document.getElementById('scBadge').textContent = `Escala variable (${Math.round(svgScale)}px/m)`;
-  renderPlans();
-}
-
-function addPRoom() {
-  const r = {
-    id: Date.now(),
-    name: document.getElementById('rName').value || 'Espacio',
-    w: parseFloat(document.getElementById('rW').value) || 3,
-    h: parseFloat(document.getElementById('rH').value) || 3,
-    type: document.getElementById('rType').value,
-    x: 50, y: 50
-  };
-  planarRooms.push(r);
-  renderPlans();
-  showToast("Ambiente agregado al plano plano");
-}
-
-const furnitureCatalog = {
-  mb: { name: 'Mueble bajo', w: 0.6, h: 0.55, fill: '#FAEEDA', stroke: '#BA7517' },
-  ma: { name: 'Mueble alto', w: 0.6, h: 0.3, fill: '#FFF3E0', stroke: '#FB8C00' },
-  isla: { name: 'Isla central', w: 1.2, h: 0.9, fill: '#EAF3DE', stroke: '#3B6D11' },
-  freg: { name: 'Fregadero', w: 0.8, h: 0.55, fill: '#E6F1FB', stroke: '#185FA5' },
-  estufa: { name: 'Estufa/Placa', w: 0.6, h: 0.6, fill: '#FCEBEB', stroke: '#A32D2D' },
-  refri: { name: 'Refrigerador', w: 0.7, h: 0.7, fill: '#EEEEEE', stroke: '#666666' },
-  closet: { name: 'Armario/Closet', w: 1.2, h: 0.6, fill: '#EEEDFE', stroke: '#534AB7' },
-  camad: { name: 'Cama Matrimonial', w: 1.4, h: 2.0, fill: '#F5EBE8', stroke: '#A32D2D' },
-  tvstand: { name: 'Módulo de TV', w: 1.5, h: 0.45, fill: '#E1F5EE', stroke: '#0F6E56' }
-};
-
-function addF(type) {
-  const template = furnitureCatalog[type] || { name: 'Mueble', w: 0.6, h: 0.6, fill: '#fff', stroke: '#333' };
-  const f = {
-    id: Date.now(),
-    ...template,
-    x: 100, y: 100, angle: 0
-  };
-  planarFurniture.push(f);
-  renderPlans();
-}
-
-function renderPlans() {
-  const svg = document.getElementById('planSvg');
-  if(!svg) return;
-  svg.innerHTML = '';
-  
-  svg.setAttribute('width', '100%');
-  svg.setAttribute('height', '550');
-
-  // Dibujar Espacios
-  planarRooms.forEach(r => {
-    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect.setAttribute('x', r.x); rect.setAttribute('y', r.y);
-    rect.setAttribute('width', r.w * svgScale); rect.setAttribute('height', r.h * svgScale);
-    rect.setAttribute('fill', '#FAF9F5'); rect.setAttribute('stroke', '#222'); rect.setAttribute('stroke-width', '3');
-    svg.appendChild(rect);
-
-    const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    txt.setAttribute('x', r.x + 12); txt.setAttribute('y', r.y + 24);
-    txt.setAttribute('font-family', 'sans-serif'); txt.setAttribute('font-size', '13'); txt.setAttribute('font-weight', '600');
-    txt.textContent = `${r.name} [${r.w}x${r.h}m]`;
-    svg.appendChild(txt);
-  });
-
-  // Dibujar Mobiliario
-  planarFurniture.forEach(f => {
-    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    g.setAttribute('transform', `translate(${f.x}, ${f.y}) rotate(${f.angle})`);
-    g.style.cursor = 'move';
-
-    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect.setAttribute('x', -f.w*svgScale/2); rect.setAttribute('y', -f.h*svgScale/2);
-    rect.setAttribute('width', f.w * svgScale); rect.setAttribute('height', f.h * svgScale);
-    rect.setAttribute('fill', f.fill); rect.setAttribute('stroke', f.stroke);
-    rect.setAttribute('stroke-width', selectedElement === f ? '3' : '1.5');
-    if(selectedElement === f) rect.setAttribute('stroke-dasharray', '4');
-
-    g.appendChild(rect);
-
-    const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    txt.setAttribute('x', 0); txt.setAttribute('y', 4);
-    txt.setAttribute('text-anchor', 'middle'); txt.setAttribute('font-family', 'sans-serif'); txt.setAttribute('font-size', '10');
-    txt.textContent = f.name;
-    g.appendChild(txt);
-
-    // Sistema de Arrastre Mouse
-    g.addEventListener('mousedown', (e) => {
-      e.stopPropagation();
-      selectedElement = f;
-      if(document.getElementById('selBar')) {
-        document.getElementById('selBar').style.display = 'flex';
-        document.getElementById('selName').textContent = f.name;
-      }
-      
-      let startX = e.clientX; let startY = e.clientY;
-      let origX = f.x; let origY = f.y;
-
-      function drag(ev) {
-        f.x = origX + (ev.clientX - startX);
-        f.y = origY + (ev.clientY - startY);
-        renderPlans();
-      }
-      function drop() {
-        window.removeEventListener('mousemove', drag);
-        window.removeEventListener('mouseup', drop);
-      }
-      window.addEventListener('mousemove', drag);
-      window.addEventListener('mouseup', drop);
-      renderPlans();
-    });
-
-    svg.appendChild(g);
-  });
-  
-  updateSidePanelEditor();
-}
-
-function rotSel() {
-  if (selectedElement) { selectedElement.angle = (selectedElement.angle + 90) % 360; renderPlans(); }
-}
-function delSel() {
-  if (selectedElement) {
-    planarFurniture = planarFurniture.filter(f => f !== selectedElement);
-    selectedElement = null;
-    if(document.getElementById('selBar')) document.getElementById('selBar').style.display = 'none';
-    renderPlans();
-  }
-}
-
-function updateSidePanelEditor() {
-  const panel = document.getElementById('selPanel');
-  if(!panel) return;
-  if(!selectedElement) {
-    panel.innerHTML = `<div class="muted text-center" style="padding:20px 0">Selecciona un elemento en el lienzo para ajustar dimensiones dinámicas.</div>`;
-    return;
-  }
-  panel.innerHTML = `
-    <div class="psl" style="font-weight:600;margin-bottom:8px;color:var(--text)">Editar: ${selectedElement.name}</div>
-    <div class="field"><label>Ancho (m)</label><input type="number" step="0.05" value="${selectedElement.w}" oninput="selectedElement.w=parseFloat(this.value)||0.1; renderPlans();"></div>
-    <div class="field"><label>Fondo (m)</label><input type="number" step="0.05" value="${selectedElement.h}" oninput="selectedElement.h=parseFloat(this.value)||0.1; renderPlans();"></div>
-    <button class="btn btn-sm btn-del" style="width:100%;margin-top:8px" onclick="delSel()">Eliminar objeto</button>
-  `;
-}
-
-function setSTab(tab, btn) {
-  document.querySelectorAll('.stab').forEach(b => b.classList.remove('on'));
-  document.querySelectorAll('.sc').forEach(c => c.classList.remove('on'));
-  if(btn) btn.classList.add('on');
-  const scCont = document.getElementById(`sc-${tab}`);
-  if(scCont) scCont.classList.add('on');
-}
-
-// ==========================================
-// 8. MOTOR DE RENDERIZADO 3D (CANVAS CORE)
-// ==========================================
-function init3DCanvas() {
-  const canvas = document.getElementById('c3d');
-  if(!canvas) return;
-  
-  canvas.width = canvas.parentElement.clientWidth;
-  canvas.height = canvas.parentElement.clientHeight || 500;
-
-  canvas.addEventListener('mousedown', (e) => {
-    isDragging3d = true;
-    lastMouseX = e.clientX; lastMouseY = e.clientY;
-  });
-
-  window.addEventListener('mousemove', (e) => {
-    if (!isDragging3d) return;
-    let deltaX = e.clientX - lastMouseX;
-    let deltaY = e.clientY - lastMouseY;
-    
-    if (e.shiftKey) {
-      cameraPanX += deltaX * 0.01;
-      cameraPanY += deltaY * 0.01;
-    } else {
-      cameraAngleX += deltaX * 0.01;
-      cameraAngleY = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraAngleY + deltaY * 0.01));
-    }
-    lastMouseX = e.clientX; lastMouseY = e.clientY;
-    render3D();
-  });
-
-  window.addEventListener('mouseup', () => isDragging3d = false);
-  canvas.addEventListener('wheel', (e) => {
-    cameraZoom = Math.max(0.2, Math.min(4.0, cameraZoom - e.deltaY * 0.001));
-    render3D();
-  });
-
-  if(v3dRooms.length === 0) {
-    v3dRooms.push({ name: 'Cocina Principal', w: 4, l: 3, h: 2.6, color: '#EFECE6' });
-  }
-}
-
-function v3setView(mode, btn) {
-  document.querySelectorAll('.v3d-btn').forEach(b => { if(b.id && b.id.startsWith('v3btn')) b.classList.remove('on'); });
-  if(btn) btn.classList.add('on');
-  v3dSettings.viewMode = mode;
-  if(mode === 'top') { cameraAngleX = 0; cameraAngleY = Math.PI/2; }
-  if(mode === 'front') { cameraAngleX = 0; cameraAngleY = 0; }
-  render3D();
-}
-
-function v3toggleWalls() {
-  v3dSettings.showWalls = !v3dSettings.showWalls;
-  if(document.getElementById('v3btnW')) document.getElementById('v3btnW').classList.toggle('on');
-  render3D();
-}
-
-function v3addRoom() {
-  v3dRooms.push({
-    name: document.getElementById('v3rName').value,
-    w: parseFloat(document.getElementById('v3rW').value),
-    l: parseFloat(document.getElementById('v3rH').value),
-    h: parseFloat(document.getElementById('v3rAlt').value),
-    color: document.getElementById('v3rCol').value
-  });
-  render3D();
-}
-
-function v3addObj(type) {
-  let base = furnitureCatalog[type] || { name: 'Módulo 3D', w:0.6, h:0.6, fill:'#fff', stroke:'#999' };
-  v3dObjects.push({
-    name: base.name,
-    w: base.w, d: base.h, h: type==='ma'?0.6 : (type==='refri'?1.8 : 0.85),
-    x: 1.2, y: type==='ma'? 1.4 : 0, z: 1.0, 
-    color: base.stroke
-  });
-  render3D();
-}
-
-function v3importFromPlan() {
-  v3dObjects = planarFurniture.map(f => ({
-    name: f.name,
-    w: f.w, d: f.h, h: f.name.toLowerCase().includes('alto') ? 0.6 : 0.85,
-    x: f.x / 100, y: f.name.toLowerCase().includes('alto') ? 1.4 : 0, z: f.y / 100,
-    color: f.stroke
-  }));
-  showToast("Objetos sincronizados desde el plano 2D");
-  render3D();
-}
-
-function v3resetCam() {
-  cameraAngleX = -0.5; cameraAngleY = 0.6; cameraZoom = 1.0; cameraPanX = 0; cameraPanY = 0;
-  render3D();
-}
-
-function project3D(x, y, z, width, height) {
-  let cosX = Math.cos(cameraAngleX); let sinX = Math.sin(cameraAngleX);
-  let cosY = Math.cos(cameraAngleY); let sinY = Math.sin(cameraAngleY);
-
-  let x1 = x + cameraPanX;
-  let y1 = y;
-  let z1 = z + cameraPanY;
-
-  let rx = x1 * cosX - z1 * sinX;
-  let rz = x1 * sinX + z1 * cosX;
-
-  let ry = y1 * cosY - rz * sinY;
-  let depth = y1 * sinY + rz * cosY;
-
-  let dist = 6; 
-  let factor = (v3dSettings.viewMode === 'persp') ? (dist / (dist + depth)) : 1;
-  
-  let scale = 95 * cameraZoom * factor;
-  return {
-    x: width / 2 + rx * scale,
-    y: height / 2 - ry * scale,
-    depth: depth
-  };
-}
-
-function render3D() {
-  const canvas = document.getElementById('c3d');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width; const h = canvas.height;
-  
-  ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = "#12141e";
-  ctx.fillRect(0, 0, w, h);
-
-  v3dRooms.forEach(room => {
-    let rw = room.w; let rl = room.l; let rh = room.h;
-    
-    let pts = [
-      project3D(-rw/2, 0, -rl/2, w, h), project3D(rw/2, 0, -rl/2, w, h),
-      project3D(rw/2, 0, rl/2, w, h),  project3D(-rw/2, 0, rl/2, w, h),
-      project3D(-rw/2, rh, -rl/2, w, h), project3D(rw/2, rh, -rl/2, w, h),
-      project3D(rw/2, rh, rl/2, w, h),  project3D(-rw/2, rh, rl/2, w, h)
-    ];
-
-    // Dibujar suelo
-    ctx.fillStyle = "#1f2233";
-    ctx.strokeStyle = "rgba(255,255,255,0.05)";
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pts[0].y); ctx.lineTo(pts[1].x, pts[1].y);
-    ctx.lineTo(pts[2].x, pts[2].y); ctx.lineTo(pts[3].x, pts[3].y);
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-
-    // Dibujar Muros
-    if(v3dSettings.showWalls) {
-      ctx.fillStyle = room.color;
-      ctx.strokeStyle = "rgba(255,255,255,0.1)";
-      
-      // Muro izquierdo posterior
-      ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); ctx.lineTo(pts[1].x, pts[1].y);
-      ctx.lineTo(pts[5].x, pts[5].y); ctx.lineTo(pts[4].x, pts[4].y); ctx.closePath(); ctx.fill(); ctx.stroke();
-
-      // Muro derecho posterior
-      ctx.beginPath(); ctx.moveTo(pts[1].x, pts[1].y); ctx.lineTo(pts[2].x, pts[2].y);
-      ctx.lineTo(pts[6].x, pts[6].y); ctx.lineTo(pts[5].x, pts[5].y); ctx.closePath(); ctx.fill(); ctx.stroke();
-    }
-
-    // Dibujar Objetos Sólidos
-    v3dObjects.forEach(obj => {
-      let ox = obj.x - rw/2; let oy = obj.y; let oz = obj.z - rl/2;
-      let o_pts = [
-        project3D(ox, oy, oz, w, h), project3D(ox + obj.w, oy, oz, w, h),
-        project3D(ox + obj.w, oy, oz + obj.d, w, h), project3D(ox, oy, oz + obj.d, w, h),
-        project3D(ox, oy + obj.h, oz, w, h), project3D(ox + obj.w, oy + obj.h, oz, w, h),
-        project3D(ox + obj.w, oy + obj.h, oz + obj.d, w, h), project3D(ox, oy + obj.h, oz + obj.d, w, h)
-      ];
-
-      // Cara Superior
-      ctx.fillStyle = obj.color || "#BA7517";
-      ctx.beginPath(); ctx.moveTo(o_pts[4].x, o_pts[4].y); ctx.lineTo(o_pts[5].x, o_pts[5].y);
-      ctx.lineTo(o_pts[6].x, o_pts[6].y); ctx.lineTo(o_pts[7].x, o_pts[7].y); ctx.closePath(); ctx.fill();
-      
-      // Cara Frontal/Sombra
-      ctx.fillStyle = "rgba(0,0,0,0.15)";
-      ctx.beginPath(); ctx.moveTo(o_pts[1].x, o_pts[1].y); ctx.lineTo(o_pts[2].x, o_pts[2].y);
-      ctx.lineTo(o_pts[6].x, o_pts[6].y); ctx.lineTo(o_pts[5].x, o_pts[5].y); ctx.closePath(); ctx.fill();
-
-      ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.stroke();
-    });
-  });
-}
-
-// ==========================================
-// 9. PROYECTOS Y PERSISTENCIA (LOCALSTORAGE)
-// ==========================================
-function dbSaveCurrent() {
-  const pNameInput = document.getElementById('dbProjName');
-  const fallbackInput = document.getElementById('pName');
-  let name = (pNameInput ? pNameInput.value : "") || (fallbackInput ? fallbackInput.value : "") || "Proyecto Guardado";
-  let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
-  
-  let pPayload = {
-    id: Date.now(),
-    name: name,
-    budget: projectData,
-    rooms: planarRooms,
-    furniture: planarFurniture
-  };
-
-  allProjects.push(pPayload);
-  localStorage.setItem('linaro_projects', JSON.stringify(allProjects));
-  showToast("Proyecto indexado con éxito");
-  renderProjectsGrid();
-}
-
-function renderProjectsGrid() {
-  const grid = document.getElementById('dbGrid');
-  if(!grid) return;
-  let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
-  if(allProjects.length === 0) {
-    grid.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--text2);grid-column:1/-1"><div style="font-size:32px;margin-bottom:10px">📁</div><p>No se han encontrado proyectos locales</p></div>`;
-    return;
-  }
-  grid.innerHTML = allProjects.map(p => `
-    <div class="db-card">
-      <div class="db-card-head"><div><strong>${p.name}</strong><br><small class="muted">${p.budget.date}</small></div></div>
-      <div class="db-card-body">
-        <div class="db-stat">Cliente: <span>${p.budget.client || 'Particular'}</span></div>
-        <div class="db-stat">Módulos: <span>${p.budget.items.length}</span></div>
-      </div>
-      <div class="db-card-foot">
-        <button class="btn btn-sm btn-gold" onclick="loadProjectFromDb(${p.id})">📂 Abrir</button>
-        <button class="btn btn-sm btn-del" onclick="deleteProjectFromDb(${p.id})">×</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function loadProjectFromDb(id) {
-  let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
-  let found = allProjects.find(p => p.id === id);
-  if(found) {
-    projectData = found.budget;
-    planarRooms = found.rooms || [];
-    planarFurniture = found.furniture || [];
-    
-    if(document.getElementById('pName')) document.getElementById('pName').value = projectData.name || '';
-    if(document.getElementById('pClient')) document.getElementById('pClient').value = projectData.client || '';
-    if(document.getElementById('pLoc')) document.getElementById('pLoc').value = projectData.location || '';
-    
-    renderBudgetTable();
-    recalc();
-    showToast("Datos recuperados correctamente");
-  }
-}
-
-function deleteProjectFromDb(id) {
-  let allProjects = JSON.parse(localStorage.getItem('linaro_projects') || '[]');
-  allProjects = allProjects.filter(p => p.id !== id);
-  localStorage.setItem('linaro_projects', JSON.stringify(allProjects));
-  renderProjectsGrid();
-}
-
-function dbExportAll() {
-  let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(localStorage.getItem('linaro_projects') || '[]');
-  let dlAnchorElem = document.createElement('a');
-  dlAnchorElem.setAttribute("href", dataStr);
-  dlAnchorElem.setAttribute("download", "Linaro_Copia_Seguridad.json");
-  dlAnchorElem.click();
-}
-
-function dbImport(e) {
-  let file = e.target.files[0];
-  if (!file) return;
-  let reader = new FileReader();
-  reader.onload = function(evt) {
-    localStorage.setItem('linaro_projects', evt.target.result);
     renderProjectsGrid();
-    showToast("Copia de seguridad importada");
-  };
-  reader.readAsText(file);
-}
-
-// Inicializador automático diferido
-window.addEventListener('DOMContentLoaded', () => {
-  renderProjectsGrid();
-  // Inicializar la aplicación automáticamente si no requiere overlay de login estricto
-  initApp();
+  }
+  // Si no hay sesión, el overlay de login permanece visible
 });
 </script>
 <style>
