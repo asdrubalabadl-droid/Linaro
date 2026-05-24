@@ -643,7 +643,7 @@ function renderInventory() {
     document.getElementById('melList').innerHTML = inventory.tableros.map(m => `
       <div class="card mb8 flexb">
         <div><strong>${m.nombre}</strong> <span class="tag">${m.ancho}x${m.alto}mm</span><br><small class="muted">Local: ${m.prov}</small></div>
-        <div class="tr"><div class="tgold mono">${m.moneda} ${m.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tableros', ${m.id})">×</button></div>
+        <div class="tr"><div class="tgold mono">${m.moneda} ${m.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tableros', '${m.id}')">×</button></div>
       </div>
     `).join('') || '<div class="empty card">Sin tableros</div>';
   }
@@ -653,7 +653,7 @@ function renderInventory() {
     document.getElementById('tcList').innerHTML = inventory.tapacanto.map(t => `
       <div class="card mb8 flexb">
         <div><strong>${t.nombre}</strong> <span class="tag">${t.ancho}mm</span></div>
-        <div class="tr"><div class="tblue mono">${t.moneda} ${t.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tapacanto', ${t.id})">×</button></div>
+        <div class="tr"><div class="tblue mono">${t.moneda} ${t.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('tapacanto', '${t.id}')">×</button></div>
       </div>
     `).join('') || '<div class="empty card">Sin tapacantos</div>';
   }
@@ -663,7 +663,7 @@ function renderInventory() {
     document.getElementById('pgList').innerHTML = inventory.pega.map(p => `
       <div class="card mb8 flexb">
         <div><strong>${p.nombre}</strong> <small class="badge">${p.tipo}</small></div>
-        <div class="tr"><div class="tgreen mono">$ ${p.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('pega', ${p.id})">×</button></div>
+        <div class="tr"><div class="tgreen mono">$ ${p.precio.toFixed(2)}</div><button class="btn btn-sm btn-del" onclick="deleteInvItem('pega', '${p.id}')">×</button></div>
       </div>
     `).join('') || '<div class="empty card">Sin pegamentos</div>';
   }
