@@ -4,7 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Linaro — Presupuestación Arquitectónica</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  const SUPABASE_URL = 'https://iufichpykfkhjednfljy.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZmljaHB5a2ZraGplZG5mbGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDI3NzMsImV4cCI6MjA5NDYxODc3M30.0OG0e2Oj_5-uJckF-a0duPDgBmgyYr-3VLJm3HvQRVM';
+  // Asignar al global que ya fue declarado con var
+  window.supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Verificar sesión existente al cargar
+  const { data: { session } } = await window.supabaseClient.auth.getSession();
+  if (session) {
+    window.currentUser = session.user;
+    const overlay = document.getElementById('loginOverlay');
+    if (overlay) overlay.style.display = 'none';
+    if (typeof initApp === 'function') initApp();
+    if (typeof renderProjectsGrid === 'function') renderProjectsGrid();
+  }
+</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/%3E%3Crect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/%3E%3Cpath d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/%3E%3Crect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/%3E%3C/svg%3E">
 <script>
 // ==========================================
@@ -36,10 +52,9 @@ let inventory = {
 // ==========================================
 // SUPABASE — Cliente y usuario activo
 // ==========================================
-const SUPABASE_URL = 'https://iufichpykfkhjednfljy.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZmljaHB5a2ZraGplZG5mbGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDI3NzMsImV4cCI6MjA5NDYxODc3M30.0OG0e2Oj_5-uJckF-a0duPDgBmgyYr-3VLJm3HvQRVM';
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let currentUser = null;
+// Usamos var para no redeclarar lo que el SDK pone en window
+var supabaseClient = null;
+var currentUser = null;
 
 // Datos de Planos y 3D
 let planarRooms = [];
@@ -81,13 +96,13 @@ async function doLogin() {
   if (btn) { btn.textContent = 'Ingresando…'; btn.disabled = true; }
 
   try {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email: u, password: p });
+    const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email: u, password: p });
 
     if (error) throw error;
 
-    currentUser = data.user;
+    window.currentUser = data.user;
     document.getElementById('loginOverlay').style.display = 'none';
-    showToast(`¡Bienvenido a Linaro, ${currentUser.email}!`);
+    showToast(`¡Bienvenido a Linaro, ${window.currentUser.email}!`);
     initApp();
     renderProjectsGrid();
   } catch (e) {
@@ -854,7 +869,7 @@ function render3D() {
 // 9. PROYECTOS Y PERSISTENCIA (Supabase Database)
 // ==========================================
 async function dbSaveCurrent() {
-  if (!currentUser) return showToast('Debes iniciar sesión para guardar.');
+  if (!window.currentUser) return showToast('Debes iniciar sesión para guardar.');
 
   const pNameInput = document.getElementById('dbProjName');
   const fallbackInput = document.getElementById('pName');
@@ -866,8 +881,8 @@ async function dbSaveCurrent() {
   if (msg) msg.textContent = 'Guardando…';
 
   try {
-    const { error } = await supabaseClient.from('linaro_projects').insert({
-      user_id: currentUser.id,
+    const { error } = await window.supabaseClient.from('linaro_projects').insert({
+      user_id: window.currentUser.id,
       name,
       budget: projectData,
       rooms: planarRooms,
@@ -888,7 +903,7 @@ async function renderProjectsGrid() {
   const grid = document.getElementById('dbGrid');
   if (!grid) return;
 
-  if (!currentUser) {
+  if (!window.currentUser) {
     grid.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--text2);grid-column:1/-1"><div style="font-size:32px;margin-bottom:10px">🔒</div><p>Inicia sesión para ver tus proyectos</p></div>`;
     return;
   }
@@ -896,10 +911,10 @@ async function renderProjectsGrid() {
   grid.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text2);grid-column:1/-1">Cargando proyectos…</div>`;
 
   try {
-    const { data, error } = await supabaseClient
+    const { data, error } = await window.supabaseClient
       .from('linaro_projects')
       .select('*')
-      .eq('user_id', currentUser.id)
+      .eq('user_id', window.currentUser.id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -928,14 +943,14 @@ async function renderProjectsGrid() {
 }
 
 async function loadProjectFromDb(id) {
-  if (!currentUser) return;
+  if (!window.currentUser) return;
 
   try {
-    const { data, error } = await supabaseClient
+    const { data, error } = await window.supabaseClient
       .from('linaro_projects')
       .select('*')
       .eq('id', id)
-      .eq('user_id', currentUser.id)
+      .eq('user_id', window.currentUser.id)
       .single();
 
     if (error) throw error;
@@ -957,15 +972,15 @@ async function loadProjectFromDb(id) {
 }
 
 async function deleteProjectFromDb(id) {
-  if (!currentUser) return;
+  if (!window.currentUser) return;
   if (!confirm('¿Eliminar este proyecto? Esta acción no se puede deshacer.')) return;
 
   try {
-    const { error } = await supabaseClient
+    const { error } = await window.supabaseClient
       .from('linaro_projects')
       .delete()
       .eq('id', id)
-      .eq('user_id', currentUser.id);
+      .eq('user_id', window.currentUser.id);
 
     if (error) throw error;
     showToast('Proyecto eliminado');
@@ -976,13 +991,13 @@ async function deleteProjectFromDb(id) {
 }
 
 async function dbExportAll() {
-  if (!currentUser) return showToast('Inicia sesión para exportar.');
+  if (!window.currentUser) return showToast('Inicia sesión para exportar.');
 
   try {
-    const { data, error } = await supabaseClient
+    const { data, error } = await window.supabaseClient
       .from('linaro_projects')
       .select('*')
-      .eq('user_id', currentUser.id);
+      .eq('user_id', window.currentUser.id);
 
     if (error) throw error;
 
@@ -997,7 +1012,7 @@ async function dbExportAll() {
 }
 
 function dbImport(e) {
-  if (!currentUser) return showToast('Inicia sesión para importar.');
+  if (!window.currentUser) return showToast('Inicia sesión para importar.');
   let file = e.target.files[0];
   if (!file) return;
   let reader = new FileReader();
@@ -1005,14 +1020,14 @@ function dbImport(e) {
     try {
       const projects = JSON.parse(evt.target.result);
       const toInsert = (Array.isArray(projects) ? projects : [projects]).map(p => ({
-        user_id: currentUser.id,
+        user_id: window.currentUser.id,
         name: p.name || 'Importado',
         budget: p.budget || p,
         rooms: p.rooms || [],
         furniture: p.furniture || [],
         created_at: new Date().toISOString()
       }));
-      const { error } = await supabaseClient.from('linaro_projects').insert(toInsert);
+      const { error } = await window.supabaseClient.from('linaro_projects').insert(toInsert);
       if (error) throw error;
       await renderProjectsGrid();
       showToast(`${toInsert.length} proyecto(s) importado(s) ✓`);
@@ -1024,17 +1039,8 @@ function dbImport(e) {
 }
 
 // Inicializador automático diferido
-window.addEventListener('DOMContentLoaded', async () => {
-  // Verificar si ya hay una sesión activa de Supabase
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    const overlay = document.getElementById('loginOverlay');
-    if (overlay) overlay.style.display = 'none';
-    initApp();
-    renderProjectsGrid();
-  }
-  // Si no hay sesión, el overlay de login permanece visible
+window.addEventListener('DOMContentLoaded', () => {
+  if (typeof initApp === 'function') initApp();
 });
 </script>
 <style>
