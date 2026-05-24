@@ -78,11 +78,12 @@
         },
         delete: function() { q._delete = true; return q; },
         eq: function(col, val) { _filters.push(col + '=eq.' + val); return q; },
-        order: function(col, opts) { _order = col + '=' + ((opts && opts.ascending === false) ? 'desc' : 'asc'); return q; },
+        order: function(col, opts) { _order = col + '.' + ((opts && opts.ascending === false) ? 'desc' : 'asc'); return q; },
         single: function() { _single = true; return q; },
         then: async function(resolve, reject) {
           try {
-            var qs = _filters.join('&');
+            var qs = 'select=' + (q._cols || '*');
+            qs += (_filters.length ? '&' + _filters.join('&') : '');
             if (_order) qs += (qs ? '&' : '') + 'order=' + _order;
             var endpoint = URL + '/rest/v1/' + _table + (qs ? '?' + qs : '');
 
