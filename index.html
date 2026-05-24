@@ -4,22 +4,120 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Linaro — Presupuestación Arquitectónica</title>
-<script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-  const SUPABASE_URL = 'https://iufichpykfkhjednfljy.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZmljaHB5a2ZraGplZG5mbGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDI3NzMsImV4cCI6MjA5NDYxODc3M30.0OG0e2Oj_5-uJckF-a0duPDgBmgyYr-3VLJm3HvQRVM';
-  // Asignar al global que ya fue declarado con var
-  window.supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<script>
+// ==========================================
+// SUPABASE — Cliente REST nativo (sin SDK, sin CDN externo)
+// Solo usa fetch() nativo del navegador
+// ==========================================
+(function() {
+  var URL  = 'https://iufichpykfkhjednfljy.supabase.co';
+  var KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZmljaHB5a2ZraGplZG5mbGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDI3NzMsImV4cCI6MjA5NDYxODc3M30.0OG0e2Oj_5-uJckF-a0duPDgBmgyYr-3VLJm3HvQRVM';
+  var SESSION_KEY = 'linaro_session';
 
-  // Verificar sesión existente al cargar
-  const { data: { session } } = await window.supabaseClient.auth.getSession();
-  if (session) {
-    window.currentUser = session.user;
-    const overlay = document.getElementById('loginOverlay');
-    if (overlay) overlay.style.display = 'none';
-    if (typeof initApp === 'function') initApp();
-    if (typeof renderProjectsGrid === 'function') renderProjectsGrid();
+  function authHeaders(token) {
+    var h = { 'apikey': KEY, 'Content-Type': 'application/json' };
+    if (token) h['Authorization'] = 'Bearer ' + token;
+    else h['Authorization'] = 'Bearer ' + KEY;
+    return h;
   }
+
+  window.supabaseClient = {
+    _token: null,
+    _user: null,
+
+    auth: {
+      signInWithPassword: async function(opts) {
+        var r = await fetch(URL + '/auth/v1/token?grant_type=password', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ email: opts.email, password: opts.password })
+        });
+        var d = await r.json();
+        if (!r.ok) return { data: null, error: { message: d.error_description || d.msg || 'Error de autenticación' } };
+        window.supabaseClient._token = d.access_token;
+        window.supabaseClient._user  = d.user;
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify({ token: d.access_token, user: d.user }));
+        return { data: { user: d.user, session: d }, error: null };
+      },
+      getSession: async function() {
+        try {
+          var saved = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+          if (saved && saved.token) {
+            window.supabaseClient._token = saved.token;
+            window.supabaseClient._user  = saved.user;
+            return { data: { session: saved }, error: null };
+          }
+        } catch(e) {}
+        return { data: { session: null }, error: null };
+      },
+      signOut: async function() {
+        sessionStorage.removeItem(SESSION_KEY);
+        window.supabaseClient._token = null;
+        window.supabaseClient._user  = null;
+        return { error: null };
+      }
+    },
+
+    from: function(table) {
+      var _table = table;
+      var _filters = [];
+      var _order   = null;
+      var _single  = false;
+
+      var q = {
+        select: function(cols) { q._cols = cols || '*'; return q; },
+        insert: async function(payload) {
+          var body = Array.isArray(payload) ? payload : [payload];
+          var r = await fetch(URL + '/rest/v1/' + _table, {
+            method: 'POST',
+            headers: Object.assign(authHeaders(window.supabaseClient._token), { 'Prefer': 'return=minimal' }),
+            body: JSON.stringify(body)
+          });
+          if (!r.ok) { var e = await r.json(); return { error: { message: e.message || 'Error al insertar' } }; }
+          return { error: null };
+        },
+        delete: function() { q._delete = true; return q; },
+        eq: function(col, val) { _filters.push(col + '=eq.' + val); return q; },
+        order: function(col, opts) { _order = col + '=' + ((opts && opts.ascending === false) ? 'desc' : 'asc'); return q; },
+        single: function() { _single = true; return q; },
+        then: async function(resolve, reject) {
+          try {
+            var qs = _filters.join('&');
+            if (_order) qs += (qs ? '&' : '') + 'order=' + _order;
+            var endpoint = URL + '/rest/v1/' + _table + (qs ? '?' + qs : '');
+
+            if (q._delete) {
+              var r = await fetch(endpoint, { method: 'DELETE', headers: authHeaders(window.supabaseClient._token) });
+              if (!r.ok) { var e = await r.json(); return resolve({ data: null, error: { message: e.message } }); }
+              return resolve({ data: null, error: null });
+            }
+
+            var hdrs = Object.assign(authHeaders(window.supabaseClient._token));
+            if (_single) hdrs['Accept'] = 'application/vnd.pgrst.object+json';
+            var r2 = await fetch(endpoint, { headers: hdrs });
+            var d = await r2.json();
+            if (!r2.ok) return resolve({ data: null, error: { message: d.message || 'Error al consultar' } });
+            return resolve({ data: d, error: null });
+          } catch(err) { reject(err); }
+        }
+      };
+      q._cols = '*';
+      return q;
+    }
+  };
+
+  // Verificar sesión guardada al cargar
+  window.supabaseClient.auth.getSession().then(function(result) {
+    var session = result.data && result.data.session;
+    if (session) {
+      window.currentUser = session.user;
+      var overlay = document.getElementById('loginOverlay');
+      if (overlay) overlay.style.display = 'none';
+      if (typeof initApp === 'function') initApp();
+      if (typeof renderProjectsGrid === 'function') renderProjectsGrid();
+    }
+  });
+})();
 </script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/%3E%3Crect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/%3E%3Cpath d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/%3E%3Crect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/%3E%3C/svg%3E">
 <script>
@@ -52,9 +150,8 @@ let inventory = {
 // ==========================================
 // SUPABASE — Cliente y usuario activo
 // ==========================================
-// Usamos var para no redeclarar lo que el SDK pone en window
-var supabaseClient = null;
-var currentUser = null;
+// supabaseClient y currentUser se inicializan en window
+// por el script de carga asíncrona del SDK (ver <head>)
 
 // Datos de Planos y 3D
 let planarRooms = [];
@@ -137,7 +234,7 @@ function initApp() {
   const dInput = document.getElementById('pDate');
   if(dInput) dInput.value = projectData.date;
   updateMatSelect();
-  renderInventory();
+  loadInventory();  // carga desde Supabase si hay sesión
   recalc();
 }
 
@@ -445,48 +542,95 @@ function updateMatSelect() {
   sel.innerHTML = inventory.tableros.map(m => `<option value="${m.id}">${m.nombre} (${m.moneda} ${m.precio})</option>`).join('');
 }
 
-function addMel() {
-  const name = document.getElementById('mNombre').value || 'Tablero';
-  const price = parseFloat(document.getElementById('mPrecio').value) || 0;
-  const id = inventory.tableros.length + 1;
-  inventory.tableros.push({
-    id, nombre: name, color: document.getElementById('mColor').value,
-    prov: document.getElementById('mProv').value, ancho: parseInt(document.getElementById('mAncho').value),
-    alto: parseInt(document.getElementById('mAlto').value), espesor: parseInt(document.getElementById('mEspesor').value),
-    precio: price, moneda: document.getElementById('mMoneda').value, stock: parseInt(document.getElementById('mStock').value),
-    notes: document.getElementById('mNotas').value
-  });
-  renderInventory(); updateMatSelect(); showToast("Tablero registrado");
+async function addMel() {
+  if (!window.currentUser) return showToast('Inicia sesión para guardar.');
+  const payload = {
+    user_id:  window.currentUser.id,
+    nombre:   document.getElementById('mNombre').value  || 'Tablero',
+    color:    document.getElementById('mColor').value,
+    prov:     document.getElementById('mProv').value,
+    ancho:    parseInt(document.getElementById('mAncho').value)   || 2440,
+    alto:     parseInt(document.getElementById('mAlto').value)    || 1220,
+    espesor:  parseInt(document.getElementById('mEspesor').value) || 18,
+    precio:   parseFloat(document.getElementById('mPrecio').value) || 0,
+    moneda:   document.getElementById('mMoneda').value,
+    stock:    parseInt(document.getElementById('mStock').value)   || 1,
+    notas:    document.getElementById('mNotas').value
+  };
+  const { error } = await window.supabaseClient.from('inv_tableros').insert(payload);
+  if (error) return showToast('Error: ' + error.message);
+  showToast('Tablero registrado ✓');
+  await loadInventory();
+  updateMatSelect();
 }
 
-function addTc() {
-  const name = document.getElementById('tcNombre').value || 'Canto';
-  inventory.tapacanto.push({
-    id: inventory.tapacanto.length + 1, nombre: name, color: document.getElementById('tcColor').value,
-    mat: document.getElementById('tcMat').value, espesor: parseFloat(document.getElementById('tcEspesor').value),
-    ancho: parseInt(document.getElementById('tcAncho').value), largo: parseInt(document.getElementById('tcLargo').value),
-    precio: parseFloat(document.getElementById('tcPrecio').value), moneda: document.getElementById('tcMoneda').value,
-    stock: parseInt(document.getElementById('tcStock').value), prov: document.getElementById('tcProv').value,
-    notes: document.getElementById('tcNotas').value
-  });
-  renderInventory(); showToast("Tapacanto guardado");
+async function addTc() {
+  if (!window.currentUser) return showToast('Inicia sesión para guardar.');
+  const payload = {
+    user_id:  window.currentUser.id,
+    nombre:   document.getElementById('tcNombre').value  || 'Canto',
+    color:    document.getElementById('tcColor').value,
+    mat:      document.getElementById('tcMat').value,
+    espesor:  parseFloat(document.getElementById('tcEspesor').value) || 1,
+    ancho:    parseInt(document.getElementById('tcAncho').value)     || 22,
+    largo:    parseInt(document.getElementById('tcLargo').value)     || 50,
+    precio:   parseFloat(document.getElementById('tcPrecio').value)  || 0,
+    moneda:   document.getElementById('tcMoneda').value,
+    stock:    parseInt(document.getElementById('tcStock').value)     || 1,
+    prov:     document.getElementById('tcProv').value,
+    notas:    document.getElementById('tcNotas').value
+  };
+  const { error } = await window.supabaseClient.from('inv_tapacanto').insert(payload);
+  if (error) return showToast('Error: ' + error.message);
+  showToast('Tapacanto guardado ✓');
+  await loadInventory();
 }
 
-function addPg() {
-  inventory.pega.push({
-    id: inventory.pega.length + 1, tipo: document.getElementById('pgTipo').value,
-    nombre: document.getElementById('pgNombre').value || 'Pegamento', desc: document.getElementById('pgDesc').value,
-    pres: document.getElementById('pgPres').value, rend: parseFloat(document.getElementById('pgRend').value),
-    precio: parseFloat(document.getElementById('pgPrecio').value), moneda: 'USD',
-    prov: document.getElementById('pgProv').value, stock: parseInt(document.getElementById('pgStock').value),
-    notes: document.getElementById('pgNotas').value
-  });
-  renderInventory(); showToast("Pegamento añadido");
+async function addPg() {
+  if (!window.currentUser) return showToast('Inicia sesión para guardar.');
+  const payload = {
+    user_id:     window.currentUser.id,
+    tipo:        document.getElementById('pgTipo').value,
+    nombre:      document.getElementById('pgNombre').value || 'Pegamento',
+    descripcion: document.getElementById('pgDesc').value,
+    presentacion:document.getElementById('pgPres').value,
+    rendimiento: parseFloat(document.getElementById('pgRend').value)   || 0,
+    precio:      parseFloat(document.getElementById('pgPrecio').value) || 0,
+    moneda:      'USD',
+    prov:        document.getElementById('pgProv').value,
+    stock:       parseInt(document.getElementById('pgStock').value) || 1,
+    notas:       document.getElementById('pgNotas').value
+  };
+  const { error } = await window.supabaseClient.from('inv_pega').insert(payload);
+  if (error) return showToast('Error: ' + error.message);
+  showToast('Pegamento añadido ✓');
+  await loadInventory();
 }
 
-function deleteInvItem(type, id) {
-  inventory[type] = inventory[type].filter(item => item.id !== id);
-  renderInventory(); updateMatSelect();
+async function deleteInvItem(type, id) {
+  if (!window.currentUser) return;
+  const tableMap = { tableros: 'inv_tableros', tapacanto: 'inv_tapacanto', pega: 'inv_pega' };
+  const table = tableMap[type];
+  if (!table) return;
+  const { error } = await window.supabaseClient.from(table).delete().eq('id', id);
+  if (error) return showToast('Error al eliminar: ' + error.message);
+  await loadInventory();
+  updateMatSelect();
+}
+
+async function loadInventory() {
+  if (!window.currentUser) return;
+  const uid = window.currentUser.id;
+  const [rt, rtc, rp] = await Promise.all([
+    window.supabaseClient.from('inv_tableros').select('*').eq('user_id', uid).order('created_at', { ascending: true }),
+    window.supabaseClient.from('inv_tapacanto').select('*').eq('user_id', uid).order('created_at', { ascending: true }),
+    window.supabaseClient.from('inv_pega').select('*').eq('user_id', uid).order('created_at', { ascending: true })
+  ]);
+  inventory.tableros  = (rt.data  || []).map(r => ({ ...r, precio: parseFloat(r.precio) || 0 }));
+  inventory.tapacanto = (rtc.data || []).map(r => ({ ...r, precio: parseFloat(r.precio) || 0 }));
+  inventory.pega      = (rp.data  || []).map(r => ({ ...r, precio: parseFloat(r.precio) || 0 }));
+  renderInventory();
+  updateMatSelect();
 }
 
 function renderInventory() {
