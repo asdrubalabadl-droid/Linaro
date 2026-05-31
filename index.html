@@ -224,7 +224,7 @@ function goTab(tabId, btn) {
   currentTab = tabId;
 
   if (tabId === 'plans') { renderPlans(); }
-  if (tabId === 'vista3d') { init3DCanvas(); render3D(); }
+  if (tabId === 'vista3d') { init3DCanvas(); sync2Dto3D(); render3D(); }
 }
 
 function initApp() {
@@ -802,8 +802,18 @@ function addF(type) {
   const template = furnitureCatalog[type] || { name: 'Mueble', w: 0.6, h: 0.6, fill: '#fff', stroke: '#333' };
   const f = {
     id: Date.now(),
+    type,
     ...template,
-    x: 100, y: 100, angle: 0
+    x: 100, y: 100, angle: 0,
+    // Campos de configuración estructural
+    height3d:   getFurniture3DHeight(template.name || type).h,
+    doors:      template.door ? template.door.count : 0,
+    shelves:    1,
+    drawers:    0,
+    thickness:  18,
+    // Material asignado (ID del inventario)
+    materialId: null,
+    tapacantId: null,
   };
   planarFurniture.push(f);
   renderPlans();
@@ -890,6 +900,9 @@ function renderPlans() {
         document.getElementById('selBar').style.display = 'flex';
         document.getElementById('selName').textContent = f.name;
       }
+      // Abrir automáticamente la pestaña Editar
+      const editTab = document.querySelector('.stab[onclick*="psel"]');
+      if (editTab) { document.querySelectorAll('.stab').forEach(b=>b.classList.remove('on')); editTab.classList.add('on'); document.querySelectorAll('.sc').forEach(c=>c.classList.remove('on')); const sc=document.getElementById('sc-psel'); if(sc) sc.classList.add('on'); }
       
       let startX = e.clientX; let startY = e.clientY;
       let origX = f.x; let origY = f.y;
@@ -912,6 +925,9 @@ function renderPlans() {
   });
   
   updateSidePanelEditor();
+
+  // ── Sincronización automática 2D → 3D ───────────────────────────
+  sync2Dto3D();
 }
 
 function rotSel() {
@@ -928,17 +944,217 @@ function delSel() {
 
 function updateSidePanelEditor() {
   const panel = document.getElementById('selPanel');
-  if(!panel) return;
-  if(!selectedElement) {
-    panel.innerHTML = `<div class="muted text-center" style="padding:20px 0">Selecciona un elemento en el lienzo para ajustar dimensiones dinámicas.</div>`;
+  if (!panel) return;
+  if (!selectedElement) {
+    panel.innerHTML = `<div style="color:var(--text2);font-size:12px;text-align:center;padding:24px 8px">Haz clic en un mueble para editar</div>`;
     return;
   }
+  const f = selectedElement;
+
+  const matOptions = inventory.tableros.length > 0
+    ? inventory.tableros.map(m => `<option value="${m.id}" ${f.materialId == m.id ? 'selected' : ''}>${m.nombre} — ${m.moneda||'$'} ${m.precio}</option>`).join('')
+    : '<option value="">— Agrega tableros al inventario —</option>';
+
+  const tapOptions = inventory.tapacanto.length > 0
+    ? inventory.tapacanto.map(t => `<option value="${t.id}" ${f.tapacantId == t.id ? 'selected' : ''}>${t.nombre} — ${t.moneda||'$'} ${t.precio}/${t.unidad||'ml'}</option>`).join('')
+    : '<option value="">— Agrega tapacanto al inventario —</option>';
+
   panel.innerHTML = `
-    <div class="psl" style="font-weight:600;margin-bottom:8px;color:var(--text)">Editar: ${selectedElement.name}</div>
-    <div class="field"><label>Ancho (m)</label><input type="number" step="0.05" value="${selectedElement.w}" oninput="selectedElement.w=parseFloat(this.value)||0.1; renderPlans();"></div>
-    <div class="field"><label>Fondo (m)</label><input type="number" step="0.05" value="${selectedElement.h}" oninput="selectedElement.h=parseFloat(this.value)||0.1; renderPlans();"></div>
-    <button class="btn btn-sm btn-del" style="width:100%;margin-top:8px" onclick="delSel()">Eliminar objeto</button>
+    <div class="psl">✏️ ${f.name}</div>
+
+    <div class="pfield"><label>Nombre del módulo</label>
+      <input type="text" value="${f.name}" oninput="selectedElement.name=this.value; renderPlans();">
+    </div>
+    <div class="pg2">
+      <div class="pfield"><label>Ancho (m)</label>
+        <input type="number" step="0.05" min="0.1" value="${f.w}" oninput="selectedElement.w=parseFloat(this.value)||0.1; renderPlans();">
+      </div>
+      <div class="pfield"><label>Fondo (m)</label>
+        <input type="number" step="0.05" min="0.1" value="${f.h}" oninput="selectedElement.h=parseFloat(this.value)||0.1; renderPlans();">
+      </div>
+    </div>
+    <div class="pfield"><label>Alto del módulo (m)</label>
+      <input type="number" step="0.05" min="0.1" value="${f.height3d||0.85}" oninput="selectedElement.height3d=parseFloat(this.value)||0.85; sync2Dto3D(); updateFurnitureCutPreview();">
+    </div>
+
+    <div style="height:1px;background:var(--border);margin:8px 0"></div>
+    <div class="psl" style="color:var(--gold-b,#7a4d0a)">🪵 Material asignado</div>
+
+    <div class="pfield"><label>Tablero</label>
+      <select onchange="selectedElement.materialId=this.value; updateFurnitureCutPreview();">
+        <option value="">— Seleccionar tablero —</option>
+        ${matOptions}
+      </select>
+    </div>
+    <div class="pfield"><label>Tapacanto</label>
+      <select onchange="selectedElement.tapacantId=this.value; updateFurnitureCutPreview();">
+        <option value="">— Seleccionar tapacanto —</option>
+        ${tapOptions}
+      </select>
+    </div>
+    <div class="pfield"><label>Espesor tablero (mm)</label>
+      <input type="number" value="${f.thickness||18}" min="9" max="36" step="1" oninput="selectedElement.thickness=parseInt(this.value)||18; updateFurnitureCutPreview();">
+    </div>
+
+    <div style="height:1px;background:var(--border);margin:8px 0"></div>
+    <div class="psl">🔧 Configuración</div>
+    <div class="pg2">
+      <div class="pfield"><label>Puertas</label>
+        <input type="number" value="${f.doors||0}" min="0" max="8" step="1"
+          oninput="selectedElement.doors=parseInt(this.value)||0; selectedElement.door={count:selectedElement.doors}; renderPlans(); updateFurnitureCutPreview();">
+      </div>
+      <div class="pfield"><label>Entrepaños</label>
+        <input type="number" value="${f.shelves!=null?f.shelves:1}" min="0" max="10" step="1"
+          oninput="selectedElement.shelves=parseInt(this.value)||0; updateFurnitureCutPreview();">
+      </div>
+    </div>
+    <div class="pfield"><label>Cajones</label>
+      <input type="number" value="${f.drawers||0}" min="0" max="8" step="1"
+        oninput="selectedElement.drawers=parseInt(this.value)||0; updateFurnitureCutPreview();">
+    </div>
+
+    <div id="furnitureCutPreview"></div>
+
+    <div style="margin-top:8px;display:flex;flex-direction:column;gap:5px">
+      <button class="tbtn tbtn-gold" style="width:100%" onclick="addFurnitureToBudget()">📋 Añadir al presupuesto</button>
+      <button class="tbtn tbtn-del"  style="width:100%" onclick="delSel()">× Eliminar del plano</button>
+    </div>
   `;
+
+  updateFurnitureCutPreview();
+}
+
+// ── Vista previa de despiece por mueble ────────────────────────────
+function updateFurnitureCutPreview() {
+  const box = document.getElementById('furnitureCutPreview');
+  if (!box || !selectedElement) return;
+  const f = selectedElement;
+  const mat = inventory.tableros.find(m => m.id == f.materialId);
+
+  if (!mat) {
+    box.innerHTML = `<div style="font-size:11px;color:var(--text2);padding:6px 4px;text-align:center">Asigna un tablero para ver el despiece y costo estimado</div>`;
+    return;
+  }
+
+  const W = Math.round(f.w * 1000);
+  const D = Math.round(f.h * 1000);
+  const H = Math.round((f.height3d || 0.85) * 1000);
+  const T = f.thickness || 18;
+  const doors   = f.doors   || 0;
+  const shelves = f.shelves != null ? f.shelves : 1;
+  const drawers = f.drawers || 0;
+
+  let cuts = [];
+  cuts.push({ desc:'Laterales',   cant:2,       l:H,                   a:D-20 });
+  cuts.push({ desc:'Base',        cant:1,       l:W-(2*T),             a:D-20 });
+  cuts.push({ desc:'Amarres',     cant:2,       l:W-(2*T),             a:100  });
+  if (shelves > 0) cuts.push({ desc:'Entrepaños', cant:shelves, l:W-(2*T)-2, a:D-40 });
+  if (doors   > 0) cuts.push({ desc:'Puertas',    cant:doors,   l:H-4,       a:Math.round(W/doors)-3 });
+  if (drawers > 0) {
+    const dh = Math.round(H / (drawers+1));
+    cuts.push({ desc:'Frentes cajón', cant:drawers, l:dh-4,   a:W-(2*T)-3 });
+    cuts.push({ desc:'Fondos cajón',  cant:drawers, l:dh-100, a:D-60      });
+  }
+
+  const totalArea  = cuts.reduce((s,c) => s + c.l*c.a*c.cant/1e6, 0);
+  const sheetArea  = (mat.ancho * mat.alto) / 1e6;
+  const sheets     = Math.ceil(totalArea / (sheetArea * 0.8));
+  const costMat    = sheets * mat.precio;
+
+  const tap        = inventory.tapacanto.find(t => t.id == f.tapacantId);
+  const tapML      = ((H*2 + W*2) / 1000).toFixed(2);
+  const tapCost    = tap ? (parseFloat(tapML) * tap.precio).toFixed(2) : null;
+  const totalCost  = costMat + (tap ? parseFloat(tapCost) : 0);
+
+  const rows = cuts.map(c => `
+    <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:.5px solid rgba(186,117,23,.2)">
+      <span style="color:var(--text)">${c.desc} <span style="color:var(--text2)">×${c.cant}</span></span>
+      <span style="font-family:monospace;font-size:10px;color:var(--text2)">${c.l}×${c.a}</span>
+    </div>`).join('');
+
+  box.innerHTML = `
+    <div style="background:var(--gold-l);border:1px solid var(--gold-m);border-radius:8px;padding:10px;margin-top:8px">
+      <div style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">📐 Despiece estimado</div>
+      ${rows}
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:3px">
+        <div style="display:flex;justify-content:space-between;font-size:11px">
+          <span>Área útil</span><span style="font-family:monospace">${totalArea.toFixed(2)} m²</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px">
+          <span>Láminas (merma 20%)</span><span style="font-family:monospace;font-weight:700;color:var(--gold)">${sheets} ud</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;border-top:.5px solid var(--gold-m);padding-top:5px;margin-top:2px">
+          <span>Tablero (${mat.nombre})</span>
+          <span style="font-family:monospace;color:var(--gold)">${mat.moneda||'$'} ${costMat.toFixed(2)}</span>
+        </div>
+        ${tap ? `<div style="display:flex;justify-content:space-between;font-size:11px">
+          <span>Tapacanto ${tapML}ml</span>
+          <span style="font-family:monospace">${tap.moneda||'$'} ${tapCost}</span>
+        </div>` : ''}
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;border-top:.5px solid var(--gold);padding-top:5px;margin-top:2px;color:var(--gold)">
+          <span>Total estimado</span>
+          <span style="font-family:monospace">${mat.moneda||'$'} ${totalCost.toFixed(2)}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Enviar mueble al presupuesto ───────────────────────────────────
+function addFurnitureToBudget() {
+  if (!selectedElement) return;
+  const f   = selectedElement;
+  const mat = inventory.tableros.find(m => m.id == f.materialId);
+  if (!mat) return showToast('Asigna un tablero antes de añadir al presupuesto');
+
+  const W = Math.round(f.w * 1000);
+  const D = Math.round(f.h * 1000);
+  const H = Math.round((f.height3d || 0.85) * 1000);
+  const T = f.thickness || 18;
+  const doors   = f.doors   || 0;
+  const shelves = f.shelves != null ? f.shelves : 1;
+  const drawers = f.drawers || 0;
+
+  let cuts = [
+    { cant:2, l:H,        a:D-20  },
+    { cant:1, l:W-(2*T),  a:D-20  },
+    { cant:2, l:W-(2*T),  a:100   },
+  ];
+  if (shelves > 0) cuts.push({ cant:shelves, l:W-(2*T)-2, a:D-40 });
+  if (doors   > 0) cuts.push({ cant:doors,   l:H-4,       a:Math.round(W/doors)-3 });
+  if (drawers > 0) {
+    const dh = Math.round(H/(drawers+1));
+    cuts.push({ cant:drawers, l:dh-4,   a:W-(2*T)-3 });
+    cuts.push({ cant:drawers, l:dh-100, a:D-60      });
+  }
+
+  const totalArea = cuts.reduce((s,c) => s + c.l*c.a*c.cant/1e6, 0);
+  const sheetArea = (mat.ancho * mat.alto) / 1e6;
+  const sheets    = Math.ceil(totalArea / (sheetArea * 0.8));
+  const costMat   = sheets * mat.precio;
+
+  // Agregar línea de tablero
+  projectData.items.push({
+    desc:   `${f.name} — ${mat.nombre} ${W}×${H}mm`,
+    unid:   'unid',
+    cant:   1,
+    precio: parseFloat(costMat.toFixed(2))
+  });
+
+  // Agregar línea de tapacanto si fue asignado
+  const tap = inventory.tapacanto.find(t => t.id == f.tapacantId);
+  if (tap) {
+    const tapML = parseFloat(((H*2 + W*2) / 1000).toFixed(2));
+    projectData.items.push({
+      desc:   `Tapacanto ${tap.nombre} — ${f.name}`,
+      unid:   'ml',
+      cant:   tapML,
+      precio: tap.precio
+    });
+  }
+
+  renderBudgetTable();
+  recalc();
+  showToast(`✓ ${f.name} añadido al presupuesto`);
 }
 
 function setSTab(tab, btn) {
@@ -1037,6 +1253,77 @@ function v3importFromPlan() {
   }));
   showToast("Objetos sincronizados desde el plano 2D");
   render3D();
+}
+
+// ── Altura 3D inteligente según tipo de mueble ──────────────────────
+function getFurniture3DHeight(name) {
+  const n = name.toLowerCase();
+  if (n.includes('alto') || n.includes('pta') && n.includes('alto'))
+    return { h: 0.75, y: 1.45 };   // mueble alto: montado en pared
+  if (n.includes('torre') || n.includes('columna') || n.includes('despensa'))
+    return { h: 2.10, y: 0 };      // torres: suelo a techo
+  if (n.includes('refrigerador') || n.includes('refrig'))
+    return { h: 1.80, y: 0 };
+  if (n.includes('cama'))
+    return { h: 0.55, y: 0 };
+  if (n.includes('isla'))
+    return { h: 0.90, y: 0 };
+  if (n.includes('sofá') || n.includes('sofa'))
+    return { h: 0.80, y: 0 };
+  if (n.includes('closet') || n.includes('armario'))
+    return { h: 2.00, y: 0 };
+  if (n.includes('inodoro') || n.includes('ducha') || n.includes('bañera'))
+    return { h: 0.85, y: 0 };
+  return { h: 0.85, y: 0 };        // mueble bajo estándar
+}
+
+// ── Enviar TODOS los muebles con material asignado al presupuesto ──
+function addAllFurnitureToBudget() {
+  const withMat = planarFurniture.filter(f => f.materialId);
+  if (withMat.length === 0)
+    return showToast('Ningún mueble tiene material asignado. Usa la pestaña Editar para asignar tableros.');
+
+  const prev = selectedElement;
+  let added = 0;
+  withMat.forEach(f => {
+    selectedElement = f;
+    addFurnitureToBudget();
+    added++;
+  });
+  selectedElement = prev;
+  showToast(`✓ ${added} módulo(s) enviados al presupuesto`);
+  // Ir a la pestaña de presupuesto
+  const budgetTab = document.querySelector('.nt[onclick*="budget"]');
+  if (budgetTab) budgetTab.click();
+}
+function sync2Dto3D() {
+  // Ambientes: sincronizar dimensiones desde el plano 2D
+  if (planarRooms.length > 0) {
+    const colorMap = { bath:'#E8EEF5', bed:'#F5EBE8', kitchen:'#F5F0E8', closet:'#EEF3E8' };
+    v3dRooms = planarRooms.map(r => ({
+      name: r.name,
+      w: r.w, l: r.h, h: 2.6,
+      color: colorMap[r.type] || '#EFECE6'
+    }));
+  }
+
+  // Mobiliario: convertir posición en píxeles → metros
+  const pad = 50; // padding del canvas-inner
+  v3dObjects = planarFurniture.map(f => {
+    const info = getFurniture3DHeight(f.name);
+    return {
+      name: f.name,
+      w: f.w, d: f.h, h: info.h,
+      x: Math.max(0, (f.x - pad) / svgScale),
+      y: info.y,
+      z: Math.max(0, (f.y - pad) / svgScale),
+      color: f.stroke
+    };
+  });
+
+  // Renderizar 3D solo si el canvas ya fue inicializado (usuario ya entró a la vista)
+  const canvas = document.getElementById('c3d');
+  if (canvas && canvas.width > 0) render3D();
 }
 
 function v3resetCam() {
@@ -1418,35 +1705,46 @@ td input:focus{background:var(--bg3);padding:2px 5px;border-radius:4px}
 .db-stat span{color:var(--text);font-weight:500}
 .autosave-bar{background:var(--green-l);border:.5px solid var(--green-b);border-radius:var(--r);padding:6px 14px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:8px;margin-bottom:12px}
 /* PLANS */
-.plan-app{display:flex;flex-direction:column;height:720px;border:.5px solid var(--border);border-radius:var(--rl);overflow:hidden;background:var(--bg2)}
-.plan-toolbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg2);border-bottom:.5px solid var(--border);flex-shrink:0;flex-wrap:wrap}
-.ptitle{font-size:13px;font-weight:600;color:var(--gold);flex-shrink:0}
+.plan-app{display:flex;flex-direction:column;height:720px;border:1px solid var(--gold-m);border-radius:var(--rl);overflow:hidden;background:var(--bg2);box-shadow:0 4px 24px rgba(186,117,23,0.08)}
+.plan-toolbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;border-top:3px solid var(--gold)}
+.ptitle{font-size:13px;font-weight:700;color:var(--gold);flex-shrink:0;letter-spacing:-.01em}
 .tsep{width:.5px;height:18px;background:var(--border);flex-shrink:0}
-.tbtn{padding:4px 11px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg2);font-size:12px;cursor:pointer;font-family:inherit;color:var(--text);white-space:nowrap}
-.tbtn:hover{background:var(--bg3)}
-.tbtn-gold{background:var(--gold-l);border-color:var(--gold);color:var(--gold);font-weight:500}.tbtn-gold:hover{background:var(--gold-m)}
+.tbtn{padding:4px 11px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg2);font-size:12px;cursor:pointer;font-family:inherit;color:var(--text);white-space:nowrap;transition:all .12s}
+.tbtn:hover{background:var(--bg3);border-color:var(--border2)}
+.tbtn-gold{background:var(--gold-l);border-color:var(--gold);color:var(--gold);font-weight:600}.tbtn-gold:hover{background:var(--gold-m);color:#7a4d0a}
 .tbtn-del{color:var(--red);border-color:#F7C1C1}.tbtn-del:hover{background:var(--red-l)}
-.scbadge{font-size:11px;font-family:monospace;padding:3px 8px;background:var(--bg3);border-radius:var(--r);color:var(--text2)}
+.scbadge{font-size:11px;font-family:monospace;padding:3px 8px;background:var(--gold-l);border-radius:var(--r);color:var(--gold);border:.5px solid var(--gold-m);font-weight:600}
 .plan-main{display:flex;flex:1;overflow:hidden}
-.plan-side{width:240px;flex-shrink:0;border-right:.5px solid var(--border);background:var(--bg2);overflow-y:auto}
-.stabs{display:flex;border-bottom:.5px solid var(--border);flex-shrink:0}
-.stab{flex:1;padding:7px 4px;border:none;background:none;font-size:12px;cursor:pointer;font-family:inherit;color:var(--text2);border-bottom:2px solid transparent}
-.stab.on{color:var(--text);border-bottom-color:var(--gold);font-weight:500}
+.plan-side{width:248px;flex-shrink:0;border-right:1px solid var(--border);background:#FDFCF8;overflow-y:auto}
+.stabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:#FAF8F2}
+.stab{flex:1;padding:8px 4px;border:none;background:none;font-size:12px;cursor:pointer;font-family:inherit;color:var(--text2);border-bottom:2px solid transparent;transition:color .12s;font-weight:500}
+.stab:hover{color:var(--text);background:var(--gold-l)}
+.stab.on{color:var(--gold);border-bottom-color:var(--gold);font-weight:700;background:#FEFCF5}
 .sc{display:none;padding:10px}.sc.on{display:block}
-.psl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin:10px 0 6px}
+.psl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--gold);margin:10px 0 6px;background:var(--gold-l);padding:4px 8px;border-radius:4px}
 .pfield{margin-bottom:8px}
-.pfield label{display:block;font-size:11px;color:var(--text2);margin-bottom:3px}
-.pfield input,.pfield select{width:100%;padding:5px 8px;border:.5px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);font-size:12px;font-family:inherit;outline:none}
-.pfield input:focus,.pfield select:focus{border-color:var(--gold)}
+.pfield label{display:block;font-size:11px;color:var(--text2);margin-bottom:3px;font-weight:600}
+.pfield input,.pfield select{width:100%;padding:5px 8px;border:1px solid var(--border2);border-radius:var(--r);background:#FEFDF9;color:var(--text);font-size:12px;font-family:inherit;outline:none}
+.pfield input:focus,.pfield select:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(186,117,23,.1)}
 .pg2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.cat-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);padding:8px 10px 4px;display:flex;align-items:center;gap:5px;border-top:.5px solid var(--border);margin-top:4px}
+.cat-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);padding:8px 10px 4px;display:flex;align-items:center;gap:5px;border-top:1px solid var(--border);margin-top:4px}
 .cat-lbl:first-child{border-top:none;margin-top:0}
 .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:0 10px 6px}
-.fbtn{padding:6px 4px;border:.5px solid var(--border);border-radius:var(--r);background:var(--bg2);font-size:11px;cursor:pointer;text-align:center;font-family:inherit;line-height:1.3}
-.fbtn:hover{background:var(--gold-l);border-color:var(--gold);color:var(--gold)}
-.fbtn span{display:block;font-size:10px;color:var(--text2)}
+.fbtn{padding:7px 4px;border:1px solid var(--border);border-radius:var(--r);background:#FEFDF9;font-size:11px;cursor:pointer;text-align:center;font-family:inherit;line-height:1.3;transition:all .12s;color:var(--text)}
+.fbtn:hover{background:var(--gold-l);border-color:var(--gold);color:var(--gold);transform:translateY(-1px);box-shadow:0 2px 6px rgba(186,117,23,.18)}
+.fbtn:active{transform:translateY(0)}
+.fbtn span{display:block;font-size:10px;color:var(--text2);margin-top:1px}
+.fbtn:hover span{color:var(--gold)}
 .ritem{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:var(--r);margin-bottom:3px;font-size:12px}
-.canvas-wrap{flex:1;overflow:auto;background:#ECEAE4;position:relative}
+/* Canvas: cuadrícula tipo papel de dibujo arquitectónico (1 cuadro = 1m a escala base) */
+.canvas-wrap{flex:1;overflow:auto;position:relative;
+  background-color:#F7F4EE;
+  background-image:
+    linear-gradient(rgba(186,117,23,0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(186,117,23,0.12) 1px, transparent 1px),
+    linear-gradient(rgba(186,117,23,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(186,117,23,0.05) 1px, transparent 1px);
+  background-size: 50px 50px, 50px 50px, 10px 10px, 10px 10px}
 .canvas-inner{padding:50px;display:inline-block;min-width:100%;min-height:100%}
 #planSvg{display:block;cursor:default}
 /* 3D */
@@ -1884,6 +2182,7 @@ if (typeof currentInvTab === 'undefined') {
         <div class="tsep"></div>
       </div>
       <button class="tbtn" onclick="window.print()" style="margin-left:auto">imprimir plano</button>
+      <button class="tbtn tbtn-gold" onclick="addAllFurnitureToBudget()" title="Envía todos los muebles con material asignado al presupuesto">📋 Todo al presupuesto</button>
     </div>
     <div class="plan-main">
       <div class="plan-side">
