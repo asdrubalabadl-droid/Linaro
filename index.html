@@ -781,7 +781,21 @@ const furnitureCatalog = {
   refri: { name: 'Refrigerador', w: 0.7, h: 0.7, fill: '#EEEEEE', stroke: '#666666' },
   closet: { name: 'Armario/Closet', w: 1.2, h: 0.6, fill: '#EEEDFE', stroke: '#534AB7' },
   camad: { name: 'Cama Matrimonial', w: 1.4, h: 2.0, fill: '#F5EBE8', stroke: '#A32D2D' },
-  tvstand: { name: 'Módulo de TV', w: 1.5, h: 0.45, fill: '#E1F5EE', stroke: '#0F6E56' }
+  tvstand: { name: 'Módulo de TV', w: 1.5, h: 0.45, fill: '#E1F5EE', stroke: '#0F6E56' },
+  // ── Módulos con puertas batientes ──────────────────────────────────
+  mb1p:   { name: 'Bajo 1 Pta',      w: 0.60, h: 0.55, fill: '#FFF5E0', stroke: '#BA7517', door: { count: 1 } },
+  mb2p:   { name: 'Bajo 2 Ptas',     w: 1.20, h: 0.55, fill: '#FFF5E0', stroke: '#BA7517', door: { count: 2 } },
+  mb3p:   { name: 'Bajo 3 Ptas',     w: 1.80, h: 0.55, fill: '#FFF5E0', stroke: '#BA7517', door: { count: 3 } },
+  mb4p:   { name: 'Bajo 4 Ptas',     w: 2.40, h: 0.55, fill: '#FFF5E0', stroke: '#BA7517', door: { count: 4 } },
+  ma1p:   { name: 'Alto 1 Pta',      w: 0.60, h: 0.35, fill: '#FFF8EC', stroke: '#FB8C00', door: { count: 1 } },
+  ma2p:   { name: 'Alto 2 Ptas',     w: 1.20, h: 0.35, fill: '#FFF8EC', stroke: '#FB8C00', door: { count: 2 } },
+  ma3p:   { name: 'Alto 3 Ptas',     w: 1.80, h: 0.35, fill: '#FFF8EC', stroke: '#FB8C00', door: { count: 3 } },
+  // ── Torres de horno (medidas estándar carpintería) ─────────────────
+  tornohorno:  { name: 'Torre Horno',      w: 0.60, h: 0.60, fill: '#F0EBE8', stroke: '#5D4037', door: { count: 1 } },
+  tordoble:    { name: 'Torre H+MW',       w: 0.60, h: 0.60, fill: '#F0EBE8', stroke: '#5D4037', door: { count: 1 } },
+  torref:      { name: 'Torre Refrig.',    w: 0.70, h: 0.70, fill: '#EEEEEE', stroke: '#444444', door: { count: 1 } },
+  torcolumna:  { name: 'Torre Columna',    w: 0.60, h: 0.60, fill: '#F5EBE8', stroke: '#7B3F00', door: { count: 2 } },
+  tordes:      { name: 'Torre Despensa',   w: 0.60, h: 0.60, fill: '#EAF3DE', stroke: '#3B6D11', door: { count: 1 } },
 };
 
 function addF(type) {
@@ -832,6 +846,35 @@ function renderPlans() {
     if(selectedElement === f) rect.setAttribute('stroke-dasharray', '4');
 
     g.appendChild(rect);
+
+    // ── Puertas batientes (arco de apertura arquitectónico) ──────────
+    if (f.door) {
+      const fw = f.w * svgScale;
+      const fh = f.h * svgScale;
+      const fy = fh / 2;          // borde frontal (parte inferior del rect)
+      const count = f.door.count || 1;
+      const dw   = fw / count;    // ancho de cada hoja de puerta
+
+      for (let di = 0; di < count; di++) {
+        const hingeX = -fw / 2 + di * dw;  // bisagra = esquina izq de cada hoja
+        const tipX   = hingeX + dw;         // extremo libre de la puerta (cerrada)
+        // Línea de puerta en posición abierta (90°)
+        const dl = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        dl.setAttribute('x1', hingeX); dl.setAttribute('y1', fy);
+        dl.setAttribute('x2', hingeX); dl.setAttribute('y2', fy + dw);
+        dl.setAttribute('stroke', f.stroke); dl.setAttribute('stroke-width', '1');
+        g.appendChild(dl);
+        // Arco de barrido (cuarto de círculo, línea punteada)
+        const ap = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        ap.setAttribute('d', `M ${tipX},${fy} A ${dw},${dw} 0 0,1 ${hingeX},${fy + dw}`);
+        ap.setAttribute('fill', 'rgba(255,255,255,0.0)');
+        ap.setAttribute('stroke', f.stroke);
+        ap.setAttribute('stroke-width', '0.7');
+        ap.setAttribute('stroke-dasharray', '3,2');
+        g.appendChild(ap);
+      }
+    }
+    // ────────────────────────────────────────────────────────────────
 
     const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
     txt.setAttribute('x', 0); txt.setAttribute('y', 4);
@@ -1903,6 +1946,24 @@ if (typeof currentInvTab === 'undefined') {
             <button class="fbtn" onclick="addF('lavamanos')">Lavamanos<span>500×450</span></button>
             <button class="fbtn" onclick="addF('ducha')">Ducha<span>900×900</span></button>
             <button class="fbtn" onclick="addF('tina')">Bañera<span>700×1600</span></button>
+          </div>
+          <div class="cat-lbl" style="color:var(--gold)">🚪 Módulos c/ Puertas Batientes</div>
+          <div class="fgrid">
+            <button class="fbtn" onclick="addF('mb1p')">Bajo 1 Pta<span>600×550</span></button>
+            <button class="fbtn" onclick="addF('mb2p')">Bajo 2 Ptas<span>1200×550</span></button>
+            <button class="fbtn" onclick="addF('mb3p')">Bajo 3 Ptas<span>1800×550</span></button>
+            <button class="fbtn" onclick="addF('mb4p')">Bajo 4 Ptas<span>2400×550</span></button>
+            <button class="fbtn" onclick="addF('ma1p')">Alto 1 Pta<span>600×350</span></button>
+            <button class="fbtn" onclick="addF('ma2p')">Alto 2 Ptas<span>1200×350</span></button>
+            <button class="fbtn" onclick="addF('ma3p')">Alto 3 Ptas<span>1800×350</span></button>
+          </div>
+          <div class="cat-lbl" style="color:#7B3F00">🏗 Torres de Horno</div>
+          <div class="fgrid">
+            <button class="fbtn" onclick="addF('tornohorno')">Torre Horno<span>600×600</span></button>
+            <button class="fbtn" onclick="addF('tordoble')">Torre Horno+MW<span>600×600</span></button>
+            <button class="fbtn" onclick="addF('torref')">Torre Refrig.<span>700×700</span></button>
+            <button class="fbtn" onclick="addF('torcolumna')">Torre Columna<span>600×600</span></button>
+            <button class="fbtn" onclick="addF('tordes')">Torre Despensa<span>600×600</span></button>
           </div>
         </div>
         <div id="sc-psel" class="sc">
