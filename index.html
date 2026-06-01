@@ -76,6 +76,7 @@
           if (!r.ok) { var e = await r.json(); return { error: { message: e.message || 'Error al insertar' } }; }
           return { error: null };
         },
+        update: function(payload) { q._update = payload; return q; },
         delete: function() { q._delete = true; return q; },
         eq: function(col, val) { _filters.push(col + '=eq.' + val); return q; },
         order: function(col, opts) { _order = col + '.' + ((opts && opts.ascending === false) ? 'desc' : 'asc'); return q; },
@@ -86,6 +87,17 @@
             qs += (_filters.length ? '&' + _filters.join('&') : '');
             if (_order) qs += (qs ? '&' : '') + 'order=' + _order;
             var endpoint = URL + '/rest/v1/' + _table + (qs ? '?' + qs : '');
+
+            if (q._update) {
+              var qs2 = _filters.length ? '?' + _filters.join('&') : '';
+              var r = await fetch(URL + '/rest/v1/' + _table + qs2, {
+                method: 'PATCH',
+                headers: Object.assign(authHeaders(window.supabaseClient._token), { 'Prefer': 'return=minimal' }),
+                body: JSON.stringify(q._update)
+              });
+              if (!r.ok) { var e = await r.json(); return resolve({ data: null, error: { message: e.message || 'Error al actualizar' } }); }
+              return resolve({ data: null, error: null });
+            }
 
             if (q._delete) {
               var r = await fetch(endpoint, { method: 'DELETE', headers: authHeaders(window.supabaseClient._token) });
@@ -500,26 +512,123 @@ function calcCuts() {
 function openCutModal(name, w, h) {
   if(document.getElementById('cutPlanModal')) document.getElementById('cutPlanModal').style.display = 'block';
   if(document.getElementById('cpTitle')) document.getElementById('cpTitle').textContent = `Optimización de Láminas — ${name}`;
-  if(document.getElementById('cpSubtitle')) document.getElementById('cpSubtitle').textContent = `Distribución de paneles sobre formato comercial de 2440x1220mm`;
-  
+  if(document.getElementById('cpSubtitle')) document.getElementById('cpSubtitle').textContent = `Distribución de paneles sobre formato comercial de 2440×1220mm`;
+
   const content = document.getElementById('cpContent');
-  if(content) {
-    content.innerHTML = `
-      <div style="background:#e0dfdb; padding:20px; border-radius:8px; text-align:center">
-        <svg width="100%" height="300" viewBox="0 0 2440 1220" style="background:#fff; border:1px solid #999">
-          <rect x="0" y="0" width="2440" height="1220" fill="#f4eedf" stroke="#ba7517" stroke-width="10"/>
-          <rect x="20" y="20" width="720" height="550" fill="#27500a" opacity="0.3" stroke="#27500a" stroke-width="4"/>
-          <text x="50" y="80" font-family="sans-serif" font-size="50" fill="#27500a">Lateral 1</text>
-          <rect x="760" y="20" width="720" height="550" fill="#27500a" opacity="0.3" stroke="#27500a" stroke-width="4"/>
-          <text x="790" y="80" font-family="sans-serif" font-size="50" fill="#27500a">Lateral 2</text>
-          <rect x="20" y="600" width="1460" height="550" fill="#0c447c" opacity="0.3" stroke="#0c447c" stroke-width="4"/>
-          <text x="50" y="660" font-family="sans-serif" font-size="50" fill="#0c447c">Base + Estantería</text>
-          <line x1="1500" y1="0" x2="1500" y2="1220" stroke="red" stroke-dasharray="20" stroke-width="6"/>
-          <text x="1530" y="600" font-family="sans-serif" font-size="60" fill="red">Retal útil: 940x1220mm</text>
-        </svg>
-      </div>
-    `;
+  if (!content) return;
+
+  // Reconstruir lista de cortes desde calcCuts (misma lógica)
+  const t = parseFloat(document.getElementById('pT')?.value) || 18;
+  const shelves = parseInt(document.getElementById('pS')?.value) || 0;
+  const doors = parseInt(document.getElementById('pDr')?.value) || 0;
+  const gola = document.getElementById('pGolaB')?.value || 'none';
+  const d = parseFloat(document.getElementById('pD')?.value) || 550;
+
+  const cuts = [];
+  cuts.push({ desc: 'Laterales', cant: 2, l: h, a: d - 20 });
+  cuts.push({ desc: 'Base inf.', cant: 1, l: w - 2*t, a: d - 20 });
+  cuts.push({ desc: 'Amarre sup.', cant: 2, l: w - 2*t, a: 100 });
+  if (shelves > 0) cuts.push({ desc: `Entrepaños (${shelves})`, cant: shelves, l: w - 2*t - 2, a: d - 40 });
+  if (doors > 0) {
+    let dH = h - 4; if (gola !== 'none') dH -= 35;
+    let dW = Math.floor(w / doors) - 3;
+    cuts.push({ desc: `Puertas (${doors})`, cant: doors, l: dH, a: dW });
   }
+
+  // Algoritmo de empaquetado simple (shelf-first, guillotine)
+  const SHEET_W = 2440, SHEET_H = 1220;
+  const MARGIN = 4; // kerf/espacio entre cortes
+  const COLORS = ['#27500a','#0c447c','#7B3F00','#534AB7','#0F6E56','#A32D2D'];
+  const sheets = []; // cada sheet: array de piezas colocadas {x,y,w,h,desc}
+
+  // Expandir piezas individuales
+  const pieces = [];
+  cuts.forEach((c, ci) => {
+    for (let i = 0; i < c.cant; i++) {
+      pieces.push({ desc: c.desc, w: c.l, h: c.a, ci });
+    }
+  });
+  // Ordenar por área descendente (heurística)
+  pieces.sort((a, b) => (b.w * b.h) - (a.w * a.h));
+
+  function tryPlace(sheet, pw, ph) {
+    // Shelf-first: ordenar espacios libres por Y luego X
+    // Usamos guillotine simplificado: lista de rectángulos libres
+    if (!sheet._free) sheet._free = [{ x: MARGIN, y: MARGIN, w: SHEET_W - MARGIN, h: SHEET_H - MARGIN }];
+    for (let i = 0; i < sheet._free.length; i++) {
+      const sp = sheet._free[i];
+      if (pw + MARGIN <= sp.w && ph + MARGIN <= sp.h) {
+        const placed = { x: sp.x, y: sp.y, w: pw, h: ph };
+        // Dividir espacio libre (guillotine horizontal)
+        const newSpaces = [];
+        if (sp.w - pw - MARGIN > 10) newSpaces.push({ x: sp.x + pw + MARGIN, y: sp.y, w: sp.w - pw - MARGIN, h: ph });
+        if (sp.h - ph - MARGIN > 10) newSpaces.push({ x: sp.x, y: sp.y + ph + MARGIN, w: sp.w, h: sp.h - ph - MARGIN });
+        sheet._free.splice(i, 1, ...newSpaces);
+        return placed;
+      }
+    }
+    return null;
+  }
+
+  pieces.forEach(p => {
+    let placed = false;
+    for (const sheet of sheets) {
+      const pos = tryPlace(sheet, p.w, p.h);
+      if (pos) { sheet.pieces.push({ ...p, ...pos }); placed = true; break; }
+    }
+    if (!placed) {
+      const ns = { pieces: [] };
+      const pos = tryPlace(ns, p.w, p.h);
+      if (pos) ns.pieces.push({ ...p, ...pos });
+      sheets.push(ns);
+    }
+  });
+
+  // Calcular retales
+  const usedAreas = sheets.map(s => s.pieces.reduce((a, p) => a + p.w * p.h, 0));
+  const totalArea = SHEET_W * SHEET_H;
+
+  // Renderizar SVGs
+  const svgBlocks = sheets.map((sheet, si) => {
+    const used = usedAreas[si];
+    const retal = ((1 - used / totalArea) * 100).toFixed(1);
+    const sc = 200 / SHEET_W; // escala para visualización
+
+    const rects = sheet.pieces.map(p => {
+      const col = COLORS[p.ci % COLORS.length];
+      const lx = (p.x * sc).toFixed(1), ly = (p.y * sc).toFixed(1);
+      const lw = (p.w * sc).toFixed(1), lh = (p.h * sc).toFixed(1);
+      const cx = (p.x * sc + p.w * sc / 2).toFixed(1);
+      const cy = (p.y * sc + p.h * sc / 2).toFixed(1);
+      const label = p.desc.length > 12 ? p.desc.slice(0, 11) + '…' : p.desc;
+      const fontSize = Math.min(8, (p.w * sc) / 5);
+      return `<rect x="${lx}" y="${ly}" width="${lw}" height="${lh}" fill="${col}" fill-opacity="0.28" stroke="${col}" stroke-width="1"/>
+              <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" font-size="${fontSize}" fill="${col}" font-family="sans-serif" font-weight="600">${label}</text>`;
+    }).join('');
+
+    const svgW = (SHEET_W * sc).toFixed(0);
+    const svgH = (SHEET_H * sc).toFixed(0);
+    return `
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px">
+          Lámina ${si+1} · Retal útil: <span style="color:var(--gold)">${retal}%</span>
+        </div>
+        <svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" style="background:#FFF8EE;border:1px solid #BA7517;border-radius:4px;max-width:100%">
+          <rect x="0" y="0" width="${svgW}" height="${svgH}" fill="#FFF8EE" stroke="#BA7517" stroke-width="1.5"/>
+          ${rects}
+          <text x="${svgW/2}" y="${parseFloat(svgH)-4}" text-anchor="middle" font-size="7" fill="#BA7517" font-family="sans-serif">2440 × 1220 mm</text>
+        </svg>
+      </div>`;
+  }).join('');
+
+  content.innerHTML = `
+    <div style="background:var(--bg3);padding:16px;border-radius:8px">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
+        <strong>${sheets.length} lámina(s)</strong> necesarias · ${pieces.length} piezas distribuidas
+      </div>
+      ${svgBlocks}
+      <div style="font-size:11px;color:var(--text3);margin-top:8px">* Distribución estimada con algoritmo guillotine. Puede variar según optimización del operador.</div>
+    </div>`;
 }
 
 // ==========================================
@@ -1457,6 +1566,35 @@ async function dbSaveCurrent() {
   }
 }
 
+async function dbUpdateCurrent() {
+  if (!window.currentUser) return showToast('Debes iniciar sesión para guardar.');
+  if (!window._editingProjectId) return showToast('No hay proyecto abierto para actualizar. Usa "Guardar nuevo" para crearlo primero.');
+
+  const pNameInput = document.getElementById('dbProjName');
+  const fallbackInput = document.getElementById('pName');
+  const name = (pNameInput?.value.trim()) || (fallbackInput?.value.trim()) || 'Proyecto Guardado';
+
+  const bar = document.getElementById('autosaveBar');
+  const msg = document.getElementById('autosaveMsg');
+  if (bar) bar.style.display = 'block';
+  if (msg) msg.textContent = 'Actualizando…';
+
+  try {
+    const { error } = await window.supabaseClient
+      .from('linaro_projects')
+      .update({ name, budget: projectData, rooms: planarRooms, furniture: planarFurniture })
+      .eq('id', window._editingProjectId)
+      .eq('user_id', window.currentUser.id);
+    if (error) throw error;
+    showToast('Proyecto actualizado en la nube ✓');
+    if (msg) msg.textContent = 'Actualizado en Supabase';
+    await renderProjectsGrid();
+  } catch (e) {
+    showToast('Error al actualizar: ' + e.message);
+    if (bar) bar.style.display = 'none';
+  }
+}
+
 async function renderProjectsGrid() {
   const grid = document.getElementById('dbGrid');
   if (!grid) return;
@@ -1491,6 +1629,7 @@ async function renderProjectsGrid() {
         </div>
         <div class="db-card-foot">
           <button class="btn btn-sm btn-gold" onclick="loadProjectFromDb('${p.id}')">📂 Abrir</button>
+          <button class="btn btn-sm btn-green" onclick="quickUpdateProject('${p.id}')">💾 Actualizar</button>
           <button class="btn btn-sm btn-del" onclick="deleteProjectFromDb('${p.id}')">×</button>
         </div>
       </div>
@@ -1516,6 +1655,7 @@ async function loadProjectFromDb(id) {
     projectData = data.budget;
     planarRooms = data.rooms || [];
     planarFurniture = data.furniture || [];
+    window._editingProjectId = id;  // Registrar proyecto activo para actualizar
 
     if (document.getElementById('pName')) document.getElementById('pName').value = projectData.name || '';
     if (document.getElementById('pClient')) document.getElementById('pClient').value = projectData.client || '';
@@ -1527,6 +1667,13 @@ async function loadProjectFromDb(id) {
   } catch (e) {
     showToast('Error al cargar: ' + e.message);
   }
+}
+
+async function quickUpdateProject(id) {
+  if (!window.currentUser) return showToast('Debes iniciar sesión.');
+  if (!confirm('¿Guardar el estado actual del proyecto sobre esta versión?')) return;
+  window._editingProjectId = id;
+  await dbUpdateCurrent();
 }
 
 async function deleteProjectFromDb(id) {
