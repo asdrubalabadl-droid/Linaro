@@ -1778,6 +1778,40 @@ footer span{color:var(--gold);font-weight:500}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 @media(max-width:640px){.nav{padding:0 12px}.nt{padding:0 9px;font-size:12px}.page{padding:14px 12px 60px}}
 @media print{.nav,.plan-toolbar,.plan-side,footer,.v3d-tb,.v3d-side,.cp-head button{display:none!important}.plan-app,.v3d-app{height:auto;border:none}.canvas-wrap{overflow:visible!important}}
+/* ── ASISTENTE DE COCINA ─────────────────────────────────────── */
+.kw-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px}
+.kw-modal{background:var(--bg2);border-radius:16px;width:100%;max-width:900px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.4);border:1px solid var(--gold-m)}
+.kw-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--gold-l);flex-shrink:0}
+.kw-title{font-size:17px;font-weight:700;color:var(--gold);letter-spacing:-.02em}
+.kw-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.kw-body{display:flex;flex:1;overflow:hidden;min-height:0}
+.kw-left{width:310px;flex-shrink:0;padding:16px;overflow-y:auto;border-right:1px solid var(--border)}
+.kw-right{flex:1;display:flex;flex-direction:column;padding:16px;min-width:0}
+.kw-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);background:var(--gold-l);padding:4px 8px;border-radius:4px;margin:12px 0 8px}
+.kw-section:first-child{margin-top:0}
+.kw-types{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:4px}
+.kw-type-btn{padding:8px 4px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg3);cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;color:var(--text2);display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .12s}
+.kw-type-btn:hover{border-color:var(--gold);color:var(--gold)}
+.kw-type-btn.on{border-color:var(--gold);background:var(--gold-l);color:var(--gold)}
+.kw-checks{display:flex;flex-direction:column;gap:6px}
+.kw-check{display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:5px 8px;border-radius:6px;border:.5px solid var(--border);background:var(--bg3)}
+.kw-check:hover{background:var(--gold-l);border-color:var(--gold)}
+.kw-check input{accent-color:var(--gold);width:14px;height:14px;flex-shrink:0}
+.kw-preview-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.kw-preview-wrap{flex:1;background:#F7F4EE;border-radius:10px;border:1px solid var(--gold-m);overflow:hidden;position:relative;min-height:280px;
+  background-image:linear-gradient(rgba(186,117,23,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(186,117,23,.1) 1px,transparent 1px);
+  background-size:30px 30px}
+.kw-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.kw-stat{background:var(--bg3);border-radius:8px;padding:8px 10px;text-align:center}
+.kw-stat-val{font-size:18px;font-weight:700;font-family:monospace;color:var(--gold)}
+.kw-stat-lbl{font-size:10px;color:var(--text2);margin-top:2px}
+.kw-validation{border-radius:8px;padding:9px 12px;font-size:12px;margin-top:8px}
+.kw-warn{background:#FFF8E0;border:.5px solid #E8C840;color:#7A5A00}
+.kw-ok{background:var(--green-l);border:.5px solid var(--green-m);color:var(--green)}
+/* ka-type-btn: botones de tipo de cocina en el asistente */
+.ka-type-btn{padding:8px 4px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg3);cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;color:var(--text2);display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .12s;width:100%}
+.ka-type-btn:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-l)}
+.ka-type-btn.on{border-color:var(--gold);background:var(--gold-l);color:var(--gold)}
 </style>
 
 <script>
@@ -2183,6 +2217,7 @@ if (typeof currentInvTab === 'undefined') {
       </div>
       <button class="tbtn" onclick="window.print()" style="margin-left:auto">imprimir plano</button>
       <button class="tbtn tbtn-gold" onclick="addAllFurnitureToBudget()" title="Envía todos los muebles con material asignado al presupuesto">📋 Todo al presupuesto</button>
+      <button class="tbtn" style="background:var(--green-l);border-color:var(--green-b);color:var(--green);font-weight:600" onclick="openKitchenAssistant()">🍳 Asistente de cocina</button>
     </div>
     <div class="plan-main">
       <div class="plan-side">
@@ -2372,6 +2407,121 @@ if (typeof currentInvTab === 'undefined') {
 <footer>Hecho con <span>Linaro</span> — Presupuestación arquitectónica profesional</footer>
 <div class="toast" id="toast"></div>
 
+<!-- ========= ASISTENTE DE COCINA ========= -->
+<div id="kaModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9500;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;width:min(960px,96vw);max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.45)">
+    <!-- Header -->
+    <div style="padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#1a1206,#2C1F08);border-radius:16px 16px 0 0">
+      <div>
+        <div style="font-size:19px;font-weight:700;color:#fff;letter-spacing:-.02em">🍳 Asistente de Cocina</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:2px">Genera el layout completo con módulos posicionados automáticamente</div>
+      </div>
+      <button onclick="document.getElementById('kaModal').style.display='none'" style="background:rgba(255,255,255,.12);border:none;color:#fff;font-size:18px;width:32px;height:32px;border-radius:50%;cursor:pointer;line-height:1">×</button>
+    </div>
+    <!-- Body -->
+    <div style="display:grid;grid-template-columns:1fr 320px;flex:1;overflow:hidden;min-height:0">
+      <!-- Config -->
+      <div style="padding:20px 24px;overflow-y:auto;border-right:1px solid var(--border)">
+
+        <!-- Tipo de cocina -->
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:10px">Tipo de cocina</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px" id="kaTypeGrid">
+          <button class="ka-type-btn on" onclick="kaSetType('linear',this)">
+            <svg width="48" height="32" viewBox="0 0 48 32"><rect x="2" y="20" width="44" height="9" fill="#BA7517" rx="1"/><rect x="2" y="11" width="44" height="7" fill="#FFF3E0" rx="1"/></svg>
+            <div>Lineal</div>
+          </button>
+          <button class="ka-type-btn" onclick="kaSetType('l',this)">
+            <svg width="48" height="32" viewBox="0 0 48 32"><rect x="2" y="20" width="30" height="9" fill="#BA7517" rx="1"/><rect x="2" y="3" width="9" height="26" fill="#BA7517" rx="1"/></svg>
+            <div>En L</div>
+          </button>
+          <button class="ka-type-btn" onclick="kaSetType('u',this)">
+            <svg width="48" height="32" viewBox="0 0 48 32"><rect x="2" y="20" width="44" height="9" fill="#BA7517" rx="1"/><rect x="2" y="3" width="9" height="26" fill="#BA7517" rx="1"/><rect x="37" y="3" width="9" height="26" fill="#BA7517" rx="1"/></svg>
+            <div>En U</div>
+          </button>
+          <button class="ka-type-btn" onclick="kaSetType('island',this)">
+            <svg width="48" height="32" viewBox="0 0 48 32"><rect x="2" y="20" width="44" height="9" fill="#BA7517" rx="1"/><rect x="10" y="8" width="28" height="8" fill="#3B6D11" rx="2"/></svg>
+            <div>Con isla</div>
+          </button>
+        </div>
+
+        <!-- Medidas de paredes -->
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:10px">Medidas</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px">
+          <div class="field"><label id="kaW1Lbl">Pared principal (m)</label><input type="number" id="kaW1" value="3.6" step="0.1" min="1.5" oninput="kaUpdatePreview()"></div>
+          <div class="field" id="kaW2Field"><label id="kaW2Lbl">Pared lateral (m)</label><input type="number" id="kaW2" value="2.7" step="0.1" min="1.5" oninput="kaUpdatePreview()"></div>
+          <div class="field" id="kaW3Field" style="display:none"><label>Pared lateral derecha (m)</label><input type="number" id="kaW3" value="2.7" step="0.1" min="1.5" oninput="kaUpdatePreview()"></div>
+          <div class="field"><label>Profundidad del espacio (m)</label><input type="number" id="kaRoomD" value="3.2" step="0.1" min="2.0" oninput="kaUpdatePreview()"></div>
+        </div>
+
+        <div style="height:1px;background:var(--border);margin:14px 0"></div>
+
+        <!-- Electrodomésticos y especiales -->
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:10px">Electrodomésticos</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--border);border-radius:8px;user-select:none">
+            <input type="checkbox" id="kaFridge" checked onchange="kaUpdatePreview()"> Refrigerador
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--border);border-radius:8px;user-select:none">
+            <input type="checkbox" id="kaStove" checked onchange="kaUpdatePreview()"> Estufa/Placa
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--border);border-radius:8px;user-select:none">
+            <input type="checkbox" id="kaTower" checked onchange="kaUpdatePreview()"> Torre de horno
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;border:1px solid var(--border);border-radius:8px;user-select:none">
+            <input type="checkbox" id="kaIsland" onchange="kaUpdatePreview()"> Isla central
+          </label>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px">
+          <div class="field"><label>Posición del fregadero</label>
+            <select id="kaSinkPos" onchange="kaUpdatePreview()">
+              <option value="center">Centro de la pared</option>
+              <option value="left">Extremo izquierdo</option>
+              <option value="right">Extremo derecho</option>
+            </select>
+          </div>
+          <div class="field"><label>Pared del fregadero</label>
+            <select id="kaSinkWall" onchange="kaUpdatePreview()">
+              <option value="bottom">Pared principal</option>
+              <option value="left">Pared lateral izq.</option>
+              <option value="right">Pared lateral der.</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="height:1px;background:var(--border);margin:14px 0"></div>
+
+        <!-- Muebles altos -->
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:10px">Muebles aéreos</div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;user-select:none">
+          <input type="checkbox" id="kaWallCabs" checked onchange="kaUpdatePreview()">
+          Generar muebles altos/aéreos (en pared, fondo 35cm)
+        </label>
+
+        <div style="height:1px;background:var(--border);margin:14px 0"></div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;user-select:none">
+          <input type="checkbox" id="kaReplace" checked>
+          Reemplazar muebles existentes en el plano
+        </label>
+      </div>
+
+      <!-- Preview -->
+      <div style="padding:16px;background:#F7F4EE;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2)">Vista previa</div>
+        <div style="flex:1;background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:260px">
+          <svg id="kaPreviewSvg" style="width:100%;height:100%"></svg>
+        </div>
+        <div id="kaStats" style="font-size:11px;color:var(--text2);line-height:1.6;background:#fff;border-radius:8px;padding:10px;border:1px solid var(--border)">—</div>
+      </div>
+    </div>
+    <!-- Footer -->
+    <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;background:#fafaf8">
+      <button onclick="document.getElementById('kaModal').style.display='none'" class="btn">Cancelar</button>
+      <button onclick="generateKitchen()" class="btn btn-gold" style="font-weight:700;padding:10px 28px;font-size:14px">🍳 Generar cocina en plano</button>
+    </div>
+  </div>
+</div>
+
 <!-- CUT PLAN MODAL -->
 <div id="cutPlanModal" class="cp-modal">
   <div class="cp-inner">
@@ -2407,4 +2557,369 @@ document.addEventListener('keydown', async function(e) {
   if (!input) return;
   await updateInvPrice(input.dataset.invEnter, input.dataset.invTable, input.dataset.invId, input.value);
 });
+
+// ============================================================
+// ASISTENTE DE COCINA — Lógica completa
+// ============================================================
+let kaCurrentType = 'linear';
+
+function openKitchenAssistant() {
+  const modal = document.getElementById('kaModal');
+  modal.style.display = 'flex';
+  kaUpdatePreview();
+}
+
+function kaSetType(type, btn) {
+  kaCurrentType = type;
+  document.querySelectorAll('.ka-type-btn').forEach(b => b.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+
+  // Mostrar/ocultar campos según tipo
+  const w2 = document.getElementById('kaW2Field');
+  const w3 = document.getElementById('kaW3Field');
+  if (w2) w2.style.display = (type === 'l' || type === 'u') ? 'block' : 'none';
+  if (w3) w3.style.display = (type === 'u') ? 'block' : 'none';
+
+  kaUpdatePreview();
+}
+
+function kaUpdatePreview() {
+  const w1     = parseFloat(document.getElementById('kaW1')?.value)    || 3.6;
+  const w2     = parseFloat(document.getElementById('kaW2')?.value)    || 2.7;
+  const w3     = parseFloat(document.getElementById('kaW3')?.value)    || 2.7;
+  const roomD  = parseFloat(document.getElementById('kaRoomD')?.value) || 3.2;
+  const hasFridge   = document.getElementById('kaFridge')?.checked;
+  const hasStove    = document.getElementById('kaStove')?.checked;
+  const hasTower    = document.getElementById('kaTower')?.checked;
+  const hasIsland   = document.getElementById('kaIsland')?.checked;
+  const hasWallCabs = document.getElementById('kaWallCabs')?.checked;
+
+  // Calcular estadísticas
+  const stats = kaComputeStats(w1, w2, w3, roomD, { hasFridge, hasStove, hasTower, hasIsland, hasWallCabs });
+
+  const statsEl = document.getElementById('kaStats');
+  if (statsEl) {
+    statsEl.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div><span style="font-weight:700;color:var(--gold);font-size:15px">${stats.baseMods}</span><br>Módulos bajos</div>
+        <div><span style="font-weight:700;color:var(--gold);font-size:15px">${stats.highMods}</span><br>Módulos altos</div>
+        <div><span style="font-weight:700;font-size:15px">${stats.totalML.toFixed(1)} ml</span><br>Metros lineales</div>
+        <div><span style="font-weight:700;font-size:15px">${stats.clearance}</span><br>Pasillo libre</div>
+      </div>
+      ${stats.warning ? `<div style="margin-top:8px;padding:6px 8px;background:#FFF8E0;border-radius:6px;color:#7A5A00;font-size:11px">⚠️ ${stats.warning}</div>` : ''}
+      ${stats.ok     ? `<div style="margin-top:8px;padding:6px 8px;background:var(--green-l);border-radius:6px;color:var(--green);font-size:11px">✓ ${stats.ok}</div>` : ''}
+    `;
+  }
+
+  // Dibujar preview SVG
+  kaDrawPreview(w1, w2, w3, roomD, stats);
+}
+
+function kaComputeStats(w1, w2, w3, roomD, opts) {
+  const BASE_DEPTH = 0.55, HIGH_DEPTH = 0.35, MOD_W = 0.60;
+  let baseMods = 0, highMods = 0, totalML = 0;
+
+  // Pared 1 (siempre)
+  const seq1 = kaBuildSequence(w1, opts);
+  baseMods += seq1.length;
+  totalML  += w1;
+
+  // Pared 2 (L, U)
+  if (kaCurrentType === 'l' || kaCurrentType === 'u') {
+    const seq2 = kaBuildSequence(w2, {});
+    baseMods += seq2.length;
+    totalML  += w2;
+  }
+
+  // Pared 3 (U)
+  if (kaCurrentType === 'u') {
+    const seq3 = kaBuildSequence(w3, {});
+    baseMods += seq3.length;
+    totalML  += w3;
+  }
+
+  if (opts.hasIsland) { baseMods += 1; totalML += 1.2; }
+
+  // Muebles altos (mismas paredes, sin nevera/torre/horno)
+  if (opts.hasWallCabs) {
+    highMods = Math.floor(w1 / MOD_W);
+    if (kaCurrentType === 'l' || kaCurrentType === 'u') highMods += Math.floor(w2 / MOD_W);
+    if (kaCurrentType === 'u') highMods += Math.floor(w3 / MOD_W);
+  }
+
+  // Pasillo libre (cocina en U o isla)
+  const usedDepth = (kaCurrentType === 'u' || kaCurrentType === 'island') ? BASE_DEPTH * 2 : BASE_DEPTH;
+  const clearanceM = roomD - usedDepth;
+  const clearance = clearanceM.toFixed(1) + ' m';
+
+  let warning = null, ok = null;
+  if (clearanceM < 1.0) warning = 'Pasillo libre menor a 1m. Considera ampliar el espacio.';
+  else if (clearanceM >= 1.2) ok = `Pasillo libre de ${clearance} — cumple norma mínima (≥1.2m).`;
+
+  return { baseMods, highMods, totalML, clearance, warning, ok };
+}
+
+function kaDrawPreview(w1, w2, w3, roomD, stats) {
+  const svg = document.getElementById('kaPreviewSvg');
+  if (!svg) return;
+
+  const container = svg.parentElement;
+  const PW = container.clientWidth  || 280;
+  const PH = container.clientHeight || 260;
+
+  // Escala para que la cocina quepa bien
+  const roomW = (kaCurrentType === 'u') ? w1 : (kaCurrentType === 'l') ? Math.max(w1, w2 + 0.6) : w1;
+  const scaleX = (PW - 40) / roomW;
+  const scaleY = (PH - 40) / roomD;
+  const sc = Math.min(scaleX, scaleY, 60);
+
+  const ox = 20, oy = 20; // origen
+
+  let html = `<svg viewBox="0 0 ${PW} ${PH}" xmlns="http://www.w3.org/2000/svg">`;
+
+  // Fondo del espacio
+  const rW = roomW * sc, rH = roomD * sc;
+  html += `<rect x="${ox}" y="${oy}" width="${rW}" height="${rH}" fill="#FAF9F5" stroke="#222" stroke-width="2.5" rx="2"/>`;
+
+  const BASE_D = 0.55 * sc, HIGH_D = 0.35 * sc;
+  const GOLD = '#BA7517', LIGHT = '#FFF5E0', HIGH_C = '#FFF3E0';
+
+  // Helper: draw module row
+  function drawWall(seqArr, side) {
+    let off = 0;
+    seqArr.forEach(m => {
+      const mw = m.w * sc;
+      let rx2, ry2, mwv, mhv;
+      if (side === 'bottom') {
+        rx2 = ox + off; ry2 = oy + rH - BASE_D; mwv = mw; mhv = BASE_D;
+      } else if (side === 'top') {
+        rx2 = ox + off; ry2 = oy; mwv = mw; mhv = BASE_D;
+      } else if (side === 'left') {
+        rx2 = ox; ry2 = oy + rH - BASE_D - off - mw; mwv = BASE_D; mhv = mw;
+      } else if (side === 'right') {
+        rx2 = ox + rW - BASE_D; ry2 = oy + off; mwv = BASE_D; mhv = mw;
+      }
+      const fill = m.type==='freg'?'#E6F1FB': m.type==='refri'?'#EEEEEE': m.type==='tornohorno'?'#F0EBE8': m.type==='estufa'?'#FCEBEB': LIGHT;
+      const stroke = m.type==='freg'?'#185FA5': m.type==='refri'?'#666': m.type==='tornohorno'?'#5D4037': m.type==='estufa'?'#A32D2D': GOLD;
+      html += `<rect x="${rx2.toFixed(1)}" y="${ry2.toFixed(1)}" width="${mwv.toFixed(1)}" height="${mhv.toFixed(1)}" fill="${fill}" stroke="${stroke}" stroke-width="1.2" rx="1"/>`;
+      off += mw;
+    });
+  }
+
+  const seq1 = kaBuildSequence(w1, {
+    hasFridge: document.getElementById('kaFridge')?.checked,
+    hasStove:  document.getElementById('kaStove')?.checked,
+    hasTower:  document.getElementById('kaTower')?.checked
+  });
+  drawWall(seq1, 'bottom');
+
+  if (kaCurrentType === 'l' || kaCurrentType === 'u') {
+    const seq2 = kaBuildSequence(w2, {});
+    drawWall(seq2, 'left');
+  }
+  if (kaCurrentType === 'u') {
+    const seq3 = kaBuildSequence(w3, {});
+    drawWall(seq3, 'right');
+  }
+
+  // Island
+  if (document.getElementById('kaIsland')?.checked) {
+    const iw = 1.2*sc, ih = 0.9*sc;
+    const ix = ox + rW/2 - iw/2, iy = oy + rH/2 - ih/2;
+    html += `<rect x="${ix.toFixed(1)}" y="${iy.toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" fill="#EAF3DE" stroke="#3B6D11" stroke-width="1.2" rx="2"/>`;
+    html += `<text x="${(ix+iw/2).toFixed(1)}" y="${(iy+ih/2+3).toFixed(1)}" text-anchor="middle" font-size="9" fill="#3B6D11" font-family="sans-serif">Isla</text>`;
+  }
+
+  html += `</svg>`;
+  svg.outerHTML = html; // replaces the svg element with the new one
+  // Actually we can't outerHTML svg like that, let's use innerHTML on parent
+  container.innerHTML = html;
+}
+
+function kaBuildSequence(wallLen, { hasFridge=false, hasStove=false, hasTower=false } = {}) {
+  const seq = [];
+  let remaining = wallLen;
+
+  // Reservar espacios fijos
+  const fridgeW = 0.70, stoveW = 0.60, towerW = 0.60, sinkW = 0.80;
+  let rFridge = hasFridge && remaining >= fridgeW ? fridgeW : 0;
+  let rTower  = hasTower  && remaining >= towerW  ? towerW  : 0;
+  let rStove  = hasStove  && remaining >= stoveW  ? stoveW  : 0;
+  let rSink   = remaining >= sinkW ? sinkW : remaining;
+
+  remaining -= (rFridge + rTower + rStove + rSink);
+  const fill = Math.max(0, Math.floor(remaining / 0.60));
+  const fillL = Math.ceil(fill / 2), fillR = fill - fillL;
+
+  // LEFT END: nevera
+  if (rFridge) seq.push({ type:'refri',      name:'Refrigerador', w:fridgeW });
+  // Fill izq
+  for (let i=0; i<fillL; i++) seq.push({ type:'mb1p', name:`Bajo ${seq.length+1}`, w:0.60 });
+  // Centro: sink
+  seq.push({ type:'freg', name:'Fregadero', w:sinkW });
+  // Estufa cerca del sink
+  if (rStove) seq.push({ type:'estufa', name:'Estufa', w:stoveW });
+  // Fill der
+  for (let i=0; i<fillR; i++) seq.push({ type:'mb1p', name:`Bajo ${seq.length+1}`, w:0.60 });
+  // RIGHT END: torre horno
+  if (rTower) seq.push({ type:'tornohorno', name:'Torre Horno', w:towerW });
+
+  return seq;
+}
+
+function generateKitchen() {
+  const w1     = parseFloat(document.getElementById('kaW1')?.value)    || 3.6;
+  const w2     = parseFloat(document.getElementById('kaW2')?.value)    || 2.7;
+  const w3     = parseFloat(document.getElementById('kaW3')?.value)    || 2.7;
+  const roomD  = parseFloat(document.getElementById('kaRoomD')?.value) || 3.2;
+  const hasFridge   = document.getElementById('kaFridge')?.checked   || false;
+  const hasStove    = document.getElementById('kaStove')?.checked    || false;
+  const hasTower    = document.getElementById('kaTower')?.checked    || false;
+  const hasIsland   = document.getElementById('kaIsland')?.checked   || false;
+  const hasWallCabs = document.getElementById('kaWallCabs')?.checked || false;
+  const doReplace   = document.getElementById('kaReplace')?.checked  || false;
+
+  // Dimensiones del cuarto
+  const roomW = (kaCurrentType === 'u') ? w1 : (kaCurrentType === 'l') ? Math.max(w1, w2 + 0.6) : w1 + 0.2;
+  const room = {
+    id: Date.now(), name: 'Cocina', w: Math.max(roomW, w1),
+    h: roomD, type: 'kitchen', x: 80, y: 60
+  };
+  planarRooms.push(room);
+
+  if (doReplace) planarFurniture = [];
+
+  const sc = svgScale;
+  const rx = room.x, ry = room.y;
+  const rW = room.w * sc, rH = room.h * sc;
+  const newF = [];
+
+  // ── Función de colocación ──────────────────────────────
+  function placeWall(seq, side) {
+    const BASE_D = 0.55;
+    let offset = 0;
+    seq.forEach((mod, i) => {
+      const template = furnitureCatalog[mod.type] || furnitureCatalog.mb1p;
+      let fx, fy, angle = 0;
+      const mw = mod.w;
+      const md = mod.type === 'tornohorno' ? 0.60 : BASE_D;
+
+      if (side === 'bottom') {
+        fx = rx + offset * sc + mw * sc / 2;
+        fy = ry + rH - md * sc / 2;
+        angle = 0;
+      } else if (side === 'top') {
+        fx = rx + offset * sc + mw * sc / 2;
+        fy = ry + md * sc / 2;
+        angle = 0;
+      } else if (side === 'left') {
+        fx = rx + md * sc / 2;
+        fy = ry + rH - offset * sc - mw * sc / 2;
+        angle = 90;
+      } else if (side === 'right') {
+        fx = rx + rW - md * sc / 2;
+        fy = ry + offset * sc + mw * sc / 2;
+        angle = -90;
+      }
+
+      const hasDoor = !['freg','refri','isla','estufa'].includes(mod.type);
+      newF.push({
+        id: Date.now() + i + Math.round(Math.random()*9999),
+        type: mod.type,
+        name: mod.name,
+        w: mw, h: md,
+        fill: template.fill || '#FAEEDA',
+        stroke: template.stroke || '#BA7517',
+        door: hasDoor ? { count: Math.max(1, Math.round(mw / 0.6)) } : null,
+        x: fx, y: fy, angle,
+        height3d: getFurniture3DHeight(mod.name).h,
+        doors: hasDoor ? Math.max(1, Math.round(mw / 0.6)) : 0,
+        shelves: 1, drawers: 0, thickness: 18,
+        materialId: null, tapacantId: null
+      });
+      offset += mw;
+    });
+  }
+
+  // ── Función de muebles altos (aéreos) ─────────────────
+  function placeHighWall(wallLen, side) {
+    const HIGH_D = 0.35, MOD_W = 0.60;
+    const count = Math.floor(wallLen / MOD_W);
+    let offset = 0;
+    for (let i = 0; i < count; i++) {
+      let fx, fy, angle = 0;
+      if (side === 'bottom') {
+        fx = rx + offset * sc + MOD_W * sc / 2;
+        fy = ry + rH - HIGH_D * sc / 2;
+        angle = 0;
+      } else if (side === 'top') {
+        fx = rx + offset * sc + MOD_W * sc / 2;
+        fy = ry + HIGH_D * sc / 2;
+        angle = 0;
+      } else if (side === 'left') {
+        fx = rx + HIGH_D * sc / 2;
+        fy = ry + rH - offset * sc - MOD_W * sc / 2;
+        angle = 90;
+      } else if (side === 'right') {
+        fx = rx + rW - HIGH_D * sc / 2;
+        fy = ry + offset * sc + MOD_W * sc / 2;
+        angle = -90;
+      }
+      const t = furnitureCatalog.ma1p;
+      newF.push({
+        id: Date.now() + i + 50000 + Math.round(Math.random()*9999),
+        type: 'ma1p', name: `Aéreo ${i+1}`,
+        w: MOD_W, h: HIGH_D,
+        fill: t.fill, stroke: t.stroke,
+        door: { count: 1 },
+        x: fx, y: fy, angle,
+        height3d: 0.75,
+        doors: 1, shelves: 1, drawers: 0, thickness: 18,
+        materialId: null, tapacantId: null
+      });
+      offset += MOD_W;
+    }
+  }
+
+  // ── Generar paredes ────────────────────────────────────
+  const seq1 = kaBuildSequence(w1, { hasFridge, hasStove, hasTower });
+  placeWall(seq1, 'bottom');
+  if (hasWallCabs) placeHighWall(w1, 'bottom');
+
+  if (kaCurrentType === 'l' || kaCurrentType === 'u') {
+    const seq2 = kaBuildSequence(w2, {});
+    placeWall(seq2, 'left');
+    if (hasWallCabs) placeHighWall(w2, 'left');
+  }
+  if (kaCurrentType === 'u') {
+    const seq3 = kaBuildSequence(w3, {});
+    placeWall(seq3, 'right');
+    if (hasWallCabs) placeHighWall(w3, 'right');
+  }
+
+  // ── Isla ──────────────────────────────────────────────
+  if (hasIsland || kaCurrentType === 'island') {
+    const t = furnitureCatalog.isla;
+    newF.push({
+      id: Date.now() + 99999,
+      type: 'isla', name: 'Isla central',
+      w: 1.20, h: 0.90,
+      fill: t.fill, stroke: t.stroke, door: null,
+      x: rx + rW / 2,
+      y: ry + rH / 2,
+      angle: 0,
+      height3d: 0.90,
+      doors: 0, shelves: 1, drawers: 0, thickness: 18,
+      materialId: null, tapacantId: null
+    });
+  }
+
+  planarFurniture.push(...newF);
+
+  // Cerrar modal y renderizar
+  document.getElementById('kaModal').style.display = 'none';
+  goTab('plans', document.querySelector('.nt[onclick*="plans"]'));
+  renderPlans();
+  showToast(`✓ Cocina generada: ${newF.length} módulos colocados en el plano`);
+}
 </script>
