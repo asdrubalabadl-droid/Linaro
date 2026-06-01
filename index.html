@@ -76,7 +76,6 @@
           if (!r.ok) { var e = await r.json(); return { error: { message: e.message || 'Error al insertar' } }; }
           return { error: null };
         },
-        update: function(payload) { q._update = payload; return q; },
         delete: function() { q._delete = true; return q; },
         eq: function(col, val) { _filters.push(col + '=eq.' + val); return q; },
         order: function(col, opts) { _order = col + '.' + ((opts && opts.ascending === false) ? 'desc' : 'asc'); return q; },
@@ -87,17 +86,6 @@
             qs += (_filters.length ? '&' + _filters.join('&') : '');
             if (_order) qs += (qs ? '&' : '') + 'order=' + _order;
             var endpoint = URL + '/rest/v1/' + _table + (qs ? '?' + qs : '');
-
-            if (q._update) {
-              var qs2 = _filters.length ? '?' + _filters.join('&') : '';
-              var r = await fetch(URL + '/rest/v1/' + _table + qs2, {
-                method: 'PATCH',
-                headers: Object.assign(authHeaders(window.supabaseClient._token), { 'Prefer': 'return=minimal' }),
-                body: JSON.stringify(q._update)
-              });
-              if (!r.ok) { var e = await r.json(); return resolve({ data: null, error: { message: e.message || 'Error al actualizar' } }); }
-              return resolve({ data: null, error: null });
-            }
 
             if (q._delete) {
               var r = await fetch(endpoint, { method: 'DELETE', headers: authHeaders(window.supabaseClient._token) });
@@ -512,123 +500,26 @@ function calcCuts() {
 function openCutModal(name, w, h) {
   if(document.getElementById('cutPlanModal')) document.getElementById('cutPlanModal').style.display = 'block';
   if(document.getElementById('cpTitle')) document.getElementById('cpTitle').textContent = `Optimización de Láminas — ${name}`;
-  if(document.getElementById('cpSubtitle')) document.getElementById('cpSubtitle').textContent = `Distribución de paneles sobre formato comercial de 2440×1220mm`;
-
+  if(document.getElementById('cpSubtitle')) document.getElementById('cpSubtitle').textContent = `Distribución de paneles sobre formato comercial de 2440x1220mm`;
+  
   const content = document.getElementById('cpContent');
-  if (!content) return;
-
-  // Reconstruir lista de cortes desde calcCuts (misma lógica)
-  const t = parseFloat(document.getElementById('pT')?.value) || 18;
-  const shelves = parseInt(document.getElementById('pS')?.value) || 0;
-  const doors = parseInt(document.getElementById('pDr')?.value) || 0;
-  const gola = document.getElementById('pGolaB')?.value || 'none';
-  const d = parseFloat(document.getElementById('pD')?.value) || 550;
-
-  const cuts = [];
-  cuts.push({ desc: 'Laterales', cant: 2, l: h, a: d - 20 });
-  cuts.push({ desc: 'Base inf.', cant: 1, l: w - 2*t, a: d - 20 });
-  cuts.push({ desc: 'Amarre sup.', cant: 2, l: w - 2*t, a: 100 });
-  if (shelves > 0) cuts.push({ desc: `Entrepaños (${shelves})`, cant: shelves, l: w - 2*t - 2, a: d - 40 });
-  if (doors > 0) {
-    let dH = h - 4; if (gola !== 'none') dH -= 35;
-    let dW = Math.floor(w / doors) - 3;
-    cuts.push({ desc: `Puertas (${doors})`, cant: doors, l: dH, a: dW });
-  }
-
-  // Algoritmo de empaquetado simple (shelf-first, guillotine)
-  const SHEET_W = 2440, SHEET_H = 1220;
-  const MARGIN = 4; // kerf/espacio entre cortes
-  const COLORS = ['#27500a','#0c447c','#7B3F00','#534AB7','#0F6E56','#A32D2D'];
-  const sheets = []; // cada sheet: array de piezas colocadas {x,y,w,h,desc}
-
-  // Expandir piezas individuales
-  const pieces = [];
-  cuts.forEach((c, ci) => {
-    for (let i = 0; i < c.cant; i++) {
-      pieces.push({ desc: c.desc, w: c.l, h: c.a, ci });
-    }
-  });
-  // Ordenar por área descendente (heurística)
-  pieces.sort((a, b) => (b.w * b.h) - (a.w * a.h));
-
-  function tryPlace(sheet, pw, ph) {
-    // Shelf-first: ordenar espacios libres por Y luego X
-    // Usamos guillotine simplificado: lista de rectángulos libres
-    if (!sheet._free) sheet._free = [{ x: MARGIN, y: MARGIN, w: SHEET_W - MARGIN, h: SHEET_H - MARGIN }];
-    for (let i = 0; i < sheet._free.length; i++) {
-      const sp = sheet._free[i];
-      if (pw + MARGIN <= sp.w && ph + MARGIN <= sp.h) {
-        const placed = { x: sp.x, y: sp.y, w: pw, h: ph };
-        // Dividir espacio libre (guillotine horizontal)
-        const newSpaces = [];
-        if (sp.w - pw - MARGIN > 10) newSpaces.push({ x: sp.x + pw + MARGIN, y: sp.y, w: sp.w - pw - MARGIN, h: ph });
-        if (sp.h - ph - MARGIN > 10) newSpaces.push({ x: sp.x, y: sp.y + ph + MARGIN, w: sp.w, h: sp.h - ph - MARGIN });
-        sheet._free.splice(i, 1, ...newSpaces);
-        return placed;
-      }
-    }
-    return null;
-  }
-
-  pieces.forEach(p => {
-    let placed = false;
-    for (const sheet of sheets) {
-      const pos = tryPlace(sheet, p.w, p.h);
-      if (pos) { sheet.pieces.push({ ...p, ...pos }); placed = true; break; }
-    }
-    if (!placed) {
-      const ns = { pieces: [] };
-      const pos = tryPlace(ns, p.w, p.h);
-      if (pos) ns.pieces.push({ ...p, ...pos });
-      sheets.push(ns);
-    }
-  });
-
-  // Calcular retales
-  const usedAreas = sheets.map(s => s.pieces.reduce((a, p) => a + p.w * p.h, 0));
-  const totalArea = SHEET_W * SHEET_H;
-
-  // Renderizar SVGs
-  const svgBlocks = sheets.map((sheet, si) => {
-    const used = usedAreas[si];
-    const retal = ((1 - used / totalArea) * 100).toFixed(1);
-    const sc = 200 / SHEET_W; // escala para visualización
-
-    const rects = sheet.pieces.map(p => {
-      const col = COLORS[p.ci % COLORS.length];
-      const lx = (p.x * sc).toFixed(1), ly = (p.y * sc).toFixed(1);
-      const lw = (p.w * sc).toFixed(1), lh = (p.h * sc).toFixed(1);
-      const cx = (p.x * sc + p.w * sc / 2).toFixed(1);
-      const cy = (p.y * sc + p.h * sc / 2).toFixed(1);
-      const label = p.desc.length > 12 ? p.desc.slice(0, 11) + '…' : p.desc;
-      const fontSize = Math.min(8, (p.w * sc) / 5);
-      return `<rect x="${lx}" y="${ly}" width="${lw}" height="${lh}" fill="${col}" fill-opacity="0.28" stroke="${col}" stroke-width="1"/>
-              <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" font-size="${fontSize}" fill="${col}" font-family="sans-serif" font-weight="600">${label}</text>`;
-    }).join('');
-
-    const svgW = (SHEET_W * sc).toFixed(0);
-    const svgH = (SHEET_H * sc).toFixed(0);
-    return `
-      <div style="margin-bottom:16px">
-        <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px">
-          Lámina ${si+1} · Retal útil: <span style="color:var(--gold)">${retal}%</span>
-        </div>
-        <svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" style="background:#FFF8EE;border:1px solid #BA7517;border-radius:4px;max-width:100%">
-          <rect x="0" y="0" width="${svgW}" height="${svgH}" fill="#FFF8EE" stroke="#BA7517" stroke-width="1.5"/>
-          ${rects}
-          <text x="${svgW/2}" y="${parseFloat(svgH)-4}" text-anchor="middle" font-size="7" fill="#BA7517" font-family="sans-serif">2440 × 1220 mm</text>
+  if(content) {
+    content.innerHTML = `
+      <div style="background:#e0dfdb; padding:20px; border-radius:8px; text-align:center">
+        <svg width="100%" height="300" viewBox="0 0 2440 1220" style="background:#fff; border:1px solid #999">
+          <rect x="0" y="0" width="2440" height="1220" fill="#f4eedf" stroke="#ba7517" stroke-width="10"/>
+          <rect x="20" y="20" width="720" height="550" fill="#27500a" opacity="0.3" stroke="#27500a" stroke-width="4"/>
+          <text x="50" y="80" font-family="sans-serif" font-size="50" fill="#27500a">Lateral 1</text>
+          <rect x="760" y="20" width="720" height="550" fill="#27500a" opacity="0.3" stroke="#27500a" stroke-width="4"/>
+          <text x="790" y="80" font-family="sans-serif" font-size="50" fill="#27500a">Lateral 2</text>
+          <rect x="20" y="600" width="1460" height="550" fill="#0c447c" opacity="0.3" stroke="#0c447c" stroke-width="4"/>
+          <text x="50" y="660" font-family="sans-serif" font-size="50" fill="#0c447c">Base + Estantería</text>
+          <line x1="1500" y1="0" x2="1500" y2="1220" stroke="red" stroke-dasharray="20" stroke-width="6"/>
+          <text x="1530" y="600" font-family="sans-serif" font-size="60" fill="red">Retal útil: 940x1220mm</text>
         </svg>
-      </div>`;
-  }).join('');
-
-  content.innerHTML = `
-    <div style="background:var(--bg3);padding:16px;border-radius:8px">
-      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
-        <strong>${sheets.length} lámina(s)</strong> necesarias · ${pieces.length} piezas distribuidas
       </div>
-      ${svgBlocks}
-      <div style="font-size:11px;color:var(--text3);margin-top:8px">* Distribución estimada con algoritmo guillotine. Puede variar según optimización del operador.</div>
-    </div>`;
+    `;
+  }
 }
 
 // ==========================================
@@ -920,6 +811,8 @@ function addF(type) {
     shelves:    1,
     drawers:    0,
     thickness:  18,
+    doorSide:   'front',   // 'front' | 'back' — lado de apertura
+    doorOpenPct: 90,       // ángulo de apertura del arco (45-135°)
     // Material asignado (ID del inventario)
     materialId: null,
     tapacantId: null,
@@ -967,26 +860,35 @@ function renderPlans() {
     g.appendChild(rect);
 
     // ── Puertas batientes (arco de apertura arquitectónico) ──────────
-    if (f.door) {
-      const fw = f.w * svgScale;
-      const fh = f.h * svgScale;
-      const fy = fh / 2;          // borde frontal (parte inferior del rect)
+    if (f.door && f.door.count > 0) {
+      const fw  = f.w * svgScale;
+      const fh  = f.h * svgScale;
       const count = f.door.count || 1;
-      const dw   = fw / count;    // ancho de cada hoja de puerta
+      const dw  = fw / count;
+      const openRad = ((f.doorOpenPct || 90) * Math.PI) / 180;
+      // Lado de apertura: 'front' = borde inferior (fy = fh/2), 'back' = borde superior (fy = -fh/2)
+      const fy = (f.doorSide === 'back') ? -fh / 2 : fh / 2;
+      const dir = (f.doorSide === 'back') ? -1 : 1;   // hacia adentro o afuera
 
       for (let di = 0; di < count; di++) {
-        const hingeX = -fw / 2 + di * dw;  // bisagra = esquina izq de cada hoja
-        const tipX   = hingeX + dw;         // extremo libre de la puerta (cerrada)
-        // Línea de puerta en posición abierta (90°)
+        const hingeX = -fw / 2 + di * dw;
+        // Posición del extremo libre de la puerta al abrirse openRad grados
+        const tipClosedX = hingeX + dw;
+        const tipOpenX   = hingeX + dw * Math.cos(openRad);
+        const tipOpenY   = fy + dir * dw * Math.sin(openRad);
+        // Línea de puerta abierta
         const dl = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        dl.setAttribute('x1', hingeX); dl.setAttribute('y1', fy);
-        dl.setAttribute('x2', hingeX); dl.setAttribute('y2', fy + dw);
-        dl.setAttribute('stroke', f.stroke); dl.setAttribute('stroke-width', '1');
+        dl.setAttribute('x1', hingeX);    dl.setAttribute('y1', fy);
+        dl.setAttribute('x2', tipOpenX);  dl.setAttribute('y2', tipOpenY);
+        dl.setAttribute('stroke', f.stroke); dl.setAttribute('stroke-width', '1.2');
         g.appendChild(dl);
-        // Arco de barrido (cuarto de círculo, línea punteada)
+        // Arco de barrido desde posición cerrada hasta posición abierta
+        const arcEndX = tipClosedX;
+        const arcEndY = fy;
+        const sweep   = (f.doorSide === 'back') ? 0 : 1;
         const ap = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        ap.setAttribute('d', `M ${tipX},${fy} A ${dw},${dw} 0 0,1 ${hingeX},${fy + dw}`);
-        ap.setAttribute('fill', 'rgba(255,255,255,0.0)');
+        ap.setAttribute('d', `M ${tipOpenX},${tipOpenY} A ${dw},${dw} 0 0,${sweep} ${arcEndX},${arcEndY}`);
+        ap.setAttribute('fill', 'none');
         ap.setAttribute('stroke', f.stroke);
         ap.setAttribute('stroke-width', '0.7');
         ap.setAttribute('stroke-dasharray', '3,2');
@@ -998,6 +900,11 @@ function renderPlans() {
     const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
     txt.setAttribute('x', 0); txt.setAttribute('y', 4);
     txt.setAttribute('text-anchor', 'middle'); txt.setAttribute('font-family', 'sans-serif'); txt.setAttribute('font-size', '10');
+    // Contrarotar el texto para que siempre sea legible (0° o 90°, nunca invertido)
+    const labelAngle = (f.angle === 90 || f.angle === 270) ? -f.angle : -f.angle;
+    const normAngle = ((f.angle % 360) + 360) % 360;
+    const textRot = (normAngle === 180) ? 180 : (normAngle === 270) ? 90 : (normAngle === 90) ? -90 : 0;
+    txt.setAttribute('transform', `rotate(${textRot})`);
     txt.textContent = f.name;
     g.appendChild(txt);
 
@@ -1117,6 +1024,19 @@ function updateSidePanelEditor() {
           oninput="selectedElement.shelves=parseInt(this.value)||0; updateFurnitureCutPreview();">
       </div>
     </div>
+    <div class="pg2">
+      <div class="pfield"><label>Apertura puerta (°)</label>
+        <input type="number" value="${f.doorOpenPct||90}" min="45" max="135" step="5"
+          oninput="selectedElement.doorOpenPct=parseInt(this.value)||90; renderPlans();"
+          title="Ángulo de apertura: 45° entreabiert, 90° estándar, 135° máxima">
+      </div>
+      <div class="pfield"><label>Lado apertura</label>
+        <select onchange="selectedElement.doorSide=this.value; renderPlans();">
+          <option value="front" ${(f.doorSide||'front')==='front'?'selected':''}>Frontal</option>
+          <option value="back"  ${f.doorSide==='back'?'selected':''}>Posterior</option>
+        </select>
+      </div>
+    </div>
     <div class="pfield"><label>Cajones</label>
       <input type="number" value="${f.drawers||0}" min="0" max="8" step="1"
         oninput="selectedElement.drawers=parseInt(this.value)||0; updateFurnitureCutPreview();">
@@ -1165,6 +1085,12 @@ function updateFurnitureCutPreview() {
     cuts.push({ desc:'Fondos cajón',  cant:drawers, l:dh-100, a:D-60      });
   }
 
+  // Bisagras estimadas
+  const bisagrasXPuerta = H > 1200 ? 3 : 2;
+  const totalBisagras   = doors > 0 ? doors * bisagrasXPuerta : 0;
+  const bisInv = inventory.sistemas.find(s => s.tipo === 'bisagra');
+  const bisCost = totalBisagras * (bisInv ? bisInv.precio : 0);
+
   const totalArea  = cuts.reduce((s,c) => s + c.l*c.a*c.cant/1e6, 0);
   const sheetArea  = (mat.ancho * mat.alto) / 1e6;
   const sheets     = Math.ceil(totalArea / (sheetArea * 0.8));
@@ -1173,7 +1099,7 @@ function updateFurnitureCutPreview() {
   const tap        = inventory.tapacanto.find(t => t.id == f.tapacantId);
   const tapML      = ((H*2 + W*2) / 1000).toFixed(2);
   const tapCost    = tap ? (parseFloat(tapML) * tap.precio).toFixed(2) : null;
-  const totalCost  = costMat + (tap ? parseFloat(tapCost) : 0);
+  const totalCost  = costMat + (tap ? parseFloat(tapCost) : 0) + bisCost;
 
   const rows = cuts.map(c => `
     <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:.5px solid rgba(186,117,23,.2)">
@@ -1199,6 +1125,10 @@ function updateFurnitureCutPreview() {
         ${tap ? `<div style="display:flex;justify-content:space-between;font-size:11px">
           <span>Tapacanto ${tapML}ml</span>
           <span style="font-family:monospace">${tap.moneda||'$'} ${tapCost}</span>
+        </div>` : ''}
+        ${totalBisagras > 0 ? `<div style="display:flex;justify-content:space-between;font-size:11px">
+          <span>Bisagras (${totalBisagras} ud${bisInv ? ' — ' + bisInv.nombre : ', precio pendiente'})</span>
+          <span style="font-family:monospace">${bisInv ? (bisInv.moneda||'$') + ' ' + bisCost.toFixed(2) : '—'}</span>
         </div>` : ''}
         <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;border-top:.5px solid var(--gold);padding-top:5px;margin-top:2px;color:var(--gold)">
           <span>Total estimado</span>
@@ -1258,6 +1188,24 @@ function addFurnitureToBudget() {
       unid:   'ml',
       cant:   tapML,
       precio: tap.precio
+    });
+  }
+
+  // Agregar bisagras automáticamente si el mueble tiene puertas
+  if (doors > 0) {
+    // Estándar: 2 bisagras por puerta hasta 1200mm de alto, 3 si es más alto
+    const bisagrasXPuerta = H > 1200 ? 3 : 2;
+    const totalBisagras   = doors * bisagrasXPuerta;
+    // Buscar bisagra en inventario de sistemas
+    const bisInv = inventory.sistemas.find(s => s.tipo === 'bisagra');
+    const bisDesc = bisInv
+      ? `Bisagras ${bisInv.nombre} — ${f.name} (${bisagrasXPuerta}/puerta)`
+      : `Bisagras concealed 35mm — ${f.name} (${bisagrasXPuerta}/puerta)`;
+    projectData.items.push({
+      desc:   bisDesc,
+      unid:   'unid',
+      cant:   totalBisagras,
+      precio: bisInv ? bisInv.precio : 0
     });
   }
 
@@ -1566,35 +1514,6 @@ async function dbSaveCurrent() {
   }
 }
 
-async function dbUpdateCurrent() {
-  if (!window.currentUser) return showToast('Debes iniciar sesión para guardar.');
-  if (!window._editingProjectId) return showToast('No hay proyecto abierto para actualizar. Usa "Guardar nuevo" para crearlo primero.');
-
-  const pNameInput = document.getElementById('dbProjName');
-  const fallbackInput = document.getElementById('pName');
-  const name = (pNameInput?.value.trim()) || (fallbackInput?.value.trim()) || 'Proyecto Guardado';
-
-  const bar = document.getElementById('autosaveBar');
-  const msg = document.getElementById('autosaveMsg');
-  if (bar) bar.style.display = 'block';
-  if (msg) msg.textContent = 'Actualizando…';
-
-  try {
-    const { error } = await window.supabaseClient
-      .from('linaro_projects')
-      .update({ name, budget: projectData, rooms: planarRooms, furniture: planarFurniture })
-      .eq('id', window._editingProjectId)
-      .eq('user_id', window.currentUser.id);
-    if (error) throw error;
-    showToast('Proyecto actualizado en la nube ✓');
-    if (msg) msg.textContent = 'Actualizado en Supabase';
-    await renderProjectsGrid();
-  } catch (e) {
-    showToast('Error al actualizar: ' + e.message);
-    if (bar) bar.style.display = 'none';
-  }
-}
-
 async function renderProjectsGrid() {
   const grid = document.getElementById('dbGrid');
   if (!grid) return;
@@ -1629,7 +1548,6 @@ async function renderProjectsGrid() {
         </div>
         <div class="db-card-foot">
           <button class="btn btn-sm btn-gold" onclick="loadProjectFromDb('${p.id}')">📂 Abrir</button>
-          <button class="btn btn-sm btn-green" onclick="quickUpdateProject('${p.id}')">💾 Actualizar</button>
           <button class="btn btn-sm btn-del" onclick="deleteProjectFromDb('${p.id}')">×</button>
         </div>
       </div>
@@ -1655,7 +1573,6 @@ async function loadProjectFromDb(id) {
     projectData = data.budget;
     planarRooms = data.rooms || [];
     planarFurniture = data.furniture || [];
-    window._editingProjectId = id;  // Registrar proyecto activo para actualizar
 
     if (document.getElementById('pName')) document.getElementById('pName').value = projectData.name || '';
     if (document.getElementById('pClient')) document.getElementById('pClient').value = projectData.client || '';
@@ -1667,13 +1584,6 @@ async function loadProjectFromDb(id) {
   } catch (e) {
     showToast('Error al cargar: ' + e.message);
   }
-}
-
-async function quickUpdateProject(id) {
-  if (!window.currentUser) return showToast('Debes iniciar sesión.');
-  if (!confirm('¿Guardar el estado actual del proyecto sobre esta versión?')) return;
-  window._editingProjectId = id;
-  await dbUpdateCurrent();
 }
 
 async function deleteProjectFromDb(id) {
