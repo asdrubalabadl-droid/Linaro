@@ -84,4 +84,195 @@
           try {
             var qs = 'select=' + (q._cols || '*');
             qs += (_filters.length ? '&' + _filters.join('&') : '');
-            if (_order) qs += (qs ? '&' : '') + 'order=' + _order
+            if (_order) qs += (qs ? '&' : '') + 'order=' + _order;
+            var endpoint = URL + '/rest/v1/' + _table + (qs ? '?' + qs : '');
+
+            if (q._delete) {
+              var r = await fetch(endpoint, { method: 'DELETE', headers: authHeaders(window.supabaseClient._token) });
+              if (!r.ok) { var e = await r.json(); return resolve({ data: null, error: { message: e.message } }); }
+              return resolve({ data: null, error: null });
+            }
+
+            var hdrs = Object.assign(authHeaders(window.supabaseClient._token));
+            if (_single) hdrs['Accept'] = 'application/vnd.pgrst.object+json';
+            var r2 = await fetch(endpoint, { headers: hdrs });
+            var d = await r2.json();
+            if (!r2.ok) return resolve({ data: null, error: { message: d.message || 'Error al consultar' } });
+            return resolve({ data: d, error: null });
+          } catch(err) { reject(err); }
+        }
+      };
+      q._cols = '*';
+      return q;
+    }
+  };
+
+  window.supabaseClient.auth.getSession().then(function(result) {
+    var session = result.data && result.data.session;
+    if (session) {
+      window.currentUser = session.user;
+      var overlay = document.getElementById('loginOverlay');
+      if (overlay) overlay.style.display = 'none';
+      if (typeof initApp === 'function') initApp();
+      if (typeof loadInventory === 'function') loadInventory();
+      if (typeof renderProjectsGrid === 'function') renderProjectsGrid();
+    }
+  });
+})();
+</script>
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/%3E%3Crect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/%3E%3Cpath d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/%3E%3Crect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/%3E%3C/svg%3E">
+
+<style>
+  :root {
+    --bg: #121214;
+    --bg2: #1a1a1e;
+    --card: #222226;
+    --border: #323238;
+    --text: #f0f0f5;
+    --text2: #c4c4cc;
+    --text3: #8d8d99;
+    --gold: #ba7517;
+    --gold-hover: #e09224;
+    --del: #e24a4a;
+    --green: #27854d;
+    --blue: #185fa5;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+  body { background: var(--bg); color: var(--text); padding: 16px; font-size: 14px; }
+  
+  .navbar { display: flex; justify-content: space-between; align-items: center; background: var(--bg2); padding: 12px 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px; }
+  .logo { font-size: 18px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .logo span { color: var(--gold); }
+  .nav-tabs { display: flex; gap: 8px; }
+  
+  .btn { background: var(--bg); border: 1px solid var(--border); color: var(--text2); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+  .btn:hover { border-color: var(--gold); color: var(--text); }
+  .btn.on { background: var(--gold); border-color: var(--gold); color: white; }
+  .btn-gold { background: var(--gold); color: white; border: none; }
+  .btn-gold:hover { background: var(--gold-hover); }
+  .btn-del { border-color: var(--border); color: var(--del); }
+  .btn-del:hover { background: var(--del); color: white; border-color: var(--del); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 4px; }
+  
+  .app-container { display: grid; grid-template-columns: 280px 1fr; gap: 16px; }
+  .sidebar { display: flex; flex-direction: column; gap: 16px; }
+  .main-content { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 20px; min-height: 75vh; }
+  
+  .module { display: none; }
+  .module.on { display: block; }
+  
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+  .card .sl { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: var(--text); display: flex; align-items: center; justify-content: space-between; }
+  .muted { color: var(--text3); font-size: 12px; }
+  .tag { background: var(--border); color: var(--text2); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge { background: rgba(186, 117, 23, 0.15); color: var(--gold); padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+  
+  .form-group { margin-bottom: 12px; }
+  .form-group label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 4px; font-weight: 500; }
+  input, select, textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 8px 10px; border-radius: 6px; font-size: 13px; transition: 0.2s; }
+  input:focus, select:focus, textarea:focus { border-color: var(--gold); outline: none; }
+  .flex-gap { display: flex; gap: 8px; }
+  .flexb { display: flex; justify-content: space-between; align-items: center; }
+  .tr { text-align: right; }
+  .mono { font-family: var(--mono); }
+  
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: left; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  th { background: var(--bg); color: var(--text2); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  td input { padding: 4px 6px; border-radius: 4px; font-size: 13px; background: transparent; border: 1px solid transparent; color: white; }
+  td input:hover { border-color: #444; background: var(--bg); }
+  td input:focus { border-color: var(--gold); background: var(--bg); }
+  
+  .cat-selector { display: flex; gap: 6px; margin-bottom: 16px; background: var(--bg); padding: 4px; border-radius: 6px; border: 1px solid var(--border); }
+  .cat-btn { flex: 1; text-align: center; background: transparent; border: none; color: var(--text3); padding: 6px; font-size: 12px; font-weight: 600; border-radius: 4px; cursor: pointer; }
+  .cat-btn.on { background: var(--card); color: var(--gold); }
+  
+  .totales-box { margin-top: 16px; background: var(--bg); border-radius: 8px; padding: 12px 16px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; width: 340px; margin-left: auto; }
+  
+  #loginOverlay { position: fixed; inset: 0; background: rgba(10,10,12,0.95); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+  .login-card { background: var(--card); border: 1px solid var(--border); width: 340px; padding: 24px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .login-card h2 { text-align: center; font-size: 20px; margin-bottom: 6px; color: var(--text); }
+  .login-card p { text-align: center; font-size: 12px; color: var(--text3); margin-bottom: 20px; }
+  .login-btn { width: 100%; padding: 10px; font-weight: 600; margin-top: 8px; background: var(--gold); color: white; border: none; border-radius: 6px; cursor: pointer; }
+  .login-btn:hover { background: var(--gold-hover); }
+  #loginErr { background: rgba(226,74,74,0.15); color: #ff6b6b; font-size: 12px; padding: 8px; border-radius: 6px; margin-bottom: 12px; text-align: center; border: 1px solid rgba(226,74,74,0.3); display: none; }
+  
+  #toast { position: fixed; bottom: 20px; right: 20px; background: var(--gold); color: white; padding: 12px 20px; border-radius: 6px; font-weight: 500; opacity: 0; transform: translateY(10px); transition: 0.3s; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  
+  .g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+  .metric { background: var(--bg); border: 1px solid var(--border); padding: 10px; border-radius: 6px; text-align: center; }
+  .mlabel { font-size: 11px; color: var(--text3); margin-bottom: 4px; text-transform: uppercase; }
+  .mval { font-size: 15px; font-weight: 700; font-family: var(--mono); }
+  .tgold { color: var(--gold); }
+  .tgreen { color: #27854d; }
+  
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 5000; }
+  .modal-content { background: var(--card); border: 1px solid var(--border); width: 80%; max-width: 900px; padding: 20px; border-radius: 10px; max-height: 90vh; overflow-y: auto; }
+  .empty { text-align: center; padding: 30px 10px; color: var(--text3); }
+  .empty-icon { font-size: 28px; margin-bottom: 6px; opacity: 0.5; }
+  
+  /* Diseños específicos del modulador interactivo 2D */
+  #kaCanvasContainer { background: #151518; border: 1px solid var(--border); border-radius: 8px; position: relative; overflow: hidden; height: 450px; margin-top: 12px; }
+  .ka-toolbar { display: flex; gap: 8px; background: var(--card); padding: 8px; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 10px; flex-wrap: wrap; }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<div id="toast">Notificación</div>
+
+<div id="loginOverlay">
+  <div class="login-card">
+    <h2>Linaro Cloud</h2>
+    <p>Infraestructura de control técnico y presupuestario</p>
+    <div id="loginErr"></div>
+    <div class="form-group">
+      <label>Email del Ingeniero / Operador</label>
+      <input type="email" id="loginUser" placeholder="correo@linaro.com">
+    </div>
+    <div class="form-group">
+      <label>Contraseña Encriptada</label>
+      <input type="password" id="loginPass" placeholder="••••••••">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Ingresar</button>
+  </div>
+</div>
+
+<div class="navbar">
+  <div class="logo">📐 LINARO <span>— Pro</span></div>
+  <div class="nav-tabs">
+    <button class="btn nt on" onclick="goTab('budget', this)">📋 Presupuestos</button>
+    <button class="btn nt" onclick="goTab('blueprint', this)">🗺️ Planos de Planta 2D</button>
+    <button class="btn nt" onclick="goTab('cuts', this)">🪵 Despiece e Ingeniería</button>
+    <button class="btn nt" onclick="goTab('inventory', this)">📦 Biblioteca e Inventario</button>
+  </div>
+</div>
+
+<div class="app-container">
+  
+  <div class="sidebar">
+    <div class="card">
+      <div class="sl">💼 Proyecto Activo</div>
+      <div class="form-group">
+        <label>Identificador de Obra</label>
+        <input type="text" id="pName" placeholder="Ej: Cocina Moderna Altamira" oninput="projectData.name = this.value">
+      </div>
+      <div class="form-group">
+        <label>Cliente Titular</label>
+        <input type="text" id="pClient" placeholder="Ej: Constructora SCM" oninput="projectData.client = this.value">
+      </div>
+      <div class="form-group">
+        <label>Fecha de Emisión</label>
+        <input type="date" id="pDate" oninput="projectData.date = this.value">
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="sl">☁️ Respaldos en la Nube</div>
+      <p class="muted" style="margin-bottom:10px;">Sincronización directa en base de datos relacional.</p>
+      <button id="btnGuardarNube" class="btn btn-gold btn-sm mb-2" style="width:100%; justify-content:center; margin-bottom:8px;" onclick="guardarProyectoEnNube()">☁️ Guardar Res
