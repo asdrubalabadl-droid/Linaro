@@ -2154,6 +2154,7 @@ if (typeof currentInvTab === 'undefined') {
     <button class="nt"    onclick="goTab('database',this)">📁 Proyectos</button>
     <button class="nt"    onclick="goTab('apu',this)">🏗️ APU Civil</button>
   </div>
+  <span id="obraSaveIndicator" style="margin-left:auto;font-size:11px;color:#BA7517;opacity:0;transition:opacity .4s;flex-shrink:0;white-space:nowrap">✓ Guardado en nube</span>
 </nav>
 
 <div class="page">
@@ -4445,11 +4446,135 @@ function prtExportPDF() {
 }
 
 // ==========================================
+// SUPABASE SYNC — APU y Partidas
+// Tabla única: linaro_obra_data
+// Columnas: id, user_id, apu_data (jsonb), partidas_data (jsonb), updated_at
+// ==========================================
+
+let _obraSaveTimer = null;
+
+// Guarda APU + Partidas en Supabase (debounce 1.5s para no saturar)
+async function obraSaveToSupabase() {
+  const uid = window.currentUser?.id;
+  if (!uid) return; // Sin sesión, no guarda
+
+  clearTimeout(_obraSaveTimer);
+  _obraSaveTimer = setTimeout(async () => {
+    try {
+      // Intenta actualizar primero
+      const urlBase = 'https://iufichpykfkhjednfljy.supabase.co/rest/v1/linaro_obra_data';
+      const token   = window.supabaseClient._token;
+      const KEY     = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZmljaHB5a2ZraGplZG5mbGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDI3NzMsImV4cCI6MjA5NDYxODc3M30.0OG0e2Oj_5-uJckF-a0duPDgBmgyYr-3VLJm3HvQRVM';
+      const headers = {
+        'apikey': KEY,
+        'Authorization': 'Bearer ' + (token || KEY),
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates,return=minimal'
+      };
+      const payload = {
+        user_id:       uid,
+        apu_data:      JSON.stringify(apuData),
+        partidas_data: JSON.stringify(partidasData),
+        updated_at:    new Date().toISOString()
+      };
+      const r = await fetch(urlBase + '?on_conflict=user_id', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload)
+      });
+      if (r.ok) {
+        // Muestra indicador sutil
+        const ind = document.getElementById('obraSaveIndicator');
+        if (ind) { ind.textContent = '✓ Guardado'; ind.style.opacity = '1'; setTimeout(() => ind.style.opacity = '0', 2000); }
+      } else {
+        const err = await r.json().catch(() => ({}));
+        console.warn('Supabase APU save error:', err);
+      }
+    } catch(e) { console.warn('obraSaveToSupabase:', e); }
+  }, 1500);
+}
+
+// Carga APU + Partidas desde Supabase
+async function obraLoadFromSupabase() {
+  const uid = window.currentUser?.id;
+  if (!uid) return;
+
+  try {
+    const KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZmljaHB5a2ZraGplZG5mbGp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNDI3NzMsImV4cCI6MjA5NDYxODc3M30.0OG0e2Oj_5-uJckF-a0duPDgBmgyYr-3VLJm3HvQRVM';
+    const token = window.supabaseClient._token;
+    const r = await fetch(
+      `https://iufichpykfkhjednfljy.supabase.co/rest/v1/linaro_obra_data?user_id=eq.${uid}&select=apu_data,partidas_data`,
+      { headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + (token || KEY), 'Accept': 'application/vnd.pgrst.object+json' } }
+    );
+    if (!r.ok) return; // Primera vez, sin datos aún
+    const row = await r.json();
+    if (row && row.apu_data) {
+      const parsed = typeof row.apu_data === 'string' ? JSON.parse(row.apu_data) : row.apu_data;
+      if (Array.isArray(parsed)) { apuData = parsed; apuRenderList(); }
+    }
+    if (row && row.partidas_data) {
+      const parsed = typeof row.partidas_data === 'string' ? JSON.parse(row.partidas_data) : row.partidas_data;
+      if (Array.isArray(parsed)) { partidasData = parsed; if (typeof prtRender === 'function') prtRender(); }
+    }
+    if ((row?.apu_data || row?.partidas_data)) showToast('Datos de Obras cargados ✓');
+  } catch(e) { console.warn('obraLoadFromSupabase:', e); }
+}
+
+// ── Patch de funciones APU para auto-guardar ──────────────────────
+const _apuCreateNew_orig = apuCreateNew;
+apuCreateNew = function() { _apuCreateNew_orig(); obraSaveToSupabase(); };
+
+const _apuDeleteAPU_orig = apuDeleteAPU;
+apuDeleteAPU = function(id) { _apuDeleteAPU_orig(id); obraSaveToSupabase(); };
+
+const _apuAddResource_orig = typeof apuAddResource === 'function' ? apuAddResource : null;
+if (_apuAddResource_orig) {
+  apuAddResource = function(...args) { _apuAddResource_orig(...args); obraSaveToSupabase(); };
+}
+const _apuRemoveResource_orig = typeof apuRemoveResource === 'function' ? apuRemoveResource : null;
+if (_apuRemoveResource_orig) {
+  apuRemoveResource = function(...args) { _apuRemoveResource_orig(...args); obraSaveToSupabase(); };
+}
+
+// Guardar al editar recursos (inputs en la tabla)
+document.addEventListener('change', function(e) {
+  if (e.target.closest && e.target.closest('#apuResourceTable')) obraSaveToSupabase();
+});
+document.addEventListener('input', function(e) {
+  if (e.target.closest && e.target.closest('#apuResourceTable')) {
+    clearTimeout(_obraSaveTimer);
+    _obraSaveTimer = setTimeout(obraSaveToSupabase, 2000);
+  }
+});
+
+// ── Patch de funciones Partidas para auto-guardar ─────────────────
+const _prtNewModal_save = function() {
+  // hookeamos después de que se crea la partida
+  const orig = partidasData.length;
+  const obs = new MutationObserver(() => {
+    if (partidasData.length !== orig) { obraSaveToSupabase(); obs.disconnect(); }
+  });
+  obs.observe(document.body, { childList: true, subtree: true });
+  setTimeout(() => obs.disconnect(), 3000);
+};
+
+const _prtDeletePartida_orig = prtDeletePartida;
+prtDeletePartida = function(id) { _prtDeletePartida_orig(id); obraSaveToSupabase(); };
+
+const _prtDeleteItem_orig = prtDeleteItem;
+prtDeleteItem = function(partidaId, itemId) { _prtDeleteItem_orig(partidaId, itemId); obraSaveToSupabase(); };
+
+// Guardar al añadir ítems a partidas
+const _prtAddItem_orig = typeof prtAddItem === 'function' ? prtAddItem : null;
+if (_prtAddItem_orig) {
+  prtAddItem = function(...args) { _prtAddItem_orig(...args); obraSaveToSupabase(); };
+}
+
+// ==========================================
 // Patch goTab — APU + Partidas
 // ==========================================
 const _origGoTab = goTab;
 goTab = function(tabId, btn) {
-  // Show/hide APU module (it's outside .page div)
   const apuMod = document.getElementById('apu');
   if (apuMod) {
     if (tabId === 'apu') {
@@ -4463,6 +4588,13 @@ goTab = function(tabId, btn) {
     }
   }
   _origGoTab(tabId, btn);
+};
+
+// ── Cargar datos al iniciar sesión ────────────────────────────────
+const _initApp_orig = initApp;
+initApp = function() {
+  _initApp_orig();
+  obraLoadFromSupabase();
 };
 </script>
 </body>
