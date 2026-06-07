@@ -376,39 +376,193 @@ function recalc() {
   }
 }
 
+// ── Helpers de diseño PDF ────────────────────────────────────────────
+function pdfDrawHeader(doc, title, subtitle) {
+  const W = doc.internal.pageSize.getWidth();
+  // Barra superior dorada
+  doc.setFillColor(186, 117, 23);
+  doc.rect(0, 0, W, 22, 'F');
+  // Franja oscura inferior de la barra
+  doc.setFillColor(140, 85, 10);
+  doc.rect(0, 19, W, 3, 'F');
+  // Logo "L" geométrico (icono simplificado)
+  doc.setFillColor(255, 255, 255);
+  doc.rect(8, 3, 4, 14, 'F');
+  doc.rect(8, 14, 11, 4, 'F');
+  // Nombre empresa
+  doc.setFont('Helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.setTextColor(255, 255, 255);
+  doc.text('LINARO ARQUITECTURA', 24, 11);
+  doc.setFont('Helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.text('Arq. Asdrubal Linares  ·  Tlf: 0424-5501648', 24, 17);
+  // Título del documento (lado derecho)
+  doc.setFont('Helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(255, 255, 255);
+  doc.text(title, W - 14, 10, { align: 'right' });
+  if (subtitle) {
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.text(subtitle, W - 14, 16, { align: 'right' });
+  }
+  // Reset color
+  doc.setTextColor(30, 30, 30);
+}
+
+function pdfDrawFooter(doc, pageNum, totalPages) {
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  doc.setFillColor(245, 240, 230);
+  doc.rect(0, H - 10, W, 10, 'F');
+  doc.setFillColor(186, 117, 23);
+  doc.rect(0, H - 10, W, 1, 'F');
+  doc.setFont('Helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(100, 80, 30);
+  doc.text('Linaro Arquitectura  ·  Arq. Asdrubal Linares  ·  0424-5501648', 14, H - 3.5);
+  doc.text(`Pág. ${pageNum} de ${totalPages}`, W - 14, H - 3.5, { align: 'right' });
+  doc.setTextColor(30, 30, 30);
+}
+
+function pdfInfoBlock(doc, fields, startY) {
+  const W = doc.internal.pageSize.getWidth();
+  doc.setFillColor(250, 246, 238);
+  doc.setDrawColor(220, 185, 120);
+  doc.roundedRect(10, startY, W - 20, 4 + fields.length * 5.5, 2, 2, 'FD');
+  doc.setFont('Helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.setTextColor(140, 85, 10);
+  fields.forEach((f, i) => {
+    doc.text(f.label + ':', 14, startY + 4 + i * 5.5);
+    doc.setFont('Helvetica', 'normal');
+    doc.setTextColor(30, 30, 30);
+    doc.text(String(f.value), 50, startY + 4 + i * 5.5);
+    doc.setFont('Helvetica', 'bold');
+    doc.setTextColor(140, 85, 10);
+  });
+  doc.setTextColor(30, 30, 30);
+  return startY + 6 + fields.length * 5.5;
+}
+
 function exportPDF() {
+  if (!window.jspdf) return showToast('Librería PDF no cargada aún');
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(20);
-  doc.text("Presupuesto Arquitectónico — Linaro", 14, 20);
-  doc.setFontSize(10);
-  doc.setFont("Helvetica", "normal");
-  
-  const pName = document.getElementById('pName') ? document.getElementById('pName').value : 'S/N';
-  const pClient = document.getElementById('pClient') ? document.getElementById('pClient').value : 'S/N';
-  const pDate = document.getElementById('pDate') ? document.getElementById('pDate').value : projectData.date;
-  
-  doc.text(`Proyecto: ${pName}`, 14, 28);
-  doc.text(`Cliente: ${pClient}`, 14, 34);
-  doc.text(`Fecha: ${pDate}`, 14, 40);
+  const W = doc.internal.pageSize.getWidth();
+  const cur = projectData.currency || 'USD';
 
-  let resData = [
-    ["Subtotal Carpintería/Obra", document.getElementById('subs') ? document.getElementById('subs').textContent : '0.00'],
-    [document.getElementById('disLbl') ? document.getElementById('disLbl').textContent : 'Diseño', document.getElementById('sDis') ? document.getElementById('sDis').textContent : '0.00'],
-    [document.getElementById('ulbl') ? document.getElementById('ulbl').textContent : 'Utilidad', document.getElementById('sutil') ? document.getElementById('sutil').textContent : '0.00'],
-    [document.getElementById('ilbl') ? document.getElementById('ilbl').textContent : 'IVA', document.getElementById('siva') ? document.getElementById('siva').textContent : '0.00'],
-    ["Total Final", document.getElementById('stot') ? document.getElementById('stot').textContent : '0.00']
+  const pName   = document.getElementById('pName')?.value   || '—';
+  const pClient = document.getElementById('pClient')?.value || '—';
+  const pLoc    = document.getElementById('pLocation')?.value || document.getElementById('pLoc')?.value || '—';
+  const pDate   = document.getElementById('pDate')?.value   || projectData.date;
+
+  pdfDrawHeader(doc, 'PRESUPUESTO ARQUITECTÓNICO', `Generado: ${new Date().toLocaleDateString('es-VE')}`);
+
+  let y = pdfInfoBlock(doc, [
+    { label: 'Proyecto', value: pName },
+    { label: 'Cliente',  value: pClient },
+    { label: 'Ubicación', value: pLoc },
+    { label: 'Fecha',    value: pDate }
+  ], 26);
+
+  // Tabla de partidas
+  const tableRows = projectData.items.map(it => [
+    it.desc || '—',
+    it.unid || '—',
+    (it.cant || 0).toFixed(2),
+    `${cur} ${(it.precio || 0).toFixed(2)}`,
+    `${cur} ${((it.cant || 0) * (it.precio || 0)).toFixed(2)}`
+  ]);
+
+  doc.autoTable({
+    startY: y + 2,
+    head: [['Descripción', 'Unid', 'Cant.', 'P. Unitario', 'Total']],
+    body: tableRows,
+    theme: 'plain',
+    headStyles: { fillColor: [186, 117, 23], textColor: 255, fontStyle: 'bold', fontSize: 8, cellPadding: 3 },
+    bodyStyles: { fontSize: 8, cellPadding: 2.5 },
+    alternateRowStyles: { fillColor: [252, 248, 240] },
+    columnStyles: {
+      0: { cellWidth: 80 },
+      1: { halign: 'center', cellWidth: 16 },
+      2: { halign: 'right', cellWidth: 18 },
+      3: { halign: 'right', cellWidth: 28 },
+      4: { halign: 'right', cellWidth: 28, fontStyle: 'bold' }
+    },
+    margin: { left: 10, right: 10 },
+    didDrawPage: (data) => {
+      pdfDrawHeader(doc, 'PRESUPUESTO ARQUITECTÓNICO', '');
+      pdfDrawFooter(doc, data.pageNumber, '?');
+    }
+  });
+
+  // Resumen de totales
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    pdfDrawFooter(doc, i, totalPages);
+  }
+
+  y = doc.lastAutoTable.finalY + 6;
+  const H = doc.internal.pageSize.getHeight();
+  if (y > H - 50) { doc.addPage(); y = 26; }
+
+  const subtotal = document.getElementById('subs')?.textContent || '0.00';
+  const disVal   = document.getElementById('sDis')?.textContent || '0.00';
+  const disLbl   = document.getElementById('disLbl')?.textContent || 'Honorarios de Diseño';
+  const utilVal  = document.getElementById('sutil')?.textContent || '0.00';
+  const utilLbl  = document.getElementById('ulbl')?.textContent || 'Utilidad';
+  const ivaVal   = document.getElementById('siva')?.textContent || '0.00';
+  const ivaLbl   = document.getElementById('ilbl')?.textContent || 'IVA';
+  const totVal   = document.getElementById('stot')?.textContent || '0.00';
+
+  const resRows = [
+    ['Subtotal Carpintería / Obra', subtotal],
+    [disLbl,  disVal],
+    [utilLbl, utilVal],
+    [ivaLbl,  ivaVal],
   ];
 
   doc.autoTable({
-    startY: 48,
-    head: [['Concepto', 'Total']],
-    body: resData,
-    theme: 'striped'
+    startY: y,
+    head: [['Concepto', `Monto (${cur})`]],
+    body: resRows,
+    theme: 'plain',
+    headStyles: { fillColor: [60, 50, 30], textColor: 255, fontStyle: 'bold', fontSize: 8, cellPadding: 2.5 },
+    bodyStyles: { fontSize: 8, cellPadding: 2.5 },
+    alternateRowStyles: { fillColor: [252, 248, 240] },
+    columnStyles: { 0: { cellWidth: 120 }, 1: { halign: 'right', fontStyle: 'bold' } },
+    margin: { left: 10, right: 10 }
   });
 
-  doc.save("Presupuesto_Linaro.pdf");
+  // Total destacado
+  y = doc.lastAutoTable.finalY + 4;
+  doc.setFillColor(186, 117, 23);
+  doc.roundedRect(10, y, W - 20, 12, 2, 2, 'F');
+  doc.setFont('Helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(255, 255, 255);
+  doc.text('TOTAL FINAL:', 16, y + 8);
+  doc.text(totVal, W - 14, y + 8, { align: 'right' });
+  doc.setTextColor(30, 30, 30);
+
+  // Nota pie
+  y += 18;
+  doc.setFont('Helvetica', 'italic');
+  doc.setFontSize(7);
+  doc.setTextColor(120, 100, 60);
+  doc.text('Presupuesto válido por 30 días. Precios expresados en USD. Este documento no constituye contrato.', 10, y);
+
+  const totalPages2 = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages2; i++) {
+    doc.setPage(i);
+    pdfDrawFooter(doc, i, totalPages2);
+  }
+
+  doc.save(`Presupuesto_Linaro_${pName.replace(/\s+/g,'_')}.pdf`);
+  showToast('PDF exportado con éxito ✓');
 }
 
 // ==========================================
@@ -3549,49 +3703,95 @@ function apuExportPDF() {
   if (!window.jspdf) return showToast('Librería PDF no cargada aún');
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  const cur = projectData.currency;
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const cur = projectData.currency || 'USD';
 
-  doc.setFont('Helvetica','bold');
-  doc.setFontSize(18);
-  doc.text('Análisis de Precios Unitarios — Obras Civiles', 14, 18);
-  doc.setFontSize(10); doc.setFont('Helvetica','normal');
-  doc.text(`Proyecto: ${document.getElementById('pName')?.value || '—'}`, 14, 26);
-  doc.text(`Cliente: ${document.getElementById('pClient')?.value || '—'}`, 14, 32);
-  doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 38);
+  const pName   = document.getElementById('pName')?.value   || '—';
+  const pClient = document.getElementById('pClient')?.value || '—';
+  const pDate   = new Date().toLocaleDateString('es-VE');
 
-  let y = 46;
-  apuData.forEach(a => {
+  pdfDrawHeader(doc, 'ANÁLISIS DE PRECIOS UNITARIOS', 'Obras Civiles y Remodelaciones');
+
+  let y = pdfInfoBlock(doc, [
+    { label: 'Proyecto', value: pName },
+    { label: 'Cliente',  value: pClient },
+    { label: 'Fecha',    value: pDate },
+    { label: 'Moneda',   value: cur }
+  ], 26);
+
+  y += 4;
+
+  apuData.forEach((a, idx) => {
     const tot = apuTotals(a);
-    if (y > 250) { doc.addPage(); y = 16; }
-    doc.setFont('Helvetica','bold'); doc.setFontSize(11);
-    doc.text(`${a.code} — ${a.name}`, 14, y);
-    doc.setFont('Helvetica','normal'); doc.setFontSize(9);
-    doc.text(`Unidad: ${a.unit} | Categoría: ${a.category} | Rendimiento: ${a.rendimiento} ${a.unit}/día`, 14, y + 5);
+
+    if (y > H - 60) { doc.addPage(); y = 26; }
+
+    // Cabecera APU
+    doc.setFillColor(60, 50, 30);
+    doc.rect(10, y, W - 20, 8, 'F');
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`${a.code}  —  ${a.name}`, 14, y + 5.5);
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.text(`Unid: ${a.unit}  |  Categoría: ${a.category}  |  Rendimiento: ${a.rendimiento} ${a.unit}/día`, W - 14, y + 5.5, { align: 'right' });
+    doc.setTextColor(30, 30, 30);
     y += 10;
+
     const rows = a.resources.map(r => [
       r.type, r.code, r.name, r.unit,
-      r.cant.toFixed(3), `${cur} ${r.price.toFixed(2)}`, `${cur} ${(r.cant*r.price).toFixed(2)}`
+      r.cant.toFixed(3),
+      `${cur} ${r.price.toFixed(2)}`,
+      `${cur} ${(r.cant * r.price).toFixed(2)}`
     ]);
-    rows.push(['','','','','','Costo directo:', `${cur} ${tot.subtotal.toFixed(2)}`]);
+    rows.push(['', '', '', '', '', 'Costo Directo:', `${cur} ${tot.subtotal.toFixed(2)}`]);
+
     doc.autoTable({
       startY: y,
-      head: [['Tipo','Código','Descripción','Und','Cant.','P.Unit.','Parcial']],
+      head: [['Tipo', 'Código', 'Descripción', 'Und', 'Cant.', 'P. Unit.', 'Parcial']],
       body: rows,
-      theme: 'striped',
-      styles: { fontSize: 8 },
-      columnStyles: { 5: { halign:'right' }, 6: { halign:'right', fontStyle:'bold' } },
-      margin: { left: 14, right: 14 }
+      theme: 'plain',
+      headStyles: { fillColor: [186, 117, 23], textColor: 255, fontStyle: 'bold', fontSize: 7.5, cellPadding: 2 },
+      bodyStyles: { fontSize: 7.5, cellPadding: 2 },
+      alternateRowStyles: { fillColor: [252, 248, 240] },
+      columnStyles: {
+        0: { cellWidth: 20 },
+        1: { cellWidth: 22 },
+        2: { cellWidth: 68 },
+        3: { cellWidth: 12, halign: 'center' },
+        4: { cellWidth: 16, halign: 'right' },
+        5: { cellWidth: 22, halign: 'right' },
+        6: { cellWidth: 22, halign: 'right', fontStyle: 'bold' }
+      },
+      margin: { left: 10, right: 10 },
+      didDrawPage: () => { pdfDrawHeader(doc, 'ANÁLISIS DE PRECIOS UNITARIOS', 'Obras Civiles y Remodelaciones'); }
     });
     y = doc.lastAutoTable.finalY + 8;
   });
 
   // Resumen final
-  if (y > 250) { doc.addPage(); y = 16; }
+  if (y > H - 30) { doc.addPage(); y = 26; }
+
   const totalAll = apuData.reduce((s, a) => s + apuTotals(a).subtotal, 0);
-  doc.setFont('Helvetica','bold'); doc.setFontSize(12);
-  doc.text(`Total General de Obra: ${cur} ${totalAll.toFixed(2)}`, 14, y + 6);
-  doc.save('APU_Obras_Civiles_Linaro.pdf');
-  showToast('PDF exportado ✓');
+  doc.setFillColor(186, 117, 23);
+  doc.roundedRect(10, y, W - 20, 12, 2, 2, 'F');
+  doc.setFont('Helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(255, 255, 255);
+  doc.text('COSTO DIRECTO TOTAL DE OBRA:', 16, y + 8);
+  doc.text(`${cur} ${totalAll.toFixed(2)}`, W - 14, y + 8, { align: 'right' });
+  doc.setTextColor(30, 30, 30);
+
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    pdfDrawFooter(doc, i, totalPages);
+  }
+
+  doc.save(`APU_ObrasCiviles_Linaro_${pName.replace(/\s+/g,'_')}.pdf`);
+  showToast('PDF exportado con éxito ✓');
 }
 
 // ── APUs base predefinidas ─────────────────────────────────────────
@@ -4110,73 +4310,144 @@ function prtExportPDF() {
   if (!window.jspdf) return showToast('Librería PDF no cargada aún');
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'landscape' });
-  const cur = projectData.currency;
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const cur = projectData.currency || 'USD';
 
-  doc.setFont('Helvetica','bold'); doc.setFontSize(16);
-  doc.text('Presupuesto de Obra — Partidas', 14, 16);
-  doc.setFont('Helvetica','normal'); doc.setFontSize(9);
-  doc.text(`Proyecto: ${document.getElementById('pName')?.value || '—'}   |   Cliente: ${document.getElementById('pClient')?.value || '—'}   |   Fecha: ${new Date().toLocaleDateString()}`, 14, 23);
+  const pName   = document.getElementById('pName')?.value   || '—';
+  const pClient = document.getElementById('pClient')?.value || '—';
+  const pDate   = new Date().toLocaleDateString('es-VE');
 
-  let y = 30;
-  const totalObra = partidasData.reduce((s,p) => s + prtTotalCost(p), 0);
+  pdfDrawHeader(doc, 'PRESUPUESTO DE OBRA POR PARTIDAS', `Generado: ${pDate}`);
+
+  let y = pdfInfoBlock(doc, [
+    { label: 'Proyecto', value: pName },
+    { label: 'Cliente',  value: pClient },
+    { label: 'Fecha',    value: pDate },
+    { label: 'Moneda',   value: cur }
+  ], 26);
+
+  y += 4;
+
+  const totalObra = partidasData.reduce((s, p) => s + prtTotalCost(p), 0);
 
   partidasData.forEach(p => {
-    if (y > 170) { doc.addPage(); y = 16; }
+    if (y > H - 60) { doc.addPage(); y = 26; }
     const ptot = prtTotalCost(p);
     const pdur = prtPartidaDuration(p);
-    doc.setFont('Helvetica','bold'); doc.setFontSize(11);
-    doc.text(`${p.num}  ${p.name}`, 14, y);
-    doc.setFont('Helvetica','normal'); doc.setFontSize(8);
-    if (p.desc) { doc.text(p.desc, 20, y+4); y += 4; }
-    y += 6;
+
+    // Cabecera de partida
+    doc.setFillColor(60, 50, 30);
+    doc.rect(10, y, W - 20, 8, 'F');
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`${p.num}  —  ${p.name}`, 14, y + 5.5);
+    if (p.desc) {
+      doc.setFont('Helvetica', 'italic');
+      doc.setFontSize(7);
+      doc.text(p.desc, W - 14, y + 5.5, { align: 'right' });
+    }
+    doc.setTextColor(30, 30, 30);
+    y += 10;
+
     const rows = p.items.map(it => {
       const apu = apuData.find(a => String(a.id) === String(it.apuId));
       const dur = prtItemDuration(it);
-      return [it.code, it.name, apu ? apu.code : '—', it.unit, it.metrado.toFixed(2), `${cur} ${it.price.toFixed(2)}`, `${cur} ${prtItemCost(it).toFixed(2)}`, `${dur} d`];
+      return [
+        it.code, it.name, apu ? apu.code : '—', it.unit,
+        it.metrado.toFixed(2),
+        `${cur} ${it.price.toFixed(2)}`,
+        `${cur} ${prtItemCost(it).toFixed(2)}`,
+        `${dur} d`
+      ];
     });
-    rows.push(['','','','','',`Subtotal ${p.num}:`, `${cur} ${ptot.toFixed(2)}`, `${pdur} d`]);
+    rows.push(['', '', '', '', '', `Subtotal ${p.num}:`, `${cur} ${ptot.toFixed(2)}`, `${pdur} d`]);
+
     doc.autoTable({
       startY: y,
-      head: [['Código','Descripción','APU','Und','Metrado','P.Unit.','Total','Dur.']],
+      head: [['Código', 'Descripción', 'APU', 'Und', 'Metrado', 'P. Unit.', 'Total', 'Dur.']],
       body: rows,
-      theme: 'striped',
-      styles: { fontSize: 7 },
-      columnStyles: { 5:{halign:'right'}, 6:{halign:'right',fontStyle:'bold'}, 7:{halign:'center'} },
-      margin: { left:14, right:14 }
+      theme: 'plain',
+      headStyles: { fillColor: [186, 117, 23], textColor: 255, fontStyle: 'bold', fontSize: 7.5, cellPadding: 2 },
+      bodyStyles: { fontSize: 7.5, cellPadding: 2 },
+      alternateRowStyles: { fillColor: [252, 248, 240] },
+      columnStyles: {
+        0: { cellWidth: 22 },
+        1: { cellWidth: 90 },
+        2: { cellWidth: 22 },
+        3: { cellWidth: 14, halign: 'center' },
+        4: { cellWidth: 20, halign: 'right' },
+        5: { cellWidth: 30, halign: 'right' },
+        6: { cellWidth: 30, halign: 'right', fontStyle: 'bold' },
+        7: { cellWidth: 18, halign: 'center' }
+      },
+      margin: { left: 10, right: 10 },
+      didDrawPage: () => { pdfDrawHeader(doc, 'PRESUPUESTO DE OBRA POR PARTIDAS', ''); }
     });
     y = doc.lastAutoTable.finalY + 8;
   });
 
-  // Totales finales
-  if (y > 170) { doc.addPage(); y = 16; }
-  doc.setFont('Helvetica','bold'); doc.setFontSize(12);
-  doc.text(`Costo Directo Total: ${cur} ${totalObra.toFixed(2)}`, 14, y+6);
-  doc.text(`Duración Total Estimada: ${prtTotalDuration()} días hábiles`, 14, y+14);
+  // Totales finales en página actual
+  if (y > H - 40) { doc.addPage(); y = 26; }
+  doc.setFillColor(186, 117, 23);
+  doc.roundedRect(10, y, W - 20, 12, 2, 2, 'F');
+  doc.setFont('Helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(255, 255, 255);
+  doc.text('COSTO DIRECTO TOTAL:', 16, y + 8);
+  doc.text(`${cur} ${totalObra.toFixed(2)}`, W - 80, y + 8, { align: 'right' });
+  doc.text(`Duración total: ${prtTotalDuration()} días hábiles`, W - 14, y + 8, { align: 'right' });
+  doc.setTextColor(30, 30, 30);
 
-  // Hoja de cronograma (segunda página resumen)
+  // ── Página de Cronograma ────────────────────────────────────────
   doc.addPage();
-  doc.setFontSize(13); doc.text('Cronograma de Actividades', 14, 16);
+  pdfDrawHeader(doc, 'CRONOGRAMA DE ACTIVIDADES', `Proyecto: ${pName}`);
+
   const ganttRows = [];
   let cursor = 1;
   partidasData.forEach(p => {
     p.items.forEach(it => {
       const dur = prtItemDuration(it);
       const start = it.start || cursor;
-      ganttRows.push([it.code, it.name, `${p.num} ${p.name}`, it.unit, it.metrado.toFixed(2), String(start), String(start+dur-1), `${dur} d`]);
+      ganttRows.push([
+        it.code, it.name, `${p.num} ${p.name}`,
+        it.unit, it.metrado.toFixed(2),
+        String(start), String(start + dur - 1), `${dur} d`
+      ]);
       cursor = start + dur;
     });
   });
+
   doc.autoTable({
-    startY: 22,
-    head: [['Código','Actividad','Partida','Und','Metrado','Inicio (día)','Fin (día)','Duración']],
+    startY: 28,
+    head: [['Código', 'Actividad', 'Partida', 'Und', 'Metrado', 'Inicio (día)', 'Fin (día)', 'Duración']],
     body: ganttRows,
-    theme: 'striped', styles: { fontSize: 8 },
-    columnStyles: { 5:{halign:'center'}, 6:{halign:'center'}, 7:{halign:'center',fontStyle:'bold'} },
-    margin: {left:14,right:14}
+    theme: 'plain',
+    headStyles: { fillColor: [186, 117, 23], textColor: 255, fontStyle: 'bold', fontSize: 8, cellPadding: 2.5 },
+    bodyStyles: { fontSize: 8, cellPadding: 2.5 },
+    alternateRowStyles: { fillColor: [252, 248, 240] },
+    columnStyles: {
+      0: { cellWidth: 24 },
+      1: { cellWidth: 90 },
+      2: { cellWidth: 60 },
+      3: { cellWidth: 14, halign: 'center' },
+      4: { cellWidth: 20, halign: 'right' },
+      5: { cellWidth: 22, halign: 'center' },
+      6: { cellWidth: 22, halign: 'center' },
+      7: { cellWidth: 22, halign: 'center', fontStyle: 'bold' }
+    },
+    margin: { left: 10, right: 10 }
   });
 
-  doc.save('Partidas_Obra_Linaro.pdf');
-  showToast('PDF exportado ✓');
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    pdfDrawFooter(doc, i, totalPages);
+  }
+
+  doc.save(`Partidas_Obra_Linaro_${pName.replace(/\s+/g,'_')}.pdf`);
+  showToast('PDF exportado con éxito ✓');
 }
 
 // ==========================================
