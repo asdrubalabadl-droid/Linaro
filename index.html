@@ -122,6 +122,9 @@
 })();
 </script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/%3E%3Crect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/%3E%3Cpath d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/%3E%3Crect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/%3E%3C/svg%3E">
+<!-- jsPDF + AutoTable -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
 // ==========================================
 // 1. ESTADO GLOBAL DE LA APLICACIÓN
@@ -491,23 +494,12 @@ function exportPDF() {
       3: { halign: 'right', cellWidth: 28 },
       4: { halign: 'right', cellWidth: 28, fontStyle: 'bold' }
     },
-    margin: { left: 10, right: 10 },
-    didDrawPage: (data) => {
-      pdfDrawHeader(doc, 'PRESUPUESTO ARQUITECTÓNICO', '');
-      pdfDrawFooter(doc, data.pageNumber, '?');
-    }
+    margin: { left: 10, right: 10 }
   });
-
-  // Resumen de totales
-  const totalPages = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
-    pdfDrawFooter(doc, i, totalPages);
-  }
 
   y = doc.lastAutoTable.finalY + 6;
   const H = doc.internal.pageSize.getHeight();
-  if (y > H - 50) { doc.addPage(); y = 26; }
+  if (y > H - 50) { doc.addPage(); y = 26; pdfDrawHeader(doc, 'PRESUPUESTO ARQUITECTÓNICO', ''); }
 
   const subtotal = document.getElementById('subs')?.textContent || '0.00';
   const disVal   = document.getElementById('sDis')?.textContent || '0.00';
@@ -555,10 +547,12 @@ function exportPDF() {
   doc.setTextColor(120, 100, 60);
   doc.text('Presupuesto válido por 30 días. Precios expresados en USD. Este documento no constituye contrato.', 10, y);
 
-  const totalPages2 = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= totalPages2; i++) {
+  // Aplicar header y footer a todas las páginas al final
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
-    pdfDrawFooter(doc, i, totalPages2);
+    pdfDrawHeader(doc, 'PRESUPUESTO ARQUITECTÓNICO', `Generado: ${new Date().toLocaleDateString('es-VE')}`);
+    pdfDrawFooter(doc, i, totalPages);
   }
 
   doc.save(`Presupuesto_Linaro_${pName.replace(/\s+/g,'_')}.pdf`);
@@ -3766,7 +3760,7 @@ function apuExportPDF() {
         6: { cellWidth: 22, halign: 'right', fontStyle: 'bold' }
       },
       margin: { left: 10, right: 10 },
-      didDrawPage: () => { pdfDrawHeader(doc, 'ANÁLISIS DE PRECIOS UNITARIOS', 'Obras Civiles y Remodelaciones'); }
+      didDrawPage: () => { /* headers aplicados al final */ }
     });
     y = doc.lastAutoTable.finalY + 8;
   });
@@ -4383,7 +4377,7 @@ function prtExportPDF() {
         7: { cellWidth: 18, halign: 'center' }
       },
       margin: { left: 10, right: 10 },
-      didDrawPage: () => { pdfDrawHeader(doc, 'PRESUPUESTO DE OBRA POR PARTIDAS', ''); }
+      didDrawPage: () => { /* headers aplicados al final */ }
     });
     y = doc.lastAutoTable.finalY + 8;
   });
