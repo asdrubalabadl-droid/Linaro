@@ -1876,6 +1876,34 @@ footer span{color:var(--gold);font-weight:500}
 .apu-chip-H{background:rgba(160,82,45,.1);color:#a0522d;border-color:rgba(160,82,45,.3)}
 .apu-chip-T{background:rgba(107,33,168,.1);color:#6b21a8;border-color:rgba(107,33,168,.3)}
 .apu-badge-cat{font-size:10px;padding:2px 6px;border-radius:3px;font-weight:700;background:var(--border);color:var(--text2)}
+/* ── PARTIDAS ───────────────────────────────────────────────────────── */
+.prt-card{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--rl);margin-bottom:14px;overflow:hidden}
+.prt-header{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--bg3);border-bottom:.5px solid var(--border);cursor:pointer;user-select:none}
+.prt-header:hover{background:var(--gold-l)}
+.prt-num{font-size:11px;font-weight:800;font-family:monospace;color:var(--gold);background:rgba(186,117,23,.15);padding:3px 8px;border-radius:4px;white-space:nowrap}
+.prt-name{font-size:13px;font-weight:700;color:var(--text);flex:1}
+.prt-total{font-size:13px;font-weight:800;font-family:monospace;color:var(--gold);white-space:nowrap}
+.prt-dur{font-size:11px;color:#185fa5;font-family:monospace;white-space:nowrap;margin-left:8px}
+.prt-pct{font-size:10px;color:var(--text3);white-space:nowrap;margin-left:6px}
+.prt-body{padding:10px 14px}
+.prt-items-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px}
+.prt-items-table th{padding:6px 8px;background:var(--bg3);color:var(--text2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;border-bottom:.5px solid var(--border);text-align:left}
+.prt-items-table td{padding:6px 8px;border-bottom:.5px solid var(--border)}
+.prt-items-table tr:last-child td{border-bottom:none}
+.prt-items-table td input{width:100%;background:transparent;border:.5px solid transparent;padding:3px 5px;border-radius:4px;color:var(--text);font-size:12px}
+.prt-items-table td input:hover{border-color:var(--border);background:var(--bg)}
+.prt-items-table td input:focus{border-color:var(--gold);background:var(--bg);outline:none}
+.prt-apu-badge{font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(24,95,165,.1);color:#185fa5;font-weight:700;white-space:nowrap}
+/* Gantt */
+.gantt-wrap{overflow-x:auto}
+.gantt-table{border-collapse:collapse;font-size:11px;min-width:600px}
+.gantt-table th{padding:5px 8px;background:var(--bg3);color:var(--text2);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.04em;border:.5px solid var(--border);white-space:nowrap}
+.gantt-table td{padding:5px 8px;border:.5px solid var(--border);white-space:nowrap}
+.gantt-bar-cell{padding:3px 4px;position:relative}
+.gantt-bar{height:18px;border-radius:3px;position:absolute;top:50%;transform:translateY(-50%);min-width:4px}
+.gantt-day-header{width:22px;text-align:center;font-size:9px;padding:4px 2px}
+.gantt-crit{background:linear-gradient(90deg,#ba7517,#e09224)}
+.gantt-normal{background:linear-gradient(90deg,#185fa5,#3a85cc)}
 
 .kw-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px}
 .kw-modal{background:var(--bg2);border-radius:16px;width:100%;max-width:900px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.4);border:1px solid var(--gold-m)}
@@ -2510,48 +2538,132 @@ if (typeof currentInvTab === 'undefined') {
 
 <!-- ========= APU CIVIL MODULE ========= -->
 <div id="apu" class="module" style="display:none;padding:0">
-  <div class="flexb mb16 wrap gap8">
-    <div>
-      <h2 style="font-size:18px;font-weight:600;margin-bottom:4px">🏗️ Análisis de Precios Unitarios — Obras Civiles</h2>
-      <p style="font-size:13px;color:var(--text2)">Gestiona APUs por capítulo. Cada APU desglosa materiales, equipos, mano de obra y transporte.</p>
+
+  <!-- Sub-tabs APU / Partidas -->
+  <div style="display:flex;gap:0;border-bottom:.5px solid var(--border);margin-bottom:18px;background:var(--bg3);border-radius:var(--rl) var(--rl) 0 0;overflow:hidden">
+    <button class="apu-main-tab on" id="apuTab-apus" onclick="apuSwitchMain('apus',this)" style="flex:1;padding:11px 18px;border:none;background:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--gold);border-bottom:2px solid var(--gold)">📐 Biblioteca APU</button>
+    <button class="apu-main-tab"    id="apuTab-partidas" onclick="apuSwitchMain('partidas',this)" style="flex:1;padding:11px 18px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--text2);border-bottom:2px solid transparent">📋 Partidas de Obra</button>
+  </div>
+
+  <!-- ── Panel APUs ────────────────────────────── -->
+  <div id="apuPanel-apus">
+    <div class="flexb mb16 wrap gap8">
+      <p style="font-size:13px;color:var(--text2)">Define y edita tus APUs. Luego úsalas en las Partidas de Obra.</p>
+      <div class="flex gap8 wrap">
+        <button class="btn btn-gold" onclick="apuNewModal()">+ Nueva APU</button>
+        <button class="btn" onclick="apuLoadDefaults()">📦 Cargar APUs base</button>
+      </div>
     </div>
-    <div class="flex gap8 wrap">
-      <button class="btn btn-gold" onclick="apuNewModal()">+ Nueva APU</button>
-      <button class="btn btn-green" onclick="apuExportPDF()">⬇ Exportar PDF Presupuesto</button>
-      <button class="btn" onclick="apuSendToBudget()">→ Enviar al Presupuesto</button>
+    <div class="apu-layout">
+      <div>
+        <div class="card" style="padding:10px">
+          <div class="flex gap6 mb8">
+            <input type="text" id="apuSearch" placeholder="Buscar APU…" oninput="apuRenderList()" style="flex:1;font-size:12px">
+            <select id="apuFilterCat" onchange="apuRenderList()" style="font-size:12px;width:120px">
+              <option value="">Todos</option>
+              <option>Movimiento de tierra</option><option>Fundaciones</option><option>Estructura</option>
+              <option>Mampostería</option><option>Acabados</option><option>Instalaciones</option><option>Varios</option>
+            </select>
+          </div>
+          <div id="apuListContainer" style="max-height:520px;overflow-y:auto"></div>
+          <div class="flexb mt8" style="font-size:11px;color:var(--text3)">
+            <span id="apuCount">0 APUs</span>
+          </div>
+        </div>
+      </div>
+      <div id="apuDetailPane">
+        <div style="padding:60px;text-align:center;color:var(--text2);border:.5px solid var(--border);border-radius:var(--rl);background:var(--bg2)">
+          <div style="font-size:36px;margin-bottom:10px">📐</div>
+          <p>Selecciona una APU para ver su desglose</p>
+          <p style="font-size:12px;margin-top:6px">o crea una nueva con el botón de arriba</p>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="apu-layout">
-    <!-- Lista -->
-    <div>
-      <div class="card" style="padding:10px">
-        <div class="flex gap6 mb8">
-          <input type="text" id="apuSearch" placeholder="Buscar APU…" oninput="apuRenderList()" style="flex:1;font-size:12px">
-          <select id="apuFilterCat" onchange="apuRenderList()" style="font-size:12px;width:120px">
-            <option value="">Todos</option>
-            <option>Movimiento de tierra</option>
-            <option>Fundaciones</option>
-            <option>Estructura</option>
-            <option>Mampostería</option>
-            <option>Acabados</option>
-            <option>Instalaciones</option>
-            <option>Varios</option>
-          </select>
-        </div>
-        <div id="apuListContainer" style="max-height:520px;overflow-y:auto"></div>
-        <div class="flexb mt8" style="font-size:11px;color:var(--text3)">
-          <span id="apuCount">0 APUs</span>
-          <button class="btn btn-sm" onclick="apuLoadDefaults()">📦 Cargar APUs base</button>
-        </div>
+
+  <!-- ── Panel Partidas ───────────────────────── -->
+  <div id="apuPanel-partidas" style="display:none">
+    <div class="flexb mb16 wrap gap8">
+      <div>
+        <p style="font-size:13px;color:var(--text2)">Organiza tu obra en partidas. Asigna metrados y APUs. Estima tiempos tipo Project.</p>
+      </div>
+      <div class="flex gap8 wrap">
+        <button class="btn btn-gold" onclick="prtNewModal()">+ Nueva partida</button>
+        <button class="btn btn-green" onclick="prtExportPDF()">⬇ Exportar PDF</button>
+        <button class="btn" onclick="prtSendToBudget()">→ Enviar al Presupuesto</button>
       </div>
     </div>
-    <!-- Detalle -->
-    <div id="apuDetailPane">
-      <div style="padding:60px;text-align:center;color:var(--text2);border:.5px solid var(--border);border-radius:var(--rl);background:var(--bg2)">
-        <div style="font-size:36px;margin-bottom:10px">📐</div>
-        <p>Selecciona una APU para ver su desglose</p>
-        <p style="font-size:12px;margin-top:6px">o crea una nueva con el botón de arriba</p>
+
+    <!-- Resumen general -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px" id="prtSummary">
+      <div class="metric"><div class="mlabel">Partidas</div><div class="mval tgold" id="prtMetPartidas">0</div></div>
+      <div class="metric"><div class="mlabel">Ítems totales</div><div class="mval" id="prtMetItems">0</div></div>
+      <div class="metric"><div class="mlabel">Costo directo obra</div><div class="mval tgold" id="prtMetCosto">—</div></div>
+      <div class="metric"><div class="mlabel">Duración estimada</div><div class="mval" style="color:#185fa5" id="prtMetDuracion">— días</div></div>
+    </div>
+
+    <!-- Tabla de partidas -->
+    <div id="prtContainer"></div>
+
+    <!-- Cronograma tipo Project -->
+    <div style="margin-top:20px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--text);display:flex;align-items:center;gap:8px">
+        📅 Cronograma de obra
+        <span style="font-size:11px;font-weight:400;color:var(--text2)">Estimación automática por rendimientos APU</span>
+        <button class="btn btn-sm" onclick="prtRenderGantt()" style="margin-left:auto">↻ Actualizar</button>
       </div>
+      <div id="prtGantt" style="overflow-x:auto;background:var(--bg2);border:.5px solid var(--border);border-radius:var(--rl);padding:14px;min-height:80px">
+        <div style="color:var(--text3);font-size:12px;text-align:center;padding:20px">Crea partidas con ítems para ver el cronograma</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVA PARTIDA -->
+<div id="prtModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9650;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border-radius:14px;width:min(480px,95vw);padding:24px;box-shadow:0 24px 80px rgba(0,0,0,.5);border:.5px solid var(--border)">
+    <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--gold)">Nueva Partida</div>
+    <div style="display:grid;grid-template-columns:80px 1fr;gap:10px;margin-bottom:10px">
+      <div class="field"><label>N°</label><input type="text" id="prtModalNum" placeholder="01"></div>
+      <div class="field"><label>Nombre de la partida</label><input type="text" id="prtModalName" placeholder="Ej: Movimiento de tierra"></div>
+    </div>
+    <div class="field mb14"><label>Descripción (opcional)</label><input type="text" id="prtModalDesc" placeholder="Alcance de la partida"></div>
+    <div class="flex gap8" style="justify-content:flex-end">
+      <button class="btn" onclick="document.getElementById('prtModal').style.display='none'">Cancelar</button>
+      <button class="btn btn-gold" onclick="prtCreate()">Crear partida</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AÑADIR ÍTEM A PARTIDA -->
+<div id="prtItemModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9700;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border-radius:14px;width:min(560px,95vw);padding:24px;box-shadow:0 24px 80px rgba(0,0,0,.5);border:.5px solid var(--border)">
+    <div style="font-size:15px;font-weight:700;margin-bottom:14px;color:var(--gold)">Agregar ítem a partida</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="field"><label>Código del ítem</label><input type="text" id="prtItemCode" placeholder="Ej: 01.01"></div>
+      <div class="field"><label>Unidad</label>
+        <select id="prtItemUnit"><option>m³</option><option>m²</option><option>ml</option><option>kg</option><option>global</option><option>unid</option><option>ton</option></select>
+      </div>
+    </div>
+    <div class="field mb10"><label>Descripción de la actividad</label><input type="text" id="prtItemName" placeholder="Ej: Excavación en tierra suelta con retroexcavadora"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="field"><label>Metrado (cantidad de obra)</label><input type="number" id="prtItemMetrado" value="1" min="0" step="0.01"></div>
+      <div class="field"><label>APU asignada</label>
+        <select id="prtItemAPU" onchange="prtItemAPUChanged()">
+          <option value="">— Sin APU (precio manual) —</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="field"><label>Precio unitario <span id="prtItemPriceNote" style="color:var(--text3);font-weight:400">(manual)</span></label>
+        <input type="number" id="prtItemPrice" value="0" min="0" step="0.01">
+      </div>
+      <div class="field"><label>Inicio (día del proyecto)</label><input type="number" id="prtItemStart" value="1" min="1" step="1"></div>
+    </div>
+    <div id="prtItemAPUInfo" style="display:none;background:var(--gold-l);border:.5px solid var(--gold-m);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px"></div>
+    <div class="flex gap8" style="justify-content:flex-end">
+      <button class="btn" onclick="document.getElementById('prtItemModal').style.display='none'">Cancelar</button>
+      <button class="btn btn-gold" onclick="prtItemAdd()">Agregar ítem</button>
     </div>
   </div>
 </div>
@@ -3616,7 +3728,460 @@ function apuLoadDefaults() {
   showToast(`✓ ${apuData.length} APUs base cargadas`);
 }
 
-// Patch goTab to show/hide APU module correctly
+// ==========================================
+// PARTIDAS DE OBRA — Motor completo
+// ==========================================
+let partidasData = [];   // [{ id, num, name, desc, items:[], collapsed:false }]
+
+// ── helpers ───────────────────────────────────────────────────────
+function prtItemCost(item) {
+  return (parseFloat(item.metrado) || 0) * (parseFloat(item.price) || 0);
+}
+function prtTotalCost(p) {
+  return p.items.reduce((s, it) => s + prtItemCost(it), 0);
+}
+function prtItemDuration(item) {
+  // Duración = metrado / rendimiento APU (unid/día). Si no hay APU, 1 día por ítem.
+  const apu = apuData.find(a => String(a.id) === String(item.apuId));
+  if (!apu || !apu.rendimiento) return Math.ceil((parseFloat(item.metrado) || 1));
+  return Math.max(1, Math.ceil((parseFloat(item.metrado) || 1) / apu.rendimiento));
+}
+function prtPartidaDuration(p) {
+  // Suma de duraciones de los ítems (secuencial conservador)
+  return p.items.reduce((s, it) => s + prtItemDuration(it), 0) || 1;
+}
+function prtTotalDuration() {
+  // Duración total: suma de las partidas (ruta crítica simplificada secuencial)
+  return partidasData.reduce((s, p) => s + prtPartidaDuration(p), 0);
+}
+
+// ── sub-tab switcher ──────────────────────────────────────────────
+function apuSwitchMain(tab, btn) {
+  document.querySelectorAll('.apu-main-tab').forEach(b => {
+    b.classList.remove('on');
+    b.style.color = 'var(--text2)';
+    b.style.borderBottom = '2px solid transparent';
+    b.style.fontWeight = '500';
+  });
+  btn.classList.add('on');
+  btn.style.color = 'var(--gold)';
+  btn.style.borderBottom = '2px solid var(--gold)';
+  btn.style.fontWeight = '600';
+  document.getElementById('apuPanel-apus').style.display      = tab === 'apus'     ? '' : 'none';
+  document.getElementById('apuPanel-partidas').style.display  = tab === 'partidas' ? '' : 'none';
+  if (tab === 'partidas') { prtRender(); prtRenderGantt(); }
+}
+
+// ── modales ───────────────────────────────────────────────────────
+function prtNewModal() {
+  document.getElementById('prtModalNum').value  = String(partidasData.length + 1).padStart(2,'0');
+  document.getElementById('prtModalName').value = '';
+  document.getElementById('prtModalDesc').value = '';
+  document.getElementById('prtModal').style.display = 'flex';
+  document.getElementById('prtModalName').focus();
+}
+
+function prtCreate() {
+  const num  = document.getElementById('prtModalNum').value.trim()  || String(partidasData.length+1).padStart(2,'0');
+  const name = document.getElementById('prtModalName').value.trim();
+  if (!name) return showToast('Escribe el nombre de la partida');
+  const desc = document.getElementById('prtModalDesc').value.trim();
+  partidasData.push({ id: Date.now(), num, name, desc, items: [], collapsed: false });
+  document.getElementById('prtModal').style.display = 'none';
+  prtRender();
+  showToast(`Partida ${num} creada`);
+}
+
+let _prtActivePartidaId = null;
+function prtOpenItemModal(partidaId) {
+  _prtActivePartidaId = partidaId;
+  // Populate APU select
+  const sel = document.getElementById('prtItemAPU');
+  sel.innerHTML = '<option value="">— Sin APU (precio manual) —</option>';
+  apuData.forEach(a => {
+    const tot = apuTotals(a);
+    sel.innerHTML += `<option value="${a.id}">[${a.code}] ${a.name} — ${projectData.currency} ${tot.subtotal.toFixed(2)}/${a.unit}</option>`;
+  });
+  // Reset fields
+  document.getElementById('prtItemCode').value    = '';
+  document.getElementById('prtItemName').value    = '';
+  document.getElementById('prtItemMetrado').value = '1';
+  document.getElementById('prtItemPrice').value   = '0';
+  document.getElementById('prtItemStart').value   = String(prtNextStartDay(partidaId));
+  document.getElementById('prtItemAPUInfo').style.display = 'none';
+  document.getElementById('prtItemPriceNote').textContent = '(manual)';
+  document.getElementById('prtItemModal').style.display = 'flex';
+  document.getElementById('prtItemName').focus();
+}
+
+function prtNextStartDay(partidaId) {
+  // Sugiere el día de inicio = fin de la partida anterior o 1
+  let day = 1;
+  for (const p of partidasData) {
+    if (String(p.id) === String(partidaId)) break;
+    day += prtPartidaDuration(p);
+  }
+  return day;
+}
+
+function prtItemAPUChanged() {
+  const apuId = document.getElementById('prtItemAPU').value;
+  const info  = document.getElementById('prtItemAPUInfo');
+  const priceNote = document.getElementById('prtItemPriceNote');
+  if (!apuId) {
+    info.style.display = 'none';
+    priceNote.textContent = '(manual)';
+    return;
+  }
+  const apu = apuData.find(a => String(a.id) === apuId);
+  if (!apu) return;
+  const tot = apuTotals(apu);
+  document.getElementById('prtItemPrice').value = tot.subtotal.toFixed(2);
+  priceNote.textContent = `(APU: ${apu.code})`;
+  const metrado = parseFloat(document.getElementById('prtItemMetrado').value) || 1;
+  const durDias = Math.max(1, Math.ceil(metrado / apu.rendimiento));
+  info.style.display = 'block';
+  info.innerHTML = `
+    <strong>${apu.code} — ${apu.name}</strong><br>
+    Costo APU: <strong>${projectData.currency} ${tot.subtotal.toFixed(2)}/${apu.unit}</strong> &nbsp;|&nbsp;
+    Rendimiento: <strong>${apu.rendimiento} ${apu.unit}/día</strong> &nbsp;|&nbsp;
+    Duración estimada para ${metrado} ${apu.unit}: <strong style="color:#185fa5">${durDias} día(s)</strong>
+  `;
+}
+
+function prtItemAdd() {
+  const p = partidasData.find(x => String(x.id) === String(_prtActivePartidaId));
+  if (!p) return;
+  const name = document.getElementById('prtItemName').value.trim();
+  if (!name) return showToast('Escribe la descripción del ítem');
+  const code    = document.getElementById('prtItemCode').value.trim() || `${p.num}.${String(p.items.length+1).padStart(2,'0')}`;
+  const unit    = document.getElementById('prtItemUnit').value;
+  const metrado = parseFloat(document.getElementById('prtItemMetrado').value) || 0;
+  const price   = parseFloat(document.getElementById('prtItemPrice').value)   || 0;
+  const apuId   = document.getElementById('prtItemAPU').value || null;
+  const start   = parseInt(document.getElementById('prtItemStart').value)     || 1;
+  p.items.push({ id: Date.now(), code, name, unit, metrado, price, apuId, start });
+  document.getElementById('prtItemModal').style.display = 'none';
+  prtRender();
+  prtRenderGantt();
+  showToast('Ítem agregado ✓');
+}
+
+// ── render tabla partidas ─────────────────────────────────────────
+function prtRender() {
+  const container = document.getElementById('prtContainer');
+  if (!container) return;
+
+  if (!partidasData.length) {
+    container.innerHTML = `<div style="text-align:center;padding:50px 20px;color:var(--text2);border:.5px solid var(--border);border-radius:var(--rl);background:var(--bg2)">
+      <div style="font-size:32px;margin-bottom:10px">📋</div>
+      <p>No hay partidas aún. Crea la primera con el botón de arriba.</p>
+    </div>`;
+    prtUpdateSummary();
+    return;
+  }
+
+  const totalObra = partidasData.reduce((s,p) => s + prtTotalCost(p), 0);
+
+  container.innerHTML = partidasData.map(p => {
+    const ptot  = prtTotalCost(p);
+    const pdur  = prtPartidaDuration(p);
+    const ppct  = totalObra > 0 ? ((ptot/totalObra)*100).toFixed(1) : '0.0';
+
+    const itemRows = p.items.length ? p.items.map(it => {
+      const apu    = apuData.find(a => String(a.id) === String(it.apuId));
+      const dur    = prtItemDuration(it);
+      const itCost = prtItemCost(it);
+      return `<tr>
+        <td style="font-family:monospace;font-size:11px;color:var(--text3)">${it.code}</td>
+        <td>${it.name}${apu ? `<br><span class="prt-apu-badge">${apu.code}: ${apu.name}</span>` : ''}</td>
+        <td style="text-align:center"><span class="tag">${it.unit}</span></td>
+        <td class="tr"><input type="number" value="${it.metrado}" min="0" step="0.01" style="width:72px;text-align:right" onchange="prtUpdateItem('${p.id}','${it.id}','metrado',this.value)"></td>
+        <td class="tr"><input type="number" value="${it.price}" min="0" step="0.01" style="width:80px;text-align:right" onchange="prtUpdateItem('${p.id}','${it.id}','price',this.value)"></td>
+        <td class="tr mono" style="font-weight:700;color:var(--gold)">${projectData.currency} ${itCost.toFixed(2)}</td>
+        <td style="text-align:center;color:#185fa5;font-family:monospace;font-size:11px">${dur}d</td>
+        <td style="text-align:center;color:var(--text3);font-size:11px">${it.start}</td>
+        <td><button class="btn btn-sm btn-del" onclick="prtDeleteItem('${p.id}','${it.id}')">×</button></td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="9" style="text-align:center;padding:14px;color:var(--text3);font-size:12px">Sin ítems — <button class="btn btn-sm" onclick="prtOpenItemModal('${p.id}')">+ Agregar</button></td></tr>`;
+
+    return `<div class="prt-card">
+      <div class="prt-header" onclick="prtToggle('${p.id}')">
+        <span class="prt-num">${p.num}</span>
+        <span class="prt-name">${p.name}${p.desc ? `<span style="font-size:11px;font-weight:400;color:var(--text2);margin-left:8px">${p.desc}</span>` : ''}</span>
+        <span class="prt-total">${projectData.currency} ${ptot.toFixed(2)}</span>
+        <span class="prt-dur">⏱ ${pdur}d</span>
+        <span class="prt-pct">${ppct}%</span>
+        <span style="color:var(--text3);margin-left:8px;font-size:12px">${p.collapsed ? '▶' : '▼'}</span>
+        <button class="btn btn-sm btn-del" style="flex-shrink:0" onclick="event.stopPropagation();prtDeletePartida('${p.id}')">🗑</button>
+      </div>
+      ${p.collapsed ? '' : `<div class="prt-body">
+        <table class="prt-items-table">
+          <thead><tr>
+            <th style="width:70px">Código</th><th>Descripción / APU</th>
+            <th style="width:55px;text-align:center">Und</th>
+            <th class="tr" style="width:85px">Metrado</th>
+            <th class="tr" style="width:95px">P.Unit (${projectData.currency})</th>
+            <th class="tr" style="width:110px">Total</th>
+            <th style="width:45px;text-align:center">Dur.</th>
+            <th style="width:50px;text-align:center">Inicio</th>
+            <th style="width:32px"></th>
+          </tr></thead>
+          <tbody>${itemRows}</tbody>
+        </table>
+        <div class="flex gap8">
+          <button class="btn btn-sm btn-gold" onclick="prtOpenItemModal('${p.id}')">+ Ítem</button>
+          <button class="btn btn-sm" onclick="prtEditPartida('${p.id}')">✏️ Editar partida</button>
+        </div>
+      </div>`}
+    </div>`;
+  }).join('');
+
+  // Resumen total
+  container.innerHTML += `<div style="display:flex;justify-content:flex-end;margin-top:4px">
+    <div style="background:var(--gold-l);border:.5px solid var(--gold);border-radius:8px;padding:12px 20px;display:flex;gap:24px;align-items:center">
+      <div style="text-align:center"><div style="font-size:11px;color:var(--gold)">COSTO DIRECTO TOTAL</div><div style="font-size:22px;font-weight:800;font-family:monospace;color:var(--gold)">${projectData.currency} ${totalObra.toFixed(2)}</div></div>
+      <div style="text-align:center"><div style="font-size:11px;color:var(--text2)">Duración total</div><div style="font-size:16px;font-weight:700;font-family:monospace;color:#185fa5">${prtTotalDuration()} días</div></div>
+    </div>
+  </div>`;
+
+  prtUpdateSummary();
+}
+
+function prtUpdateSummary() {
+  const totalCost = partidasData.reduce((s,p) => s + prtTotalCost(p), 0);
+  const totalItems = partidasData.reduce((s,p) => s + p.items.length, 0);
+  const el = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
+  el('prtMetPartidas', partidasData.length);
+  el('prtMetItems',    totalItems);
+  el('prtMetCosto',    `${projectData.currency} ${totalCost.toFixed(2)}`);
+  el('prtMetDuracion', `${prtTotalDuration()} días`);
+}
+
+function prtToggle(id) {
+  const p = partidasData.find(x => String(x.id) === String(id));
+  if (p) { p.collapsed = !p.collapsed; prtRender(); }
+}
+
+function prtUpdateItem(partidaId, itemId, field, value) {
+  const p  = partidasData.find(x => String(x.id) === String(partidaId));
+  const it = p && p.items.find(x => String(x.id) === String(itemId));
+  if (!it) return;
+  it[field] = field === 'start' ? parseInt(value)||1 : parseFloat(value)||0;
+  prtRender();
+  prtRenderGantt();
+}
+
+function prtDeleteItem(partidaId, itemId) {
+  const p = partidasData.find(x => String(x.id) === String(partidaId));
+  if (p) { p.items = p.items.filter(x => String(x.id) !== String(itemId)); prtRender(); prtRenderGantt(); }
+}
+
+function prtDeletePartida(id) {
+  if (!confirm('¿Eliminar esta partida y todos sus ítems?')) return;
+  partidasData = partidasData.filter(x => String(x.id) !== String(id));
+  prtRender();
+  prtRenderGantt();
+}
+
+function prtEditPartida(id) {
+  const p = partidasData.find(x => String(x.id) === String(id));
+  if (!p) return;
+  document.getElementById('prtModalNum').value  = p.num;
+  document.getElementById('prtModalName').value = p.name;
+  document.getElementById('prtModalDesc').value = p.desc || '';
+  const btn = document.querySelector('#prtModal button.btn-gold');
+  if (btn) {
+    btn.textContent = 'Guardar cambios';
+    btn.onclick = () => {
+      p.num  = document.getElementById('prtModalNum').value.trim()  || p.num;
+      p.name = document.getElementById('prtModalName').value.trim() || p.name;
+      p.desc = document.getElementById('prtModalDesc').value.trim();
+      document.getElementById('prtModal').style.display = 'none';
+      btn.textContent = 'Crear partida'; btn.onclick = prtCreate;
+      prtRender();
+    };
+  }
+  document.getElementById('prtModal').style.display = 'flex';
+}
+
+// ── Cronograma Gantt ──────────────────────────────────────────────
+function prtRenderGantt() {
+  const el = document.getElementById('prtGantt');
+  if (!el) return;
+
+  const allItems = [];
+  partidasData.forEach(p => p.items.forEach(it => allItems.push({ ...it, partidaName: `${p.num} ${p.name}` })));
+
+  if (!allItems.length) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px;text-align:center;padding:20px">Crea partidas con ítems para ver el cronograma</div>';
+    return;
+  }
+
+  // Calcular días de inicio/fin por ítem
+  const rows = [];
+  let cursor = 1;
+  partidasData.forEach(p => {
+    let partStart = cursor;
+    p.items.forEach(it => {
+      const dur   = prtItemDuration(it);
+      const start = it.start || cursor;
+      const end   = start + dur - 1;
+      rows.push({ label: `${it.code} ${it.name}`, partida: `${p.num} ${p.name}`, start, end, dur, unit: it.unit, metrado: it.metrado, apuId: it.apuId });
+      cursor = Math.max(cursor, end + 1);
+    });
+  });
+
+  const maxDay   = Math.max(...rows.map(r => r.end), 10);
+  const CELL_W   = 22;
+
+  // Header días
+  let dayHeaders = '';
+  for (let d = 1; d <= maxDay; d++) {
+    dayHeaders += `<th class="gantt-day-header" style="min-width:${CELL_W}px;background:${d % 7 === 0 ? 'rgba(186,117,23,.08)' : ''}">${d}</th>`;
+  }
+
+  // Filas
+  const rowsHtml = rows.map(r => {
+    let bars = '';
+    for (let d = 1; d <= maxDay; d++) {
+      const inRange = d >= r.start && d <= r.end;
+      const isFirst = d === r.start;
+      const isLast  = d === r.end;
+      if (inRange && isFirst) {
+        const width = (r.dur * CELL_W) - 4;
+        const apu   = apuData.find(a => String(a.id) === String(r.apuId));
+        bars += `<td class="gantt-bar-cell" colspan="${r.dur}" style="position:relative;height:28px;padding:0 2px;border:.5px solid var(--border)">
+          <div class="${apu ? 'gantt-crit' : 'gantt-normal'}" style="height:18px;border-radius:3px;display:flex;align-items:center;padding:0 6px;font-size:9px;color:#fff;font-weight:600;overflow:hidden;white-space:nowrap;width:calc(100% - 4px)">
+            ${r.metrado} ${r.unit}${apu ? ` · ${apu.code}` : ''}
+          </div>
+        </td>`;
+        d += r.dur - 1;
+      } else if (!inRange) {
+        bars += `<td style="border:.5px solid var(--border);background:${d % 7 === 0 ? 'rgba(186,117,23,.04)' : ''}"></td>`;
+      }
+    }
+    return `<tr>
+      <td style="padding:4px 8px;white-space:nowrap;font-size:11px;border:.5px solid var(--border);max-width:180px;overflow:hidden;text-overflow:ellipsis" title="${r.label}">${r.label}</td>
+      <td style="padding:4px 8px;white-space:nowrap;font-size:10px;color:var(--text2);border:.5px solid var(--border)">${r.partida}</td>
+      <td style="padding:4px 8px;text-align:center;font-size:10px;font-family:monospace;color:#185fa5;border:.5px solid var(--border)">${r.dur}d</td>
+      ${bars}
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="gantt-wrap">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px;display:flex;gap:16px">
+        <span><span style="display:inline-block;width:12px;height:10px;border-radius:2px;background:linear-gradient(90deg,#ba7517,#e09224);margin-right:4px;vertical-align:middle"></span>Con APU asignada</span>
+        <span><span style="display:inline-block;width:12px;height:10px;border-radius:2px;background:linear-gradient(90deg,#185fa5,#3a85cc);margin-right:4px;vertical-align:middle"></span>Sin APU (precio manual)</span>
+        <span style="color:var(--text3)">Duración total estimada: <strong>${maxDay} días hábiles</strong></span>
+      </div>
+      <table class="gantt-table">
+        <thead><tr>
+          <th style="min-width:160px;text-align:left">Ítem</th>
+          <th style="min-width:110px;text-align:left">Partida</th>
+          <th style="width:40px;text-align:center">Dur.</th>
+          ${dayHeaders}
+        </tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </div>`;
+}
+
+// ── Exportar / Enviar ─────────────────────────────────────────────
+function prtSendToBudget() {
+  if (!partidasData.length) return showToast('No hay partidas para enviar');
+  let added = 0;
+  partidasData.forEach(p => {
+    p.items.forEach(it => {
+      if (it.metrado > 0 && it.price > 0) {
+        projectData.items.push({ desc: `[${it.code}] ${it.name}`, unid: it.unit, cant: it.metrado, precio: it.price });
+        added++;
+      }
+    });
+  });
+  renderBudgetTable(); recalc();
+  showToast(`✓ ${added} ítem(s) de partidas enviados al presupuesto`);
+  const budgetTab = document.querySelector('.nt[onclick*="budget"]');
+  if (budgetTab) budgetTab.click();
+}
+
+function prtExportPDF() {
+  if (!window.jspdf) return showToast('Librería PDF no cargada aún');
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape' });
+  const cur = projectData.currency;
+
+  doc.setFont('Helvetica','bold'); doc.setFontSize(16);
+  doc.text('Presupuesto de Obra — Partidas', 14, 16);
+  doc.setFont('Helvetica','normal'); doc.setFontSize(9);
+  doc.text(`Proyecto: ${document.getElementById('pName')?.value || '—'}   |   Cliente: ${document.getElementById('pClient')?.value || '—'}   |   Fecha: ${new Date().toLocaleDateString()}`, 14, 23);
+
+  let y = 30;
+  const totalObra = partidasData.reduce((s,p) => s + prtTotalCost(p), 0);
+
+  partidasData.forEach(p => {
+    if (y > 170) { doc.addPage(); y = 16; }
+    const ptot = prtTotalCost(p);
+    const pdur = prtPartidaDuration(p);
+    doc.setFont('Helvetica','bold'); doc.setFontSize(11);
+    doc.text(`${p.num}  ${p.name}`, 14, y);
+    doc.setFont('Helvetica','normal'); doc.setFontSize(8);
+    if (p.desc) { doc.text(p.desc, 20, y+4); y += 4; }
+    y += 6;
+    const rows = p.items.map(it => {
+      const apu = apuData.find(a => String(a.id) === String(it.apuId));
+      const dur = prtItemDuration(it);
+      return [it.code, it.name, apu ? apu.code : '—', it.unit, it.metrado.toFixed(2), `${cur} ${it.price.toFixed(2)}`, `${cur} ${prtItemCost(it).toFixed(2)}`, `${dur} d`];
+    });
+    rows.push(['','','','','',`Subtotal ${p.num}:`, `${cur} ${ptot.toFixed(2)}`, `${pdur} d`]);
+    doc.autoTable({
+      startY: y,
+      head: [['Código','Descripción','APU','Und','Metrado','P.Unit.','Total','Dur.']],
+      body: rows,
+      theme: 'striped',
+      styles: { fontSize: 7 },
+      columnStyles: { 5:{halign:'right'}, 6:{halign:'right',fontStyle:'bold'}, 7:{halign:'center'} },
+      margin: { left:14, right:14 }
+    });
+    y = doc.lastAutoTable.finalY + 8;
+  });
+
+  // Totales finales
+  if (y > 170) { doc.addPage(); y = 16; }
+  doc.setFont('Helvetica','bold'); doc.setFontSize(12);
+  doc.text(`Costo Directo Total: ${cur} ${totalObra.toFixed(2)}`, 14, y+6);
+  doc.text(`Duración Total Estimada: ${prtTotalDuration()} días hábiles`, 14, y+14);
+
+  // Hoja de cronograma (segunda página resumen)
+  doc.addPage();
+  doc.setFontSize(13); doc.text('Cronograma de Actividades', 14, 16);
+  const ganttRows = [];
+  let cursor = 1;
+  partidasData.forEach(p => {
+    p.items.forEach(it => {
+      const dur = prtItemDuration(it);
+      const start = it.start || cursor;
+      ganttRows.push([it.code, it.name, `${p.num} ${p.name}`, it.unit, it.metrado.toFixed(2), String(start), String(start+dur-1), `${dur} d`]);
+      cursor = start + dur;
+    });
+  });
+  doc.autoTable({
+    startY: 22,
+    head: [['Código','Actividad','Partida','Und','Metrado','Inicio (día)','Fin (día)','Duración']],
+    body: ganttRows,
+    theme: 'striped', styles: { fontSize: 8 },
+    columnStyles: { 5:{halign:'center'}, 6:{halign:'center'}, 7:{halign:'center',fontStyle:'bold'} },
+    margin: {left:14,right:14}
+  });
+
+  doc.save('Partidas_Obra_Linaro.pdf');
+  showToast('PDF exportado ✓');
+}
+
+// ==========================================
+// Patch goTab — APU + Partidas
+// ==========================================
 const _origGoTab = goTab;
 goTab = function(tabId, btn) {
   // Show/hide APU module (it's outside .page div)
