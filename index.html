@@ -122,7 +122,6 @@
 })();
 </script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/%3E%3Crect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/%3E%3Cpath d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/%3E%3Crect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/%3E%3C/svg%3E">
-<link rel="shortcut icon" href="data:,">
 <script>
 // ==========================================
 // 1. ESTADO GLOBAL DE LA APLICACIÓN
@@ -1836,7 +1835,48 @@ footer span{color:var(--gold);font-weight:500}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 @media(max-width:640px){.nav{padding:0 12px}.nt{padding:0 9px;font-size:12px}.page{padding:14px 12px 60px}}
 @media print{.nav,.plan-toolbar,.plan-side,footer,.v3d-tb,.v3d-side,.cp-head button{display:none!important}.plan-app,.v3d-app{height:auto;border:none}.canvas-wrap{overflow:visible!important}}
-/* ── ASISTENTE DE COCINA ─────────────────────────────────────── */
+/* ── APU CIVIL ──────────────────────────────────────────────────────── */
+.apu-layout{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
+.apu-list-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:var(--r);margin-bottom:4px;background:var(--bg3);border:.5px solid var(--border);cursor:pointer;transition:all .12s}
+.apu-list-item:hover{border-color:var(--gold);background:var(--gold-l)}
+.apu-list-item.on{border-color:var(--gold);background:var(--gold-l)}
+.apu-list-item .apu-code{font-size:10px;font-family:monospace;color:var(--gold);font-weight:700;background:rgba(186,117,23,.15);padding:2px 5px;border-radius:3px}
+.apu-list-item .apu-name{font-size:12px;font-weight:600;color:var(--text);flex:1;margin:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.apu-list-item .apu-unit{font-size:11px;color:var(--text2)}
+.apu-section-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);padding:8px 0 4px;border-top:.5px solid var(--border);margin-top:6px}
+.apu-section-lbl:first-child{border-top:none;margin-top:0}
+.apu-detail{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--rl);overflow:hidden}
+.apu-detail-header{background:linear-gradient(135deg,#1a1206,#2c1f08);padding:16px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.apu-detail-title{font-size:16px;font-weight:700;color:#fff}
+.apu-detail-meta{font-size:12px;color:rgba(255,255,255,.55);margin-top:3px}
+.apu-tabs{display:flex;border-bottom:.5px solid var(--border);background:var(--bg3)}
+.apu-tab{padding:9px 16px;border:none;background:none;font-size:12px;cursor:pointer;font-family:inherit;color:var(--text2);border-bottom:2px solid transparent;font-weight:500;transition:all .12s}
+.apu-tab:hover{color:var(--text)}
+.apu-tab.on{color:var(--gold);border-bottom-color:var(--gold);font-weight:700}
+.apu-body{padding:16px}
+.apu-resources table{width:100%;border-collapse:collapse;font-size:13px}
+.apu-resources th{padding:7px 10px;background:var(--bg3);color:var(--text2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border-bottom:.5px solid var(--border);text-align:left}
+.apu-resources td{padding:7px 10px;border-bottom:.5px solid var(--border)}
+.apu-resources tr:last-child td{border-bottom:none}
+.apu-resources td input{width:100%;background:transparent;border:.5px solid transparent;padding:3px 5px;border-radius:4px;color:var(--text);font-size:12px;font-family:monospace}
+.apu-resources td input:hover{border-color:var(--border);background:var(--bg)}
+.apu-resources td input:focus{border-color:var(--gold);background:var(--bg);outline:none}
+.apu-res-type-M{color:#185fa5;font-weight:700;font-size:10px;padding:2px 5px;background:rgba(24,95,165,.12);border-radius:3px}
+.apu-res-type-E{color:#27854d;font-weight:700;font-size:10px;padding:2px 5px;background:rgba(39,133,77,.12);border-radius:3px}
+.apu-res-type-H{color:#a0522d;font-weight:700;font-size:10px;padding:2px 5px;background:rgba(160,82,45,.12);border-radius:3px}
+.apu-res-type-T{color:#6b21a8;font-weight:700;font-size:10px;padding:2px 5px;background:rgba(107,33,168,.12);border-radius:3px}
+.apu-totals-row{background:rgba(186,117,23,.07);font-weight:700}
+.apu-grand{background:var(--gold-l);border-radius:8px;padding:12px 16px;margin-top:12px;display:flex;justify-content:space-between;align-items:center}
+.apu-grand-lbl{font-size:13px;font-weight:700;color:var(--gold)}
+.apu-grand-val{font-size:22px;font-weight:800;font-family:monospace;color:var(--gold)}
+.apu-add-res{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:flex-end}
+.apu-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;border:.5px solid}
+.apu-chip-M{background:rgba(24,95,165,.1);color:#185fa5;border-color:rgba(24,95,165,.3)}
+.apu-chip-E{background:rgba(39,133,77,.1);color:#27854d;border-color:rgba(39,133,77,.3)}
+.apu-chip-H{background:rgba(160,82,45,.1);color:#a0522d;border-color:rgba(160,82,45,.3)}
+.apu-chip-T{background:rgba(107,33,168,.1);color:#6b21a8;border-color:rgba(107,33,168,.3)}
+.apu-badge-cat{font-size:10px;padding:2px 6px;border-radius:3px;font-weight:700;background:var(--border);color:var(--text2)}
+
 .kw-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px}
 .kw-modal{background:var(--bg2);border-radius:16px;width:100%;max-width:900px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.4);border:1px solid var(--gold-m)}
 .kw-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--gold-l);flex-shrink:0}
@@ -1936,6 +1976,7 @@ if (typeof currentInvTab === 'undefined') {
     <button class="nt"    onclick="goTab('plans',this)">Planos</button>
     <button class="nt"    onclick="goTab('vista3d',this)">Vista 3D</button>
     <button class="nt"    onclick="goTab('database',this)">📁 Proyectos</button>
+    <button class="nt"    onclick="goTab('apu',this)">🏗️ APU Civil</button>
   </div>
 </nav>
 
@@ -2462,10 +2503,117 @@ if (typeof currentInvTab === 'undefined') {
 </div>
 
 </div>
+
+</div>
 <footer>Hecho con <span>Linaro</span> — Presupuestación arquitectónica profesional</footer>
 <div class="toast" id="toast"></div>
 
-<!-- ========= ASISTENTE DE COCINA ========= -->
+<!-- ========= APU CIVIL MODULE ========= -->
+<div id="apu" class="module" style="display:none;padding:0">
+  <div class="flexb mb16 wrap gap8">
+    <div>
+      <h2 style="font-size:18px;font-weight:600;margin-bottom:4px">🏗️ Análisis de Precios Unitarios — Obras Civiles</h2>
+      <p style="font-size:13px;color:var(--text2)">Gestiona APUs por capítulo. Cada APU desglosa materiales, equipos, mano de obra y transporte.</p>
+    </div>
+    <div class="flex gap8 wrap">
+      <button class="btn btn-gold" onclick="apuNewModal()">+ Nueva APU</button>
+      <button class="btn btn-green" onclick="apuExportPDF()">⬇ Exportar PDF Presupuesto</button>
+      <button class="btn" onclick="apuSendToBudget()">→ Enviar al Presupuesto</button>
+    </div>
+  </div>
+  <div class="apu-layout">
+    <!-- Lista -->
+    <div>
+      <div class="card" style="padding:10px">
+        <div class="flex gap6 mb8">
+          <input type="text" id="apuSearch" placeholder="Buscar APU…" oninput="apuRenderList()" style="flex:1;font-size:12px">
+          <select id="apuFilterCat" onchange="apuRenderList()" style="font-size:12px;width:120px">
+            <option value="">Todos</option>
+            <option>Movimiento de tierra</option>
+            <option>Fundaciones</option>
+            <option>Estructura</option>
+            <option>Mampostería</option>
+            <option>Acabados</option>
+            <option>Instalaciones</option>
+            <option>Varios</option>
+          </select>
+        </div>
+        <div id="apuListContainer" style="max-height:520px;overflow-y:auto"></div>
+        <div class="flexb mt8" style="font-size:11px;color:var(--text3)">
+          <span id="apuCount">0 APUs</span>
+          <button class="btn btn-sm" onclick="apuLoadDefaults()">📦 Cargar APUs base</button>
+        </div>
+      </div>
+    </div>
+    <!-- Detalle -->
+    <div id="apuDetailPane">
+      <div style="padding:60px;text-align:center;color:var(--text2);border:.5px solid var(--border);border-radius:var(--rl);background:var(--bg2)">
+        <div style="font-size:36px;margin-bottom:10px">📐</div>
+        <p>Selecciona una APU para ver su desglose</p>
+        <p style="font-size:12px;margin-top:6px">o crea una nueva con el botón de arriba</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVA APU -->
+<div id="apuModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9600;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border-radius:14px;width:min(520px,95vw);padding:24px;box-shadow:0 24px 80px rgba(0,0,0,.5);border:.5px solid var(--border)">
+    <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--gold)">Nueva APU</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="field"><label>Código APU</label><input type="text" id="apuModalCode" placeholder="Ej: MT-001"></div>
+      <div class="field"><label>Unidad</label>
+        <select id="apuModalUnit"><option>m³</option><option>m²</option><option>ml</option><option>kg</option><option>global</option><option>unid</option><option>ton</option></select>
+      </div>
+    </div>
+    <div class="field mb10"><label>Descripción de la actividad</label><input type="text" id="apuModalName" placeholder="Ej: Excavación en tierra con retroexcavadora"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div class="field"><label>Categoría</label>
+        <select id="apuModalCat">
+          <option>Movimiento de tierra</option><option>Fundaciones</option><option>Estructura</option>
+          <option>Mampostería</option><option>Acabados</option><option>Instalaciones</option><option>Varios</option>
+        </select>
+      </div>
+      <div class="field"><label>Rendimiento (unid/día)</label><input type="number" id="apuModalRend" value="8" min="0.01" step="0.01"></div>
+    </div>
+    <div class="flex gap8" style="justify-content:flex-end">
+      <button class="btn" onclick="document.getElementById('apuModal').style.display='none'">Cancelar</button>
+      <button class="btn btn-gold" onclick="apuCreateNew()">Crear APU</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AGREGAR RECURSO APU -->
+<div id="apuResModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9700;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border-radius:14px;width:min(480px,95vw);padding:24px;box-shadow:0 24px 80px rgba(0,0,0,.5);border:.5px solid var(--border)">
+    <div style="font-size:15px;font-weight:700;margin-bottom:14px;color:var(--gold)">Agregar Recurso</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="field"><label>Tipo de recurso</label>
+        <select id="apuResType" onchange="apuResTypeChanged()">
+          <option value="M">🧱 Material</option>
+          <option value="E">⚙️ Equipo/Herramienta</option>
+          <option value="H">👷 Mano de obra</option>
+          <option value="T">🚛 Transporte</option>
+        </select>
+      </div>
+      <div class="field"><label>Código</label><input type="text" id="apuResCode" placeholder="Ej: MAT-001"></div>
+    </div>
+    <div class="field mb10"><label>Descripción del recurso</label><input type="text" id="apuResName" placeholder="Ej: Cemento Portland tipo I, saco 42.5kg"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+      <div class="field"><label>Unidad</label>
+        <select id="apuResUnit"><option>kg</option><option>saco</option><option>m³</option><option>m²</option><option>ml</option><option>und</option><option>hr</option><option>día</option><option>ton</option><option>lt</option><option>global</option></select>
+      </div>
+      <div class="field"><label>Cantidad/unidad APU</label><input type="number" id="apuResCant" value="1" min="0" step="0.001"></div>
+      <div class="field"><label>Precio unitario</label><input type="number" id="apuResPrice" value="0" min="0" step="0.01"></div>
+    </div>
+    <div id="apuResRendRow" class="field mb10" style="display:none"><label>Rendimiento (hr o días/unid APU) — Mano de obra/Equipo</label><input type="number" id="apuResRend" value="1" min="0.01" step="0.01"></div>
+    <div class="flex gap8" style="justify-content:flex-end">
+      <button class="btn" onclick="document.getElementById('apuResModal').style.display='none'">Cancelar</button>
+      <button class="btn btn-gold" onclick="apuAddResource()">Agregar recurso</button>
+    </div>
+  </div>
+</div>
+
 <div id="kaModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9500;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:16px;width:min(960px,96vw);max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.45)">
     <!-- Header -->
@@ -2980,8 +3128,513 @@ function generateKitchen() {
   renderPlans();
   showToast(`✓ Cocina generada: ${newF.length} módulos colocados en el plano`);
 }
-</script>
 
-</div><!-- /.page -->
+// ==========================================
+// APU CIVIL — Motor completo
+// ==========================================
+let apuData = [];       // Array de APUs
+let apuSelected = null; // APU activa
+
+// ── Estructura de una APU ──────────────────────────────────────────
+// { id, code, name, unit, category, rendimiento, resources: [
+//   { id, type: 'M'|'E'|'H'|'T', code, name, unit, cant, price, rendimiento? }
+// ]}
+
+function apuNew(code, name, unit, category, rendimiento) {
+  return { id: Date.now() + Math.random(), code, name, unit, category: category || 'Varios', rendimiento: parseFloat(rendimiento) || 1, resources: [] };
+}
+
+function apuTotals(apu) {
+  const byType = { M: 0, E: 0, H: 0, T: 0 };
+  apu.resources.forEach(r => { byType[r.type] = (byType[r.type] || 0) + (r.cant * r.price); });
+  const subtotal = Object.values(byType).reduce((a, b) => a + b, 0);
+  const iva = subtotal * (projectData.iva / 100);
+  const util = subtotal * (projectData.utility / 100);
+  return { byType, subtotal, iva, util, total: subtotal + iva + util };
+}
+
+function apuNewModal() {
+  const m = document.getElementById('apuModal');
+  if (m) { m.style.display = 'flex'; document.getElementById('apuModalCode').focus(); }
+}
+
+function apuCreateNew() {
+  const code = document.getElementById('apuModalCode').value.trim() || ('APU-' + (apuData.length + 1).toString().padStart(3,'0'));
+  const name = document.getElementById('apuModalName').value.trim();
+  if (!name) return showToast('Escribe una descripción para la APU');
+  const unit = document.getElementById('apuModalUnit').value;
+  const cat  = document.getElementById('apuModalCat').value;
+  const rend = document.getElementById('apuModalRend').value;
+  const apu  = apuNew(code, name, unit, cat, rend);
+  apuData.push(apu);
+  document.getElementById('apuModal').style.display = 'none';
+  apuRenderList();
+  apuSelectAPU(apu.id);
+  showToast(`APU ${code} creada`);
+}
+
+function apuRenderList() {
+  const container = document.getElementById('apuListContainer');
+  const countEl   = document.getElementById('apuCount');
+  if (!container) return;
+  const q   = (document.getElementById('apuSearch')?.value || '').toLowerCase();
+  const cat = document.getElementById('apuFilterCat')?.value || '';
+
+  const catGroups = {};
+  apuData
+    .filter(a => (!q || a.name.toLowerCase().includes(q) || a.code.toLowerCase().includes(q)) && (!cat || a.category === cat))
+    .forEach(a => { (catGroups[a.category] = catGroups[a.category] || []).push(a); });
+
+  if (!Object.keys(catGroups).length) {
+    container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text3);font-size:12px">Sin resultados</div>';
+    if (countEl) countEl.textContent = '0 APUs';
+    return;
+  }
+
+  let html = '';
+  for (const [catName, items] of Object.entries(catGroups)) {
+    html += `<div class="apu-section-lbl">${catName}</div>`;
+    items.forEach(a => {
+      const tot = apuTotals(a);
+      const isOn = apuSelected && apuSelected.id === a.id ? 'on' : '';
+      html += `<div class="apu-list-item ${isOn}" onclick="apuSelectAPU('${a.id}')">
+        <span class="apu-code">${a.code}</span>
+        <span class="apu-name">${a.name}</span>
+        <span class="apu-unit">${a.unit}</span>
+        <span style="font-size:11px;font-family:monospace;color:var(--gold);white-space:nowrap;margin-left:6px">${projectData.currency} ${tot.subtotal.toFixed(2)}</span>
+      </div>`;
+    });
+  }
+  container.innerHTML = html;
+  if (countEl) countEl.textContent = `${apuData.length} APU${apuData.length !== 1 ? 's' : ''}`;
+}
+
+function apuSelectAPU(id) {
+  apuSelected = apuData.find(a => String(a.id) === String(id)) || null;
+  apuRenderList();
+  apuRenderDetail();
+}
+
+function apuRenderDetail() {
+  const pane = document.getElementById('apuDetailPane');
+  if (!pane) return;
+  if (!apuSelected) {
+    pane.innerHTML = `<div style="padding:60px;text-align:center;color:var(--text2);border:.5px solid var(--border);border-radius:var(--rl);background:var(--bg2)"><div style="font-size:36px;margin-bottom:10px">📐</div><p>Selecciona una APU</p></div>`;
+    return;
+  }
+  const a = apuSelected;
+  const tot = apuTotals(a);
+  const typeLabel = { M: '🧱 Material', E: '⚙️ Equipo', H: '👷 Mano de obra', T: '🚛 Transporte' };
+  const typeClass = { M: 'apu-res-type-M', E: 'apu-res-type-E', H: 'apu-res-type-H', T: 'apu-res-type-T' };
+
+  // Agrupar recursos por tipo
+  const groups = { M: [], E: [], H: [], T: [] };
+  a.resources.forEach(r => (groups[r.type] = groups[r.type] || []).push(r));
+
+  let resRows = '';
+  ['M','E','H','T'].forEach(t => {
+    if (!groups[t] || !groups[t].length) return;
+    const typeTot = groups[t].reduce((s, r) => s + r.cant * r.price, 0);
+    resRows += `<tr style="background:rgba(0,0,0,.03)"><td colspan="7" style="padding:6px 10px">
+      <span class="${typeClass[t]}">${typeLabel[t]}</span>
+      <span style="font-size:11px;color:var(--text2);margin-left:8px">Subtipo: ${projectData.currency} ${typeTot.toFixed(2)}</span>
+    </td></tr>`;
+    groups[t].forEach(r => {
+      const parcial = r.cant * r.price;
+      resRows += `<tr>
+        <td><span class="apu-chip apu-chip-${r.type}">${r.type}</span></td>
+        <td style="font-family:monospace;font-size:11px;color:var(--text3)">${r.code}</td>
+        <td>${r.name}</td>
+        <td style="text-align:center"><span class="tag">${r.unit}</span></td>
+        <td class="tr"><input type="number" value="${r.cant}" min="0" step="0.001" style="width:76px;text-align:right" onchange="apuUpdateRes('${a.id}','${r.id}','cant',this.value)"></td>
+        <td class="tr"><input type="number" value="${r.price}" min="0" step="0.01" style="width:88px;text-align:right" onchange="apuUpdateRes('${a.id}','${r.id}','price',this.value)"></td>
+        <td class="tr mono" id="apuParcial-${r.id}">${projectData.currency} ${parcial.toFixed(2)}</td>
+        <td><button class="btn btn-sm btn-del" onclick="apuDeleteRes('${a.id}','${r.id}')">×</button></td>
+      </tr>`;
+    });
+  });
+
+  pane.innerHTML = `
+    <div class="apu-detail">
+      <div class="apu-detail-header">
+        <div>
+          <div class="apu-detail-title">${a.name}</div>
+          <div class="apu-detail-meta">
+            <span class="apu-code" style="margin-right:8px">${a.code}</span>
+            <span style="color:rgba(255,255,255,.5)">Unidad: ${a.unit} &nbsp;|&nbsp; Categoría: ${a.category} &nbsp;|&nbsp; Rend. ${a.rendimiento} ${a.unit}/día</span>
+          </div>
+        </div>
+        <div class="flex gap6">
+          <button class="btn btn-sm" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)" onclick="apuEditModal('${a.id}')">✏️ Editar</button>
+          <button class="btn btn-sm btn-del" style="background:rgba(226,74,74,.15);border-color:rgba(226,74,74,.4)" onclick="apuDeleteAPU('${a.id}')">🗑 Eliminar</button>
+        </div>
+      </div>
+
+      <div style="padding:14px 16px">
+        <!-- Métricas rápidas -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">
+          <div class="metric"><div class="mlabel">🧱 Materiales</div><div class="mval" style="color:#185fa5">${projectData.currency} ${tot.byType.M.toFixed(2)}</div></div>
+          <div class="metric"><div class="mlabel">⚙️ Equipos</div><div class="mval" style="color:#27854d">${projectData.currency} ${tot.byType.E.toFixed(2)}</div></div>
+          <div class="metric"><div class="mlabel">👷 Mano de obra</div><div class="mval" style="color:#a0522d">${projectData.currency} ${tot.byType.H.toFixed(2)}</div></div>
+          <div class="metric"><div class="mlabel">🚛 Transporte</div><div class="mval" style="color:#6b21a8">${projectData.currency} ${tot.byType.T.toFixed(2)}</div></div>
+        </div>
+
+        <!-- Tabla de recursos -->
+        <div class="apu-resources">
+          <table>
+            <thead><tr>
+              <th style="width:40px">Tipo</th>
+              <th style="width:80px">Código</th>
+              <th>Descripción</th>
+              <th style="width:60px;text-align:center">Und</th>
+              <th class="tr" style="width:90px">Cantidad</th>
+              <th class="tr" style="width:100px">P. Unit.</th>
+              <th class="tr" style="width:110px">Parcial</th>
+              <th style="width:32px"></th>
+            </tr></thead>
+            <tbody>${resRows || `<tr><td colspan="8"><div class="empty" style="padding:20px"><div class="empty-icon">📦</div><p>Sin recursos aún</p></div></td></tr>`}</tbody>
+          </table>
+        </div>
+
+        <!-- Botones agregar recurso -->
+        <div class="apu-add-res">
+          <span style="font-size:12px;color:var(--text2);font-weight:600">Agregar:</span>
+          <button class="btn btn-sm" style="border-color:rgba(24,95,165,.4);color:#185fa5" onclick="apuOpenResModal('${a.id}','M')">🧱 Material</button>
+          <button class="btn btn-sm" style="border-color:rgba(39,133,77,.4);color:#27854d" onclick="apuOpenResModal('${a.id}','E')">⚙️ Equipo</button>
+          <button class="btn btn-sm" style="border-color:rgba(160,82,45,.4);color:#a0522d" onclick="apuOpenResModal('${a.id}','H')">👷 Mano de obra</button>
+          <button class="btn btn-sm" style="border-color:rgba(107,33,168,.4);color:#6b21a8" onclick="apuOpenResModal('${a.id}','T')">🚛 Transporte</button>
+        </div>
+
+        <!-- Total APU -->
+        <div class="apu-grand">
+          <div>
+            <div class="apu-grand-lbl">Costo directo / ${a.unit}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">Sin IVA ni utilidad</div>
+          </div>
+          <div class="apu-grand-val" id="apuGrandTotal">${projectData.currency} ${tot.subtotal.toFixed(2)}</div>
+        </div>
+        ${projectData.iva > 0 || projectData.utility > 0 ? `
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          ${projectData.utility > 0 ? `<div style="flex:1;background:var(--bg3);border-radius:6px;padding:8px 12px;text-align:center"><div style="font-size:11px;color:var(--text2)">+ Utilidad (${projectData.utility}%)</div><div style="font-family:monospace;font-weight:700;color:var(--gold)">${projectData.currency} ${tot.util.toFixed(2)}</div></div>` : ''}
+          ${projectData.iva > 0 ? `<div style="flex:1;background:var(--bg3);border-radius:6px;padding:8px 12px;text-align:center"><div style="font-size:11px;color:var(--text2)">+ IVA (${projectData.iva}%)</div><div style="font-family:monospace;font-weight:700;color:var(--text)">${projectData.currency} ${tot.iva.toFixed(2)}</div></div>` : ''}
+          <div style="flex:1;background:var(--gold-l);border:.5px solid var(--gold);border-radius:6px;padding:8px 12px;text-align:center"><div style="font-size:11px;color:var(--gold)">Total con impuestos</div><div style="font-family:monospace;font-weight:800;color:var(--gold)">${projectData.currency} ${tot.total.toFixed(2)}</div></div>
+        </div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function apuOpenResModal(apuId, type) {
+  apuSelected = apuData.find(a => String(a.id) === String(apuId)) || apuSelected;
+  document.getElementById('apuResType').value = type;
+  document.getElementById('apuResCode').value = '';
+  document.getElementById('apuResName').value = '';
+  document.getElementById('apuResCant').value = '1';
+  document.getElementById('apuResPrice').value = '0';
+  apuResTypeChanged();
+  document.getElementById('apuResModal').style.display = 'flex';
+  document.getElementById('apuResName').focus();
+}
+
+function apuResTypeChanged() {
+  const t = document.getElementById('apuResType').value;
+  const rendRow = document.getElementById('apuResRendRow');
+  if (rendRow) rendRow.style.display = (t === 'H' || t === 'E') ? 'block' : 'none';
+}
+
+function apuAddResource() {
+  if (!apuSelected) return;
+  const type  = document.getElementById('apuResType').value;
+  const code  = document.getElementById('apuResCode').value.trim() || (type + '-' + (apuSelected.resources.length + 1).toString().padStart(3,'0'));
+  const name  = document.getElementById('apuResName').value.trim();
+  if (!name) return showToast('Escribe la descripción del recurso');
+  const unit  = document.getElementById('apuResUnit').value;
+  const cant  = parseFloat(document.getElementById('apuResCant').value)  || 0;
+  const price = parseFloat(document.getElementById('apuResPrice').value) || 0;
+  const rend  = parseFloat(document.getElementById('apuResRend')?.value) || 1;
+  apuSelected.resources.push({ id: Date.now() + Math.random(), type, code, name, unit, cant, price, rendimiento: rend });
+  document.getElementById('apuResModal').style.display = 'none';
+  apuRenderDetail();
+  apuRenderList();
+  showToast('Recurso agregado ✓');
+}
+
+function apuUpdateRes(apuId, resId, field, value) {
+  const apu = apuData.find(a => String(a.id) === String(apuId));
+  if (!apu) return;
+  const res = apu.resources.find(r => String(r.id) === String(resId));
+  if (!res) return;
+  res[field] = parseFloat(value) || 0;
+  const parcialEl = document.getElementById(`apuParcial-${resId}`);
+  if (parcialEl) parcialEl.textContent = `${projectData.currency} ${(res.cant * res.price).toFixed(2)}`;
+  // Actualizar totales sin re-renderizar la tabla entera
+  const tot = apuTotals(apu);
+  const grandEl = document.getElementById('apuGrandTotal');
+  if (grandEl) grandEl.textContent = `${projectData.currency} ${tot.subtotal.toFixed(2)}`;
+  apuRenderList();
+}
+
+function apuDeleteRes(apuId, resId) {
+  const apu = apuData.find(a => String(a.id) === String(apuId));
+  if (!apu) return;
+  apu.resources = apu.resources.filter(r => String(r.id) !== String(resId));
+  apuRenderDetail();
+  apuRenderList();
+}
+
+function apuDeleteAPU(id) {
+  if (!confirm('¿Eliminar esta APU?')) return;
+  apuData = apuData.filter(a => String(a.id) !== String(id));
+  apuSelected = null;
+  apuRenderList();
+  apuRenderDetail();
+}
+
+function apuEditModal(id) {
+  const a = apuData.find(x => String(x.id) === String(id));
+  if (!a) return;
+  document.getElementById('apuModalCode').value = a.code;
+  document.getElementById('apuModalName').value = a.name;
+  document.getElementById('apuModalUnit').value = a.unit;
+  document.getElementById('apuModalCat').value  = a.category;
+  document.getElementById('apuModalRend').value = a.rendimiento;
+  // Patch create button to save edit
+  const createBtn = document.querySelector('#apuModal button.btn-gold');
+  if (createBtn) {
+    createBtn.textContent = 'Guardar cambios';
+    createBtn.onclick = () => {
+      a.code = document.getElementById('apuModalCode').value.trim() || a.code;
+      a.name = document.getElementById('apuModalName').value.trim() || a.name;
+      a.unit = document.getElementById('apuModalUnit').value;
+      a.category = document.getElementById('apuModalCat').value;
+      a.rendimiento = parseFloat(document.getElementById('apuModalRend').value) || 1;
+      document.getElementById('apuModal').style.display = 'none';
+      createBtn.textContent = 'Crear APU';
+      createBtn.onclick = apuCreateNew;
+      apuRenderList();
+      apuRenderDetail();
+    };
+  }
+  document.getElementById('apuModal').style.display = 'flex';
+}
+
+function apuSendToBudget() {
+  if (!apuData.length) return showToast('No hay APUs para enviar');
+  apuData.forEach(a => {
+    const tot = apuTotals(a);
+    if (tot.subtotal > 0) {
+      projectData.items.push({ desc: `[APU ${a.code}] ${a.name}`, unid: a.unit, cant: 1, precio: tot.subtotal });
+    }
+  });
+  renderBudgetTable();
+  recalc();
+  showToast(`✓ ${apuData.length} APU(s) enviadas al presupuesto`);
+  const budgetTab = document.querySelector('.nt[onclick*="budget"]');
+  if (budgetTab) budgetTab.click();
+}
+
+function apuExportPDF() {
+  if (!window.jspdf) return showToast('Librería PDF no cargada aún');
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const cur = projectData.currency;
+
+  doc.setFont('Helvetica','bold');
+  doc.setFontSize(18);
+  doc.text('Análisis de Precios Unitarios — Obras Civiles', 14, 18);
+  doc.setFontSize(10); doc.setFont('Helvetica','normal');
+  doc.text(`Proyecto: ${document.getElementById('pName')?.value || '—'}`, 14, 26);
+  doc.text(`Cliente: ${document.getElementById('pClient')?.value || '—'}`, 14, 32);
+  doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 38);
+
+  let y = 46;
+  apuData.forEach(a => {
+    const tot = apuTotals(a);
+    if (y > 250) { doc.addPage(); y = 16; }
+    doc.setFont('Helvetica','bold'); doc.setFontSize(11);
+    doc.text(`${a.code} — ${a.name}`, 14, y);
+    doc.setFont('Helvetica','normal'); doc.setFontSize(9);
+    doc.text(`Unidad: ${a.unit} | Categoría: ${a.category} | Rendimiento: ${a.rendimiento} ${a.unit}/día`, 14, y + 5);
+    y += 10;
+    const rows = a.resources.map(r => [
+      r.type, r.code, r.name, r.unit,
+      r.cant.toFixed(3), `${cur} ${r.price.toFixed(2)}`, `${cur} ${(r.cant*r.price).toFixed(2)}`
+    ]);
+    rows.push(['','','','','','Costo directo:', `${cur} ${tot.subtotal.toFixed(2)}`]);
+    doc.autoTable({
+      startY: y,
+      head: [['Tipo','Código','Descripción','Und','Cant.','P.Unit.','Parcial']],
+      body: rows,
+      theme: 'striped',
+      styles: { fontSize: 8 },
+      columnStyles: { 5: { halign:'right' }, 6: { halign:'right', fontStyle:'bold' } },
+      margin: { left: 14, right: 14 }
+    });
+    y = doc.lastAutoTable.finalY + 8;
+  });
+
+  // Resumen final
+  if (y > 250) { doc.addPage(); y = 16; }
+  const totalAll = apuData.reduce((s, a) => s + apuTotals(a).subtotal, 0);
+  doc.setFont('Helvetica','bold'); doc.setFontSize(12);
+  doc.text(`Total General de Obra: ${cur} ${totalAll.toFixed(2)}`, 14, y + 6);
+  doc.save('APU_Obras_Civiles_Linaro.pdf');
+  showToast('PDF exportado ✓');
+}
+
+// ── APUs base predefinidas ─────────────────────────────────────────
+function apuLoadDefaults() {
+  if (apuData.length && !confirm('¿Reemplazar APUs actuales con las base?')) return;
+  apuData = [
+    // MOVIMIENTO DE TIERRA
+    { id: 1, code:'MT-001', name:'Limpieza y descapote manual (e=20cm)', unit:'m²', category:'Movimiento de tierra', rendimiento:80,
+      resources:[
+        {id:11,type:'H',code:'H-01',name:'Obrero (jornada 8h)',unit:'día',cant:0.0125,price:35,rendimiento:1},
+        {id:12,type:'E',code:'E-01',name:'Herramienta menor (pala, pico)',unit:'global',cant:1,price:0.50}
+      ]},
+    { id: 2, code:'MT-002', name:'Excavación en tierra suelta c/retroexcavadora', unit:'m³', category:'Movimiento de tierra', rendimiento:150,
+      resources:[
+        {id:21,type:'E',code:'E-02',name:'Retroexcavadora (hr)',unit:'hr',cant:0.053,price:120},
+        {id:22,type:'H',code:'H-01',name:'Operador de maquinaria',unit:'hr',cant:0.053,price:18},
+        {id:23,type:'T',code:'T-01',name:'Transporte de material sobrante (5km)',unit:'m³',cant:1.25,price:4.5}
+      ]},
+    { id: 3, code:'MT-003', name:'Relleno y compactación c/material selecto', unit:'m³', category:'Movimiento de tierra', rendimiento:60,
+      resources:[
+        {id:31,type:'M',code:'M-01',name:'Material selecto (m³ banco)',unit:'m³',cant:1.30,price:12},
+        {id:32,type:'E',code:'E-03',name:'Compactador vibratorio (hr)',unit:'hr',cant:0.133,price:25},
+        {id:33,type:'H',code:'H-01',name:'Obrero',unit:'día',cant:0.05,price:35}
+      ]},
+    // FUNDACIONES
+    { id: 4, code:'FD-001', name:'Concreto ciclópeo f\'c=175 kg/cm² (60%c+40%p)', unit:'m³', category:'Fundaciones', rendimiento:6,
+      resources:[
+        {id:41,type:'M',code:'M-02',name:'Cemento Portland tipo I (saco 42.5kg)',unit:'saco',cant:5.5,price:9.5},
+        {id:42,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.55,price:22},
+        {id:43,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.55,price:28},
+        {id:44,type:'M',code:'M-05',name:'Agua potable',unit:'m³',cant:0.22,price:1.5},
+        {id:45,type:'M',code:'M-06',name:'Piedra bola (40% vol)',unit:'m³',cant:0.40,price:18},
+        {id:46,type:'E',code:'E-04',name:'Mezcladora 1 saco (hr)',unit:'hr',cant:1,price:12},
+        {id:47,type:'H',code:'H-01',name:'Oficial albañil',unit:'día',cant:0.5,price:45},
+        {id:48,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:1,price:35}
+      ]},
+    { id: 5, code:'FD-002', name:'Concreto estructural f\'c=210 kg/cm² en zapatas', unit:'m³', category:'Fundaciones', rendimiento:4,
+      resources:[
+        {id:51,type:'M',code:'M-02',name:'Cemento Portland tipo I',unit:'saco',cant:7.8,price:9.5},
+        {id:52,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.55,price:22},
+        {id:53,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.80,price:28},
+        {id:54,type:'M',code:'M-05',name:'Agua potable',unit:'m³',cant:0.22,price:1.5},
+        {id:55,type:'E',code:'E-05',name:'Vibrador de concreto (hr)',unit:'hr',cant:0.8,price:8},
+        {id:56,type:'E',code:'E-04',name:'Mezcladora 1 saco',unit:'hr',cant:2,price:12},
+        {id:57,type:'H',code:'H-01',name:'Oficial albañil',unit:'día',cant:0.75,price:45},
+        {id:58,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:1.5,price:35}
+      ]},
+    { id: 6, code:'FD-003', name:'Acero de refuerzo fy=4200 kg/cm² (suministro y colocación)', unit:'kg', category:'Fundaciones', rendimiento:200,
+      resources:[
+        {id:61,type:'M',code:'M-07',name:'Varilla corrugada fy=4200 (ton)',unit:'kg',cant:1.05,price:1.12},
+        {id:62,type:'M',code:'M-08',name:'Alambre negro #18',unit:'kg',cant:0.02,price:1.5},
+        {id:63,type:'H',code:'H-03',name:'Fierrero oficial',unit:'día',cant:0.01,price:50},
+        {id:64,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.01,price:35}
+      ]},
+    // ESTRUCTURA
+    { id: 7, code:'ES-001', name:'Columna de concreto f\'c=210 kg/cm² (incluye encofrado)', unit:'m³', category:'Estructura', rendimiento:2,
+      resources:[
+        {id:71,type:'M',code:'M-02',name:'Cemento Portland tipo I',unit:'saco',cant:7.8,price:9.5},
+        {id:72,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.55,price:22},
+        {id:73,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.80,price:28},
+        {id:74,type:'M',code:'M-09',name:'Madera de encofrado (reutiliz. 3v)',unit:'m²',cant:8,price:4},
+        {id:75,type:'M',code:'M-10',name:'Clavos y alambre',unit:'kg',cant:0.5,price:2},
+        {id:76,type:'E',code:'E-05',name:'Vibrador de concreto',unit:'hr',cant:1,price:8},
+        {id:77,type:'H',code:'H-01',name:'Oficial carpintero-encofrador',unit:'día',cant:1,price:48},
+        {id:78,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:2,price:35}
+      ]},
+    { id: 8, code:'ES-002', name:'Losa de concreto f\'c=210 e=12cm (incluye encofrado)', unit:'m²', category:'Estructura', rendimiento:20,
+      resources:[
+        {id:81,type:'M',code:'M-02',name:'Cemento Portland tipo I',unit:'saco',cant:0.936,price:9.5},
+        {id:82,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.066,price:22},
+        {id:83,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.096,price:28},
+        {id:84,type:'M',code:'M-09',name:'Encofrado de madera',unit:'m²',cant:1.05,price:6.5},
+        {id:85,type:'M',code:'M-07',name:'Acero fy=4200 (malla)',unit:'kg',cant:9.6,price:1.12},
+        {id:86,type:'E',code:'E-05',name:'Vibrador',unit:'hr',cant:0.12,price:8},
+        {id:87,type:'H',code:'H-01',name:'Oficial albañil',unit:'día',cant:0.1,price:45},
+        {id:88,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.2,price:35}
+      ]},
+    // MAMPOSTERÍA
+    { id: 9, code:'MA-001', name:'Pared de bloque de arcilla 15x20x40 cm (e=15cm)', unit:'m²', category:'Mampostería', rendimiento:15,
+      resources:[
+        {id:91,type:'M',code:'M-11',name:'Bloque de arcilla 15x20x40',unit:'und',cant:13.5,price:1.20},
+        {id:92,type:'M',code:'M-12',name:'Mortero de pega 1:4 (cemento-arena)',unit:'m³',cant:0.03,price:85},
+        {id:93,type:'H',code:'H-01',name:'Oficial albañil',unit:'día',cant:0.133,price:45},
+        {id:94,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.133,price:35}
+      ]},
+    { id: 10, code:'MA-002', name:'Friso de mortero 1:4 e=1.5cm, dos manos', unit:'m²', category:'Mampostería', rendimiento:20,
+      resources:[
+        {id:101,type:'M',code:'M-02',name:'Cemento Portland',unit:'saco',cant:0.22,price:9.5},
+        {id:102,type:'M',code:'M-03',name:'Arena de río lavada',unit:'m³',cant:0.022,price:22},
+        {id:103,type:'M',code:'M-05',name:'Agua',unit:'lt',cant:12,price:0.002},
+        {id:104,type:'H',code:'H-01',name:'Oficial albañil',unit:'día',cant:0.1,price:45},
+        {id:105,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.1,price:35}
+      ]},
+    // ACABADOS
+    { id: 11, code:'AC-001', name:'Piso de cerámica 30x30 cm (suministro y colocación)', unit:'m²', category:'Acabados', rendimiento:12,
+      resources:[
+        {id:111,type:'M',code:'M-13',name:'Cerámica 30x30 cm (incluye 5% rotura)',unit:'m²',cant:1.05,price:18},
+        {id:112,type:'M',code:'M-14',name:'Pega cerámica gris',unit:'saco',cant:0.35,price:14},
+        {id:113,type:'M',code:'M-15',name:'Fragüe color',unit:'kg',cant:0.25,price:3.5},
+        {id:114,type:'E',code:'E-06',name:'Amoladora c/disco diamante',unit:'hr',cant:0.08,price:6},
+        {id:115,type:'H',code:'H-01',name:'Oficial instalador',unit:'día',cant:0.083,price:48},
+        {id:116,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.083,price:35}
+      ]},
+    { id: 12, code:'AC-002', name:'Pintura vinílica (2 manos) + base selladora', unit:'m²', category:'Acabados', rendimiento:40,
+      resources:[
+        {id:121,type:'M',code:'M-16',name:'Pintura vinílica (lt)',unit:'lt',cant:0.35,price:4.5},
+        {id:122,type:'M',code:'M-17',name:'Base selladora (lt)',unit:'lt',cant:0.15,price:3.8},
+        {id:123,type:'M',code:'M-18',name:'Lija #100 y rodillo',unit:'global',cant:1,price:1.2},
+        {id:124,type:'H',code:'H-04',name:'Pintor oficial',unit:'día',cant:0.05,price:42},
+        {id:125,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.025,price:35}
+      ]},
+    // INSTALACIONES
+    { id: 13, code:'IN-001', name:'Tubería PVC Ø4" sanitaria (suministro y coloc.)', unit:'ml', category:'Instalaciones', rendimiento:20,
+      resources:[
+        {id:131,type:'M',code:'M-19',name:'Tubo PVC sanitario Ø4" x 6m',unit:'ml',cant:1.05,price:8.5},
+        {id:132,type:'M',code:'M-20',name:'Pegamento PVC y accesorios',unit:'global',cant:1,price:1.2},
+        {id:133,type:'H',code:'H-05',name:'Plomero oficial',unit:'día',cant:0.1,price:50},
+        {id:134,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.05,price:35}
+      ]},
+    { id: 14, code:'IN-002', name:'Punto de instalación eléctrica (tomacorriente/interruptor)', unit:'und', category:'Instalaciones', rendimiento:8,
+      resources:[
+        {id:141,type:'M',code:'M-21',name:'Tubo conduit metálico Ø3/4" + accesorios',unit:'ml',cant:3.5,price:1.8},
+        {id:142,type:'M',code:'M-22',name:'Cable #12 AWG (ml)',unit:'ml',cant:6,price:0.85},
+        {id:143,type:'M',code:'M-23',name:'Toma/interruptor + placa',unit:'und',cant:1,price:4.5},
+        {id:144,type:'H',code:'H-06',name:'Electricista oficial',unit:'día',cant:0.125,price:55},
+        {id:145,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.125,price:35}
+      ]}
+  ];
+  // Asegurarse que los IDs sean únicos
+  apuData.forEach((a,i) => { a.id = Date.now() + i; a.resources.forEach((r,j) => r.id = Date.now() + i*100 + j); });
+  apuSelected = null;
+  apuRenderList();
+  apuRenderDetail();
+  showToast(`✓ ${apuData.length} APUs base cargadas`);
+}
+
+// Patch goTab to show/hide APU module correctly
+const _origGoTab = goTab;
+goTab = function(tabId, btn) {
+  // Show/hide APU module (it's outside .page div)
+  const apuMod = document.getElementById('apu');
+  if (apuMod) {
+    if (tabId === 'apu') {
+      apuMod.style.display = 'block';
+      document.querySelectorAll('.nt').forEach(b => b.classList.remove('on'));
+      if (btn) btn.classList.add('on');
+      apuRenderList();
+      return;
+    } else {
+      apuMod.style.display = 'none';
+    }
+  }
+  _origGoTab(tabId, btn);
+};
+</script>
 </body>
 </html>
+
