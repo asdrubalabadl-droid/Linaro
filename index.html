@@ -3633,6 +3633,8 @@ function apuUpdateRes(apuId, resId, field, value) {
   const grandEl = document.getElementById('apuGrandTotal');
   if (grandEl) grandEl.textContent = `${projectData.currency} ${tot.subtotal.toFixed(2)}`;
   apuRenderList();
+  // Guardar en Supabase
+  if (typeof obraSaveToSupabase === 'function') obraSaveToSupabase();
 }
 
 function apuDeleteRes(apuId, resId) {
@@ -3641,6 +3643,7 @@ function apuDeleteRes(apuId, resId) {
   apu.resources = apu.resources.filter(r => String(r.id) !== String(resId));
   apuRenderDetail();
   apuRenderList();
+  if (typeof obraSaveToSupabase === 'function') obraSaveToSupabase();
 }
 
 function apuDeleteAPU(id) {
