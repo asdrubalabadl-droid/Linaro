@@ -386,113 +386,114 @@ function recalc() {
   }
 }
 
-// ── Helpers de diseño PDF ────────────────────────────────────────────
-function pdfDrawLogo(doc, x, y, size) {
-  // Replica exacta del SVG del nav: viewBox 0 0 64 64 escalado a 'size' mm
+// ── Paleta PDF crema/beige ──────────────────────────────────────────
+// Header bg:      C1=[ 90, 68, 45]  C2=[ 65, 48, 32]
+// Acento tablas:  CA=[155,125, 90]
+// Fila alterna:   CF=[252,249,245]
+// Borde:          CB=[215,200,180]
+// Pie bg:         CP=[244,241,236]
+// Total bar:      CT=[110, 85, 60]
+// Texto acento:   TX=[ 80, 60, 38]
+
+// ── Logo Linaro en PDF ──────────────────────────────────────────────
+// Dibuja el logo SVG del nav escalado, con color 'color' (array RGB)
+// x,y = esquina superior izquierda en mm, size = alto en mm
+function pdfLogoLinaro(doc, x, y, size, color) {
   const s = size / 64;
-  const gold = [186, 117, 23];
-  const goldA = [186, 117, 23]; // opacity .55 simulado con color más claro
-  doc.setFillColor(...gold);
-  // Palo vertical: rect x=10 y=8 w=7 h=48 rx=2
-  doc.roundedRect(x + 10*s, y + 8*s, 7*s, 48*s, 1*s, 1*s, 'F');
-  // Base horizontal: rect x=10 y=49 w=30 h=7 rx=2
-  doc.roundedRect(x + 10*s, y + 49*s, 30*s, 7*s, 1*s, 1*s, 'F');
-  // Diagonal (triángulo L→A): path M17 56 L42 8 L47 8 L22 56 Z — opacity .55
-  doc.setFillColor(210, 155, 70); // gold con opacity simulada
-  doc.triangle(
-    x + 17*s, y + 56*s,
-    x + 42*s, y + 8*s,
-    x + 47*s, y + 8*s,
-    'F'
-  );
-  doc.setFillColor(...gold);
-  doc.triangle(
-    x + 17*s, y + 56*s,
-    x + 47*s, y + 8*s,
-    x + 22*s, y + 56*s,
-    'F'
-  );
-  // Barra horizontal media: rect x=17 y=34 w=20 h=5 rx=1.5
-  doc.roundedRect(x + 17*s, y + 34*s, 20*s, 5*s, 1*s, 1*s, 'F');
+  const [r, g, b] = color;
+  // Palo vertical  (rect x=10 y=8 w=7 h=48)
+  doc.setFillColor(r, g, b);
+  doc.roundedRect(x + 10*s, y + 8*s,  7*s, 48*s, 0.8*s, 0.8*s, 'F');
+  // Base horizontal (rect x=10 y=49 w=30 h=7)
+  doc.roundedRect(x + 10*s, y + 49*s, 30*s,  7*s, 0.8*s, 0.8*s, 'F');
+  // Diagonal clara (path M17 56 L42 8 L47 8 L22 56)
+  const dr = Math.round(r + (255-r)*0.45);
+  const dg = Math.round(g + (255-g)*0.45);
+  const db = Math.round(b + (255-b)*0.45);
+  doc.setFillColor(dr, dg, db);
+  doc.triangle(x+17*s, y+56*s,  x+42*s, y+8*s,  x+47*s, y+8*s,  'F');
+  doc.setFillColor(r, g, b);
+  doc.triangle(x+17*s, y+56*s,  x+47*s, y+8*s,  x+22*s, y+56*s, 'F');
+  // Barra horizontal media (rect x=17 y=34 w=20 h=5)
+  doc.roundedRect(x + 17*s, y + 34*s, 20*s, 5*s, 0.8*s, 0.8*s, 'F');
 }
 
 function pdfDrawHeader(doc, title, subtitle) {
   const W = doc.internal.pageSize.getWidth();
-  // Barra superior dorada
-  doc.setFillColor(186, 117, 23);
+  // ── Fondo header bicolor ─────────────────────────────────────────
+  doc.setFillColor(90, 68, 45);          // marrón cálido oscuro
   doc.rect(0, 0, W, 24, 'F');
-  // Franja oscura inferior de la barra
-  doc.setFillColor(140, 85, 10);
+  doc.setFillColor(65, 48, 32);          // franja inferior más oscura
   doc.rect(0, 21, W, 3, 'F');
-  // Logo real del SVG (blanco sobre dorado)
-  doc.setFillColor(255, 255, 255);
-  // Palo vertical
-  doc.roundedRect(6, 2, 2.5, 17, 0.4, 0.4, 'F');
-  // Base horizontal
-  doc.roundedRect(6, 16.5, 10.5, 2.5, 0.4, 0.4, 'F');
-  // Diagonal — triángulo superior izq
-  doc.setFillColor(255, 255, 255, 0.55);
-  doc.setFillColor(220, 200, 160); // diagonal semitransparente simulada
-  doc.triangle(6.8, 19, 15.5, 2, 17.2, 2, 'F');
-  doc.setFillColor(255, 255, 255);
-  doc.triangle(6.8, 19, 17.2, 2, 8.5, 19, 'F');
-  // Barra media
-  doc.roundedRect(8.5, 11, 7, 1.8, 0.3, 0.3, 'F');
-  // Nombre empresa
+  // ── Logo Linaro blanco, 18mm de alto ────────────────────────────
+  pdfLogoLinaro(doc, 4, 1.5, 20, [255, 255, 255]);
+  // ── Textos empresa ───────────────────────────────────────────────
   doc.setFont('Helvetica', 'bold');
   doc.setFontSize(13);
-  doc.setTextColor(255, 255, 255);
-  doc.text('LINARO ARQUITECTURA', 22, 11);
+  doc.setTextColor(255, 252, 245);       // blanco cremoso
+  doc.text('LINARO ARQUITECTURA', 27, 11);
   doc.setFont('Helvetica', 'normal');
   doc.setFontSize(7);
-  doc.text('Arq. Asdrubal Linares  ·  Tlf: 0424-5501648', 22, 18);
-  // Título del documento (lado derecho)
+  doc.setTextColor(220, 205, 185);       // crema suave
+  doc.text('Arq. Asdrubal Linares  ·  Tlf: 0424-5501648', 27, 17.5);
+  // ── Título documento (derecha) ───────────────────────────────────
   doc.setFont('Helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.setTextColor(255, 255, 255);
-  doc.text(title, W - 14, 11, { align: 'right' });
+  doc.setFontSize(9.5);
+  doc.setTextColor(255, 248, 230);       // crema cálido
+  doc.text(title, W - 12, 11, { align: 'right' });
   if (subtitle) {
     doc.setFont('Helvetica', 'normal');
     doc.setFontSize(7);
-    doc.text(subtitle, W - 14, 17, { align: 'right' });
+    doc.setTextColor(210, 195, 170);
+    doc.text(subtitle, W - 12, 17.5, { align: 'right' });
   }
-  // Reset color
-  doc.setTextColor(30, 30, 30);
+  doc.setTextColor(40, 30, 20);
 }
 
 function pdfDrawFooter(doc, pageNum, totalPages) {
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
-  doc.setFillColor(245, 240, 230);
-  doc.rect(0, H - 10, W, 10, 'F');
-  doc.setFillColor(186, 117, 23);
-  doc.rect(0, H - 10, W, 1, 'F');
+  // Fondo crema pie
+  doc.setFillColor(244, 241, 236);
+  doc.rect(0, H - 11, W, 11, 'F');
+  // Línea separadora beige
+  doc.setFillColor(155, 125, 90);
+  doc.rect(0, H - 11, W, 0.8, 'F');
+  // Logo pequeño en pie
+  pdfLogoLinaro(doc, 10, H - 10, 8, [110, 85, 60]);
   doc.setFont('Helvetica', 'normal');
-  doc.setFontSize(7);
-  doc.setTextColor(100, 80, 30);
-  doc.text('Linaro Arquitectura  ·  Arq. Asdrubal Linares  ·  0424-5501648', 14, H - 3.5);
-  doc.text(`Pág. ${pageNum} de ${totalPages}`, W - 14, H - 3.5, { align: 'right' });
-  doc.setTextColor(30, 30, 30);
+  doc.setFontSize(6.5);
+  doc.setTextColor(100, 78, 52);
+  doc.text('Linaro Arquitectura  ·  Arq. Asdrubal Linares  ·  0424-5501648', 21, H - 4.5);
+  doc.setFont('Helvetica', 'bold');
+  doc.setTextColor(90, 68, 45);
+  doc.text(`Página ${pageNum} de ${totalPages}`, W - 12, H - 4.5, { align: 'right' });
+  doc.setTextColor(40, 30, 20);
 }
 
 function pdfInfoBlock(doc, fields, startY) {
   const W = doc.internal.pageSize.getWidth();
-  doc.setFillColor(250, 246, 238);
-  doc.setDrawColor(220, 185, 120);
-  doc.roundedRect(10, startY, W - 20, 4 + fields.length * 5.5, 2, 2, 'FD');
+  // Fondo crema con borde beige
+  doc.setFillColor(250, 247, 242);
+  doc.setDrawColor(210, 195, 175);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(10, startY, W - 20, 5 + fields.length * 5.8, 2.5, 2.5, 'FD');
+  // Línea acento izquierda
+  doc.setFillColor(155, 125, 90);
+  doc.rect(10, startY, 1.2, 5 + fields.length * 5.8, 'F');
   doc.setFont('Helvetica', 'bold');
   doc.setFontSize(8);
-  doc.setTextColor(140, 85, 10);
+  doc.setTextColor(90, 68, 45);
   fields.forEach((f, i) => {
-    doc.text(f.label + ':', 14, startY + 4 + i * 5.5);
+    doc.text(f.label + ':', 15, startY + 5 + i * 5.8);
     doc.setFont('Helvetica', 'normal');
-    doc.setTextColor(30, 30, 30);
-    doc.text(String(f.value), 50, startY + 4 + i * 5.5);
+    doc.setTextColor(45, 35, 25);
+    doc.text(String(f.value), 52, startY + 5 + i * 5.8);
     doc.setFont('Helvetica', 'bold');
-    doc.setTextColor(140, 85, 10);
+    doc.setTextColor(90, 68, 45);
   });
-  doc.setTextColor(30, 30, 30);
-  return startY + 6 + fields.length * 5.5;
+  doc.setTextColor(40, 30, 20);
+  return startY + 7 + fields.length * 5.8;
 }
 
 function exportPDF() {
@@ -530,9 +531,9 @@ function exportPDF() {
     head: [['Descripción', 'Unid', 'Cant.', 'P. Unitario', 'Total']],
     body: tableRows,
     theme: 'plain',
-    headStyles: { fillColor: [186, 117, 23], textColor: 255, fontStyle: 'bold', fontSize: 8, cellPadding: 3 },
+    headStyles: { fillColor: [90, 68, 45], textColor: [255, 248, 230], fontStyle: 'bold', fontSize: 8, cellPadding: 3 },
     bodyStyles: { fontSize: 8, cellPadding: 2.5 },
-    alternateRowStyles: { fillColor: [252, 248, 240] },
+    alternateRowStyles: { fillColor: [252, 249, 245] },
     columnStyles: {
       0: { cellWidth: 80 },
       1: { halign: 'center', cellWidth: 16 },
@@ -568,20 +569,20 @@ function exportPDF() {
     head: [['Concepto', `Monto (${cur})`]],
     body: resRows,
     theme: 'plain',
-    headStyles: { fillColor: [60, 50, 30], textColor: 255, fontStyle: 'bold', fontSize: 8, cellPadding: 2.5 },
+    headStyles: { fillColor: [65, 48, 32], textColor: [255, 248, 230], fontStyle: 'bold', fontSize: 8, cellPadding: 2.5 },
     bodyStyles: { fontSize: 8, cellPadding: 2.5 },
-    alternateRowStyles: { fillColor: [252, 248, 240] },
+    alternateRowStyles: { fillColor: [252, 249, 245] },
     columnStyles: { 0: { cellWidth: 120 }, 1: { halign: 'right', fontStyle: 'bold' } },
     margin: { left: 10, right: 10 }
   });
 
   // Total destacado
   y = doc.lastAutoTable.finalY + 4;
-  doc.setFillColor(186, 117, 23);
+  doc.setFillColor(110, 85, 60);
   doc.roundedRect(10, y, W - 20, 12, 2, 2, 'F');
   doc.setFont('Helvetica', 'bold');
   doc.setFontSize(11);
-  doc.setTextColor(255, 255, 255);
+  doc.setTextColor(255, 248, 230);
   doc.text('TOTAL FINAL:', 16, y + 8);
   doc.text(totVal, W - 14, y + 8, { align: 'right' });
   doc.setTextColor(30, 30, 30);
@@ -590,7 +591,7 @@ function exportPDF() {
   y += 18;
   doc.setFont('Helvetica', 'italic');
   doc.setFontSize(7);
-  doc.setTextColor(120, 100, 60);
+  doc.setTextColor(100, 78, 52);
   doc.text('Presupuesto válido por 30 días. Precios expresados en USD. Este documento no constituye contrato.', 10, y);
 
   // Aplicar header y footer a todas las páginas al final
@@ -3772,11 +3773,11 @@ function apuExportPDF() {
     if (y > H - 60) { doc.addPage(); y = 26; }
 
     // Cabecera APU
-    doc.setFillColor(60, 50, 30);
+    doc.setFillColor(65, 48, 32);
     doc.rect(10, y, W - 20, 8, 'F');
     doc.setFont('Helvetica', 'bold');
     doc.setFontSize(9);
-    doc.setTextColor(255, 255, 255);
+    doc.setTextColor(255, 248, 230);
     doc.text(`${a.code}  —  ${a.name}`, 14, y + 5.5);
     doc.setFont('Helvetica', 'normal');
     doc.setFontSize(7);
@@ -3797,9 +3798,9 @@ function apuExportPDF() {
       head: [['Tipo', 'Código', 'Descripción', 'Und', 'Cant.', 'P. Unit.', 'Parcial']],
       body: rows,
       theme: 'plain',
-      headStyles: { fillColor: [186, 117, 23], textColor: 255, fontStyle: 'bold', fontSize: 7.5, cellPadding: 2 },
+      headStyles: { fillColor: [90, 68, 45], textColor: [255, 248, 230], fontStyle: 'bold', fontSize: 7.5, cellPadding: 2 },
       bodyStyles: { fontSize: 7.5, cellPadding: 2 },
-      alternateRowStyles: { fillColor: [252, 248, 240] },
+      alternateRowStyles: { fillColor: [252, 249, 245] },
       columnStyles: {
         0: { cellWidth: 20 },
         1: { cellWidth: 22 },
@@ -3819,11 +3820,11 @@ function apuExportPDF() {
   if (y > H - 30) { doc.addPage(); y = 26; }
 
   const totalAll = apuData.reduce((s, a) => s + apuTotals(a).subtotal, 0);
-  doc.setFillColor(186, 117, 23);
+  doc.setFillColor(110, 85, 60);
   doc.roundedRect(10, y, W - 20, 12, 2, 2, 'F');
   doc.setFont('Helvetica', 'bold');
   doc.setFontSize(11);
-  doc.setTextColor(255, 255, 255);
+  doc.setTextColor(255, 248, 230);
   doc.text('COSTO DIRECTO TOTAL DE OBRA:', 16, y + 8);
   doc.text(`${cur} ${totalAll.toFixed(2)}`, W - 14, y + 8, { align: 'right' });
   doc.setTextColor(30, 30, 30);
@@ -4749,11 +4750,11 @@ function prtExportPDF() {
     const pdur = prtPartidaDuration(p);
 
     // Cabecera de partida
-    doc.setFillColor(60, 50, 30);
+    doc.setFillColor(65, 48, 32);
     doc.rect(10, y, W - 20, 8, 'F');
     doc.setFont('Helvetica', 'bold');
     doc.setFontSize(9);
-    doc.setTextColor(255, 255, 255);
+    doc.setTextColor(255, 248, 230);
     doc.text(`${p.num}  —  ${p.name}`, 14, y + 5.5);
     if (p.desc) {
       doc.setFont('Helvetica', 'italic');
@@ -4781,9 +4782,9 @@ function prtExportPDF() {
       head: [['Código', 'Descripción', 'APU', 'Und', 'Metrado', 'P. Unit.', 'Total', 'Dur.']],
       body: rows,
       theme: 'plain',
-      headStyles: { fillColor: [186, 117, 23], textColor: 255, fontStyle: 'bold', fontSize: 7.5, cellPadding: 2 },
+      headStyles: { fillColor: [90, 68, 45], textColor: [255, 248, 230], fontStyle: 'bold', fontSize: 7.5, cellPadding: 2 },
       bodyStyles: { fontSize: 7.5, cellPadding: 2 },
-      alternateRowStyles: { fillColor: [252, 248, 240] },
+      alternateRowStyles: { fillColor: [252, 249, 245] },
       columnStyles: {
         0: { cellWidth: 22 },
         1: { cellWidth: 90 },
@@ -4802,11 +4803,11 @@ function prtExportPDF() {
 
   // Totales finales en página actual
   if (y > H - 40) { doc.addPage(); y = 26; }
-  doc.setFillColor(186, 117, 23);
+  doc.setFillColor(110, 85, 60);
   doc.roundedRect(10, y, W - 20, 12, 2, 2, 'F');
   doc.setFont('Helvetica', 'bold');
   doc.setFontSize(11);
-  doc.setTextColor(255, 255, 255);
+  doc.setTextColor(255, 248, 230);
   doc.text('COSTO DIRECTO TOTAL:', 16, y + 8);
   doc.text(`${cur} ${totalObra.toFixed(2)}`, W - 80, y + 8, { align: 'right' });
   doc.text(`Duración total: ${prtTotalDuration()} días hábiles`, W - 14, y + 8, { align: 'right' });
@@ -4836,9 +4837,9 @@ function prtExportPDF() {
     head: [['Código', 'Actividad', 'Partida', 'Und', 'Metrado', 'Inicio (día)', 'Fin (día)', 'Duración']],
     body: ganttRows,
     theme: 'plain',
-    headStyles: { fillColor: [186, 117, 23], textColor: 255, fontStyle: 'bold', fontSize: 8, cellPadding: 2.5 },
+    headStyles: { fillColor: [90, 68, 45], textColor: [255, 248, 230], fontStyle: 'bold', fontSize: 8, cellPadding: 2.5 },
     bodyStyles: { fontSize: 8, cellPadding: 2.5 },
-    alternateRowStyles: { fillColor: [252, 248, 240] },
+    alternateRowStyles: { fillColor: [252, 249, 245] },
     columnStyles: {
       0: { cellWidth: 24 },
       1: { cellWidth: 90 },
