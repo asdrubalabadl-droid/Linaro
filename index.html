@@ -121,7 +121,14 @@
   });
 })();
 </script>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='10' y='8' width='7' height='48' rx='2' fill='%23BA7517'/%3E%3Crect x='10' y='49' width='30' height='7' rx='2' fill='%23BA7517'/%3E%3Cpath d='M17 56 L42 8 L47 8 L22 56 Z' fill='%23BA7517' opacity='.55'/%3E%3Crect x='17' y='34' width='20' height='5' rx='1.5' fill='%23BA7517'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect width='64' height='64' rx='12' fill='%23BA7517'/%3E%3Crect x='10' y='8' width='7' height='48' rx='2' fill='white'/%3E%3Crect x='10' y='49' width='30' height='7' rx='2' fill='white'/%3E%3Cpath d='M17 56 L42 8 L47 8 L22 56 Z' fill='white' opacity='.6'/%3E%3Crect x='17' y='34' width='20' height='5' rx='1.5' fill='white'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%23BA7517'/%3E%3Crect x='80' y='64' width='56' height='384' rx='16' fill='white'/%3E%3Crect x='80' y='392' width='240' height='56' rx='16' fill='white'/%3E%3Cpath d='M136 448 L336 64 L376 64 L176 448 Z' fill='white' opacity='.6'/%3E%3Crect x='136' y='272' width='160' height='40' rx='12' fill='white'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#BA7517">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Linaro">
+<meta name="application-name" content="Linaro Arquitectura">
 <!-- jsPDF + AutoTable -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -380,35 +387,74 @@ function recalc() {
 }
 
 // ── Helpers de diseño PDF ────────────────────────────────────────────
+function pdfDrawLogo(doc, x, y, size) {
+  // Replica exacta del SVG del nav: viewBox 0 0 64 64 escalado a 'size' mm
+  const s = size / 64;
+  const gold = [186, 117, 23];
+  const goldA = [186, 117, 23]; // opacity .55 simulado con color más claro
+  doc.setFillColor(...gold);
+  // Palo vertical: rect x=10 y=8 w=7 h=48 rx=2
+  doc.roundedRect(x + 10*s, y + 8*s, 7*s, 48*s, 1*s, 1*s, 'F');
+  // Base horizontal: rect x=10 y=49 w=30 h=7 rx=2
+  doc.roundedRect(x + 10*s, y + 49*s, 30*s, 7*s, 1*s, 1*s, 'F');
+  // Diagonal (triángulo L→A): path M17 56 L42 8 L47 8 L22 56 Z — opacity .55
+  doc.setFillColor(210, 155, 70); // gold con opacity simulada
+  doc.triangle(
+    x + 17*s, y + 56*s,
+    x + 42*s, y + 8*s,
+    x + 47*s, y + 8*s,
+    'F'
+  );
+  doc.setFillColor(...gold);
+  doc.triangle(
+    x + 17*s, y + 56*s,
+    x + 47*s, y + 8*s,
+    x + 22*s, y + 56*s,
+    'F'
+  );
+  // Barra horizontal media: rect x=17 y=34 w=20 h=5 rx=1.5
+  doc.roundedRect(x + 17*s, y + 34*s, 20*s, 5*s, 1*s, 1*s, 'F');
+}
+
 function pdfDrawHeader(doc, title, subtitle) {
   const W = doc.internal.pageSize.getWidth();
   // Barra superior dorada
   doc.setFillColor(186, 117, 23);
-  doc.rect(0, 0, W, 22, 'F');
+  doc.rect(0, 0, W, 24, 'F');
   // Franja oscura inferior de la barra
   doc.setFillColor(140, 85, 10);
-  doc.rect(0, 19, W, 3, 'F');
-  // Logo "L" geométrico (icono simplificado)
+  doc.rect(0, 21, W, 3, 'F');
+  // Logo real del SVG (blanco sobre dorado)
   doc.setFillColor(255, 255, 255);
-  doc.rect(8, 3, 4, 14, 'F');
-  doc.rect(8, 14, 11, 4, 'F');
+  // Palo vertical
+  doc.roundedRect(6, 2, 2.5, 17, 0.4, 0.4, 'F');
+  // Base horizontal
+  doc.roundedRect(6, 16.5, 10.5, 2.5, 0.4, 0.4, 'F');
+  // Diagonal — triángulo superior izq
+  doc.setFillColor(255, 255, 255, 0.55);
+  doc.setFillColor(220, 200, 160); // diagonal semitransparente simulada
+  doc.triangle(6.8, 19, 15.5, 2, 17.2, 2, 'F');
+  doc.setFillColor(255, 255, 255);
+  doc.triangle(6.8, 19, 17.2, 2, 8.5, 19, 'F');
+  // Barra media
+  doc.roundedRect(8.5, 11, 7, 1.8, 0.3, 0.3, 'F');
   // Nombre empresa
   doc.setFont('Helvetica', 'bold');
   doc.setFontSize(13);
   doc.setTextColor(255, 255, 255);
-  doc.text('LINARO ARQUITECTURA', 24, 11);
+  doc.text('LINARO ARQUITECTURA', 22, 11);
   doc.setFont('Helvetica', 'normal');
   doc.setFontSize(7);
-  doc.text('Arq. Asdrubal Linares  ·  Tlf: 0424-5501648', 24, 17);
+  doc.text('Arq. Asdrubal Linares  ·  Tlf: 0424-5501648', 22, 18);
   // Título del documento (lado derecho)
   doc.setFont('Helvetica', 'bold');
   doc.setFontSize(9);
   doc.setTextColor(255, 255, 255);
-  doc.text(title, W - 14, 10, { align: 'right' });
+  doc.text(title, W - 14, 11, { align: 'right' });
   if (subtitle) {
     doc.setFont('Helvetica', 'normal');
     doc.setFontSize(7);
-    doc.text(subtitle, W - 14, 16, { align: 'right' });
+    doc.text(subtitle, W - 14, 17, { align: 'right' });
   }
   // Reset color
   doc.setTextColor(30, 30, 30);
