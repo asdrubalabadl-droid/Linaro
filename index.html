@@ -3796,134 +3796,502 @@ function apuExportPDF() {
 function apuLoadDefaults() {
   if (apuData.length && !confirm('¿Reemplazar APUs actuales con las base?')) return;
   apuData = [
-    // MOVIMIENTO DE TIERRA
-    { id: 1, code:'MT-001', name:'Limpieza y descapote manual (e=20cm)', unit:'m²', category:'Movimiento de tierra', rendimiento:80,
+
+    // ══════════════════════════════════════════
+    // 01. MOVIMIENTO DE TIERRA
+    // ══════════════════════════════════════════
+    { id:1001, code:'MT-001', name:'Limpieza y descapote manual (e=20cm)', unit:'m²', category:'Movimiento de tierra', rendimiento:80,
       resources:[
-        {id:11,type:'H',code:'H-01',name:'Obrero (jornada 8h)',unit:'día',cant:0.0125,price:35,rendimiento:1},
-        {id:12,type:'E',code:'E-01',name:'Herramienta menor (pala, pico)',unit:'global',cant:1,price:0.50}
+        {id:10011,type:'H',code:'H-01',name:'Obrero (jornada 8h)',unit:'día',cant:0.0125,price:30},
+        {id:10012,type:'E',code:'E-01',name:'Herramienta menor (pala, pico, carretilla)',unit:'global',cant:1,price:0.50}
       ]},
-    { id: 2, code:'MT-002', name:'Excavación en tierra suelta c/retroexcavadora', unit:'m³', category:'Movimiento de tierra', rendimiento:150,
+    { id:1002, code:'MT-002', name:'Excavación manual en tierra blanda', unit:'m³', category:'Movimiento de tierra', rendimiento:4,
       resources:[
-        {id:21,type:'E',code:'E-02',name:'Retroexcavadora (hr)',unit:'hr',cant:0.053,price:120},
-        {id:22,type:'H',code:'H-01',name:'Operador de maquinaria',unit:'hr',cant:0.053,price:18},
-        {id:23,type:'T',code:'T-01',name:'Transporte de material sobrante (5km)',unit:'m³',cant:1.25,price:4.5}
+        {id:10021,type:'H',code:'H-01',name:'Obrero',unit:'día',cant:0.25,price:30},
+        {id:10022,type:'E',code:'E-01',name:'Herramienta menor',unit:'global',cant:1,price:0.50}
       ]},
-    { id: 3, code:'MT-003', name:'Relleno y compactación c/material selecto', unit:'m³', category:'Movimiento de tierra', rendimiento:60,
+    { id:1003, code:'MT-003', name:'Excavación c/retroexcavadora en tierra suelta', unit:'m³', category:'Movimiento de tierra', rendimiento:150,
       resources:[
-        {id:31,type:'M',code:'M-01',name:'Material selecto (m³ banco)',unit:'m³',cant:1.30,price:12},
-        {id:32,type:'E',code:'E-03',name:'Compactador vibratorio (hr)',unit:'hr',cant:0.133,price:25},
-        {id:33,type:'H',code:'H-01',name:'Obrero',unit:'día',cant:0.05,price:35}
+        {id:10031,type:'E',code:'E-02',name:'Retroexcavadora JD 310 (hr)',unit:'hr',cant:0.053,price:110},
+        {id:10032,type:'H',code:'H-07',name:'Operador de maquinaria',unit:'hr',cant:0.053,price:15},
+        {id:10033,type:'T',code:'T-01',name:'Transporte material sobrante (5 km)',unit:'m³',cant:1.25,price:5}
       ]},
-    // FUNDACIONES
-    { id: 4, code:'FD-001', name:'Concreto ciclópeo f\'c=175 kg/cm² (60%c+40%p)', unit:'m³', category:'Fundaciones', rendimiento:6,
+    { id:1004, code:'MT-004', name:'Relleno y compactación c/material selecto', unit:'m³', category:'Movimiento de tierra', rendimiento:60,
       resources:[
-        {id:41,type:'M',code:'M-02',name:'Cemento Portland tipo I (saco 42.5kg)',unit:'saco',cant:5.5,price:9.5},
-        {id:42,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.55,price:22},
-        {id:43,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.55,price:28},
-        {id:44,type:'M',code:'M-05',name:'Agua potable',unit:'m³',cant:0.22,price:1.5},
-        {id:45,type:'M',code:'M-06',name:'Piedra bola (40% vol)',unit:'m³',cant:0.40,price:18},
-        {id:46,type:'E',code:'E-04',name:'Mezcladora 1 saco (hr)',unit:'hr',cant:1,price:12},
-        {id:47,type:'H',code:'H-01',name:'Oficial albañil',unit:'día',cant:0.5,price:45},
-        {id:48,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:1,price:35}
+        {id:10041,type:'M',code:'M-01',name:'Material selecto (m³ banco)',unit:'m³',cant:1.30,price:14},
+        {id:10042,type:'E',code:'E-03',name:'Compactador vibratorio (hr)',unit:'hr',cant:0.133,price:22},
+        {id:10043,type:'H',code:'H-01',name:'Obrero',unit:'día',cant:0.05,price:30}
       ]},
-    { id: 5, code:'FD-002', name:'Concreto estructural f\'c=210 kg/cm² en zapatas', unit:'m³', category:'Fundaciones', rendimiento:4,
+    { id:1005, code:'MT-005', name:'Nivelación y conformación de terreno c/motoniveladora', unit:'m²', category:'Movimiento de tierra', rendimiento:500,
       resources:[
-        {id:51,type:'M',code:'M-02',name:'Cemento Portland tipo I',unit:'saco',cant:7.8,price:9.5},
-        {id:52,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.55,price:22},
-        {id:53,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.80,price:28},
-        {id:54,type:'M',code:'M-05',name:'Agua potable',unit:'m³',cant:0.22,price:1.5},
-        {id:55,type:'E',code:'E-05',name:'Vibrador de concreto (hr)',unit:'hr',cant:0.8,price:8},
-        {id:56,type:'E',code:'E-04',name:'Mezcladora 1 saco',unit:'hr',cant:2,price:12},
-        {id:57,type:'H',code:'H-01',name:'Oficial albañil',unit:'día',cant:0.75,price:45},
-        {id:58,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:1.5,price:35}
+        {id:10051,type:'E',code:'E-09',name:'Motoniveladora (hr)',unit:'hr',cant:0.012,price:130},
+        {id:10052,type:'H',code:'H-07',name:'Operador',unit:'hr',cant:0.012,price:15}
       ]},
-    { id: 6, code:'FD-003', name:'Acero de refuerzo fy=4200 kg/cm² (suministro y colocación)', unit:'kg', category:'Fundaciones', rendimiento:200,
+
+    // ══════════════════════════════════════════
+    // 02. FUNDACIONES
+    // ══════════════════════════════════════════
+    { id:2001, code:'FD-001', name:'Concreto ciclópeo f\'c=175 kg/cm² (60%c + 40%p)', unit:'m³', category:'Fundaciones', rendimiento:5,
       resources:[
-        {id:61,type:'M',code:'M-07',name:'Varilla corrugada fy=4200 (ton)',unit:'kg',cant:1.05,price:1.12},
-        {id:62,type:'M',code:'M-08',name:'Alambre negro #18',unit:'kg',cant:0.02,price:1.5},
-        {id:63,type:'H',code:'H-03',name:'Fierrero oficial',unit:'día',cant:0.01,price:50},
-        {id:64,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.01,price:35}
+        {id:20011,type:'M',code:'M-02',name:'Cemento Portland tipo I (saco 42.5 kg)',unit:'saco',cant:5.5,price:9},
+        {id:20012,type:'M',code:'M-03',name:'Arena lavada de río',unit:'m³',cant:0.55,price:20},
+        {id:20013,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.55,price:26},
+        {id:20014,type:'M',code:'M-05',name:'Agua potable',unit:'m³',cant:0.22,price:1.5},
+        {id:20015,type:'M',code:'M-06',name:'Piedra bola (40% vol)',unit:'m³',cant:0.40,price:16},
+        {id:20016,type:'E',code:'E-04',name:'Mezcladora 1 saco (hr)',unit:'hr',cant:1,price:10},
+        {id:20017,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:0.5,price:40},
+        {id:20018,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:1,price:30}
       ]},
-    // ESTRUCTURA
-    { id: 7, code:'ES-001', name:'Columna de concreto f\'c=210 kg/cm² (incluye encofrado)', unit:'m³', category:'Estructura', rendimiento:2,
+    { id:2002, code:'FD-002', name:'Concreto estructural f\'c=210 kg/cm² en zapatas', unit:'m³', category:'Fundaciones', rendimiento:4,
       resources:[
-        {id:71,type:'M',code:'M-02',name:'Cemento Portland tipo I',unit:'saco',cant:7.8,price:9.5},
-        {id:72,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.55,price:22},
-        {id:73,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.80,price:28},
-        {id:74,type:'M',code:'M-09',name:'Madera de encofrado (reutiliz. 3v)',unit:'m²',cant:8,price:4},
-        {id:75,type:'M',code:'M-10',name:'Clavos y alambre',unit:'kg',cant:0.5,price:2},
-        {id:76,type:'E',code:'E-05',name:'Vibrador de concreto',unit:'hr',cant:1,price:8},
-        {id:77,type:'H',code:'H-01',name:'Oficial carpintero-encofrador',unit:'día',cant:1,price:48},
-        {id:78,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:2,price:35}
+        {id:20021,type:'M',code:'M-02',name:'Cemento Portland tipo I',unit:'saco',cant:7.8,price:9},
+        {id:20022,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.55,price:20},
+        {id:20023,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.80,price:26},
+        {id:20024,type:'M',code:'M-05',name:'Agua potable',unit:'m³',cant:0.22,price:1.5},
+        {id:20025,type:'E',code:'E-05',name:'Vibrador de concreto (hr)',unit:'hr',cant:0.8,price:7},
+        {id:20026,type:'E',code:'E-04',name:'Mezcladora 1 saco',unit:'hr',cant:2,price:10},
+        {id:20027,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:0.75,price:40},
+        {id:20028,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:1.5,price:30}
       ]},
-    { id: 8, code:'ES-002', name:'Losa de concreto f\'c=210 e=12cm (incluye encofrado)', unit:'m²', category:'Estructura', rendimiento:20,
+    { id:2003, code:'FD-003', name:'Acero de refuerzo fy=4200 kg/cm² (sum. y colocación)', unit:'kg', category:'Fundaciones', rendimiento:180,
       resources:[
-        {id:81,type:'M',code:'M-02',name:'Cemento Portland tipo I',unit:'saco',cant:0.936,price:9.5},
-        {id:82,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.066,price:22},
-        {id:83,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.096,price:28},
-        {id:84,type:'M',code:'M-09',name:'Encofrado de madera',unit:'m²',cant:1.05,price:6.5},
-        {id:85,type:'M',code:'M-07',name:'Acero fy=4200 (malla)',unit:'kg',cant:9.6,price:1.12},
-        {id:86,type:'E',code:'E-05',name:'Vibrador',unit:'hr',cant:0.12,price:8},
-        {id:87,type:'H',code:'H-01',name:'Oficial albañil',unit:'día',cant:0.1,price:45},
-        {id:88,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.2,price:35}
+        {id:20031,type:'M',code:'M-07',name:'Varilla corrugada fy=4200 (incluye despunte 5%)',unit:'kg',cant:1.05,price:1.05},
+        {id:20032,type:'M',code:'M-08',name:'Alambre negro #18',unit:'kg',cant:0.02,price:1.50},
+        {id:20033,type:'H',code:'H-08',name:'Fierrero oficial',unit:'día',cant:0.011,price:45},
+        {id:20034,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.011,price:30}
       ]},
-    // MAMPOSTERÍA
-    { id: 9, code:'MA-001', name:'Pared de bloque de arcilla 15x20x40 cm (e=15cm)', unit:'m²', category:'Mampostería', rendimiento:15,
+    { id:2004, code:'FD-004', name:'Viga de riostra 0.20x0.25m f\'c=210 (incluye encofrado)', unit:'ml', category:'Fundaciones', rendimiento:8,
       resources:[
-        {id:91,type:'M',code:'M-11',name:'Bloque de arcilla 15x20x40',unit:'und',cant:13.5,price:1.20},
-        {id:92,type:'M',code:'M-12',name:'Mortero de pega 1:4 (cemento-arena)',unit:'m³',cant:0.03,price:85},
-        {id:93,type:'H',code:'H-01',name:'Oficial albañil',unit:'día',cant:0.133,price:45},
-        {id:94,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.133,price:35}
+        {id:20041,type:'M',code:'M-02',name:'Cemento Portland tipo I',unit:'saco',cant:0.49,price:9},
+        {id:20042,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.034,price:20},
+        {id:20043,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.050,price:26},
+        {id:20044,type:'M',code:'M-09',name:'Madera de encofrado (tabla)',unit:'m²',cant:1.8,price:4},
+        {id:20045,type:'M',code:'M-07',name:'Acero fy=4200',unit:'kg',cant:6.2,price:1.05},
+        {id:20046,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:0.25,price:40},
+        {id:20047,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.25,price:30}
       ]},
-    { id: 10, code:'MA-002', name:'Friso de mortero 1:4 e=1.5cm, dos manos', unit:'m²', category:'Mampostería', rendimiento:20,
+    { id:2005, code:'FD-005', name:'Solera de concreto f\'c=175 e=10cm sobre terreno', unit:'m²', category:'Fundaciones', rendimiento:30,
       resources:[
-        {id:101,type:'M',code:'M-02',name:'Cemento Portland',unit:'saco',cant:0.22,price:9.5},
-        {id:102,type:'M',code:'M-03',name:'Arena de río lavada',unit:'m³',cant:0.022,price:22},
-        {id:103,type:'M',code:'M-05',name:'Agua',unit:'lt',cant:12,price:0.002},
-        {id:104,type:'H',code:'H-01',name:'Oficial albañil',unit:'día',cant:0.1,price:45},
-        {id:105,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.1,price:35}
+        {id:20051,type:'M',code:'M-02',name:'Cemento Portland',unit:'saco',cant:0.312,price:9},
+        {id:20052,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.022,price:20},
+        {id:20053,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.032,price:26},
+        {id:20054,type:'M',code:'M-07',name:'Malla electrosoldada 15x15 Ø6mm',unit:'m²',cant:1.05,price:5.5},
+        {id:20055,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:0.066,price:40},
+        {id:20056,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.066,price:30}
       ]},
-    // ACABADOS
-    { id: 11, code:'AC-001', name:'Piso de cerámica 30x30 cm (suministro y colocación)', unit:'m²', category:'Acabados', rendimiento:12,
+
+    // ══════════════════════════════════════════
+    // 03. ESTRUCTURA DE CONCRETO
+    // ══════════════════════════════════════════
+    { id:3001, code:'ES-001', name:'Columna de concreto f\'c=210 kg/cm² (incl. encofrado)', unit:'m³', category:'Estructura', rendimiento:2,
       resources:[
-        {id:111,type:'M',code:'M-13',name:'Cerámica 30x30 cm (incluye 5% rotura)',unit:'m²',cant:1.05,price:18},
-        {id:112,type:'M',code:'M-14',name:'Pega cerámica gris',unit:'saco',cant:0.35,price:14},
-        {id:113,type:'M',code:'M-15',name:'Fragüe color',unit:'kg',cant:0.25,price:3.5},
-        {id:114,type:'E',code:'E-06',name:'Amoladora c/disco diamante',unit:'hr',cant:0.08,price:6},
-        {id:115,type:'H',code:'H-01',name:'Oficial instalador',unit:'día',cant:0.083,price:48},
-        {id:116,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.083,price:35}
+        {id:30011,type:'M',code:'M-02',name:'Cemento Portland tipo I',unit:'saco',cant:7.8,price:9},
+        {id:30012,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.55,price:20},
+        {id:30013,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.80,price:26},
+        {id:30014,type:'M',code:'M-09',name:'Madera de encofrado (reutiliz. 3v)',unit:'m²',cant:8,price:4},
+        {id:30015,type:'M',code:'M-10',name:'Clavos y alambre',unit:'kg',cant:0.5,price:2},
+        {id:30016,type:'E',code:'E-05',name:'Vibrador de concreto',unit:'hr',cant:1,price:7},
+        {id:30017,type:'H',code:'H-09',name:'Carpintero-encofrador oficial',unit:'día',cant:1,price:42},
+        {id:30018,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:2,price:30}
       ]},
-    { id: 12, code:'AC-002', name:'Pintura vinílica (2 manos) + base selladora', unit:'m²', category:'Acabados', rendimiento:40,
+    { id:3002, code:'ES-002', name:'Viga de concreto f\'c=210 (incl. encofrado y acero)', unit:'m³', category:'Estructura', rendimiento:3,
       resources:[
-        {id:121,type:'M',code:'M-16',name:'Pintura vinílica (lt)',unit:'lt',cant:0.35,price:4.5},
-        {id:122,type:'M',code:'M-17',name:'Base selladora (lt)',unit:'lt',cant:0.15,price:3.8},
-        {id:123,type:'M',code:'M-18',name:'Lija #100 y rodillo',unit:'global',cant:1,price:1.2},
-        {id:124,type:'H',code:'H-04',name:'Pintor oficial',unit:'día',cant:0.05,price:42},
-        {id:125,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.025,price:35}
+        {id:30021,type:'M',code:'M-02',name:'Cemento Portland tipo I',unit:'saco',cant:7.8,price:9},
+        {id:30022,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.55,price:20},
+        {id:30023,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.80,price:26},
+        {id:30024,type:'M',code:'M-09',name:'Encofrado madera',unit:'m²',cant:6,price:4},
+        {id:30025,type:'M',code:'M-07',name:'Acero fy=4200',unit:'kg',cant:120,price:1.05},
+        {id:30026,type:'E',code:'E-05',name:'Vibrador de concreto',unit:'hr',cant:0.8,price:7},
+        {id:30027,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:1,price:40},
+        {id:30028,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:2,price:30}
       ]},
-    // INSTALACIONES
-    { id: 13, code:'IN-001', name:'Tubería PVC Ø4" sanitaria (suministro y coloc.)', unit:'ml', category:'Instalaciones', rendimiento:20,
+    { id:3003, code:'ES-003', name:'Losa de concreto f\'c=210 e=12cm (incl. encofrado y malla)', unit:'m²', category:'Estructura', rendimiento:18,
       resources:[
-        {id:131,type:'M',code:'M-19',name:'Tubo PVC sanitario Ø4" x 6m',unit:'ml',cant:1.05,price:8.5},
-        {id:132,type:'M',code:'M-20',name:'Pegamento PVC y accesorios',unit:'global',cant:1,price:1.2},
-        {id:133,type:'H',code:'H-05',name:'Plomero oficial',unit:'día',cant:0.1,price:50},
-        {id:134,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.05,price:35}
+        {id:30031,type:'M',code:'M-02',name:'Cemento Portland tipo I',unit:'saco',cant:0.936,price:9},
+        {id:30032,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.066,price:20},
+        {id:30033,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.096,price:26},
+        {id:30034,type:'M',code:'M-09',name:'Encofrado de madera',unit:'m²',cant:1.05,price:6},
+        {id:30035,type:'M',code:'M-07',name:'Acero fy=4200 (malla 15x15 Ø8)',unit:'kg',cant:9.6,price:1.05},
+        {id:30036,type:'E',code:'E-05',name:'Vibrador',unit:'hr',cant:0.12,price:7},
+        {id:30037,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:0.11,price:40},
+        {id:30038,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.22,price:30}
       ]},
-    { id: 14, code:'IN-002', name:'Punto de instalación eléctrica (tomacorriente/interruptor)', unit:'und', category:'Instalaciones', rendimiento:8,
+    { id:3004, code:'ES-004', name:'Escalera de concreto f\'c=210 (incl. encofrado)', unit:'ml', category:'Estructura', rendimiento:4,
       resources:[
-        {id:141,type:'M',code:'M-21',name:'Tubo conduit metálico Ø3/4" + accesorios',unit:'ml',cant:3.5,price:1.8},
-        {id:142,type:'M',code:'M-22',name:'Cable #12 AWG (ml)',unit:'ml',cant:6,price:0.85},
-        {id:143,type:'M',code:'M-23',name:'Toma/interruptor + placa',unit:'und',cant:1,price:4.5},
-        {id:144,type:'H',code:'H-06',name:'Electricista oficial',unit:'día',cant:0.125,price:55},
-        {id:145,type:'H',code:'H-02',name:'Ayudante',unit:'día',cant:0.125,price:35}
+        {id:30041,type:'M',code:'M-02',name:'Cemento Portland',unit:'saco',cant:1.2,price:9},
+        {id:30042,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.085,price:20},
+        {id:30043,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.12,price:26},
+        {id:30044,type:'M',code:'M-09',name:'Encofrado madera',unit:'m²',cant:2.5,price:6},
+        {id:30045,type:'M',code:'M-07',name:'Acero fy=4200',unit:'kg',cant:18,price:1.05},
+        {id:30046,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:0.5,price:40},
+        {id:30047,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.5,price:30}
+      ]},
+
+    // ══════════════════════════════════════════
+    // 04. MAMPOSTERÍA
+    // ══════════════════════════════════════════
+    { id:4001, code:'MA-001', name:'Pared bloque arcilla 15x20x40 cm (e=15cm)', unit:'m²', category:'Mampostería', rendimiento:15,
+      resources:[
+        {id:40011,type:'M',code:'M-11',name:'Bloque de arcilla 15x20x40 cm',unit:'und',cant:13.5,price:1.10},
+        {id:40012,type:'M',code:'M-02',name:'Cemento Portland (mortero 1:4)',unit:'saco',cant:0.18,price:9},
+        {id:40013,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.025,price:20},
+        {id:40014,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:0.133,price:40},
+        {id:40015,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.133,price:30}
+      ]},
+    { id:4002, code:'MA-002', name:'Pared bloque arcilla 10x20x40 cm (e=10cm)', unit:'m²', category:'Mampostería', rendimiento:16,
+      resources:[
+        {id:40021,type:'M',code:'M-11b',name:'Bloque de arcilla 10x20x40 cm',unit:'und',cant:13.5,price:0.90},
+        {id:40022,type:'M',code:'M-02',name:'Cemento Portland (mortero 1:4)',unit:'saco',cant:0.14,price:9},
+        {id:40023,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.020,price:20},
+        {id:40024,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:0.125,price:40},
+        {id:40025,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.125,price:30}
+      ]},
+    { id:4003, code:'MA-003', name:'Pared bloque de concreto 15x20x40 cm', unit:'m²', category:'Mampostería', rendimiento:14,
+      resources:[
+        {id:40031,type:'M',code:'M-11c',name:'Bloque de concreto 15x20x40 cm',unit:'und',cant:13.5,price:1.30},
+        {id:40032,type:'M',code:'M-02',name:'Cemento Portland (mortero 1:4)',unit:'saco',cant:0.18,price:9},
+        {id:40033,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.025,price:20},
+        {id:40034,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:0.143,price:40},
+        {id:40035,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.143,price:30}
+      ]},
+    { id:4004, code:'MA-004', name:'Friso de mortero 1:4 e=1.5cm (dos manos)', unit:'m²', category:'Mampostería', rendimiento:20,
+      resources:[
+        {id:40041,type:'M',code:'M-02',name:'Cemento Portland',unit:'saco',cant:0.22,price:9},
+        {id:40042,type:'M',code:'M-03',name:'Arena de río lavada',unit:'m³',cant:0.022,price:20},
+        {id:40043,type:'M',code:'M-05',name:'Agua',unit:'lt',cant:12,price:0.002},
+        {id:40044,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:0.10,price:40},
+        {id:40045,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.10,price:30}
+      ]},
+    { id:4005, code:'MA-005', name:'Repello impermeable (mortero 1:3 + impermeabilizante)', unit:'m²', category:'Mampostería', rendimiento:15,
+      resources:[
+        {id:40051,type:'M',code:'M-02',name:'Cemento Portland',unit:'saco',cant:0.30,price:9},
+        {id:40052,type:'M',code:'M-03',name:'Arena lavada fina',unit:'m³',cant:0.025,price:20},
+        {id:40053,type:'M',code:'M-28',name:'Impermeabilizante líquido (lt)',unit:'lt',cant:0.15,price:6},
+        {id:40054,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:0.133,price:40},
+        {id:40055,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.067,price:30}
+      ]},
+    { id:4006, code:'MA-006', name:'Viga de corona 0.15x0.20m (incl. encofrado y acero)', unit:'ml', category:'Mampostería', rendimiento:10,
+      resources:[
+        {id:40061,type:'M',code:'M-02',name:'Cemento Portland',unit:'saco',cant:0.18,price:9},
+        {id:40062,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.013,price:20},
+        {id:40063,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.018,price:26},
+        {id:40064,type:'M',code:'M-07',name:'Acero fy=4200 (4Ø3/8+estribos)',unit:'kg',cant:3.8,price:1.05},
+        {id:40065,type:'M',code:'M-09',name:'Encofrado madera',unit:'ml',cant:0.7,price:4},
+        {id:40066,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:0.2,price:40},
+        {id:40067,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.1,price:30}
+      ]},
+
+    // ══════════════════════════════════════════
+    // 05. CUBIERTAS Y TECHOS
+    // ══════════════════════════════════════════
+    { id:5001, code:'CU-001', name:'Cubierta zinc acanalado cal.26 (incl. estructura)', unit:'m²', category:'Cubiertas', rendimiento:25,
+      resources:[
+        {id:50011,type:'M',code:'M-30',name:'Lámina zinc acanalado cal.26',unit:'m²',cant:1.10,price:9},
+        {id:50012,type:'M',code:'M-31',name:'Correa de madera 2"x4"x3m',unit:'ml',cant:1.8,price:2.8},
+        {id:50013,type:'M',code:'M-32',name:'Tornillos autoperforantes (paq)',unit:'paq',cant:0.08,price:4.5},
+        {id:50014,type:'H',code:'H-10',name:'Techador oficial',unit:'día',cant:0.08,price:40},
+        {id:50015,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.08,price:30}
+      ]},
+    { id:5002, code:'CU-002', name:'Cubierta teja de arcilla (colonial) incl. estructura madera', unit:'m²', category:'Cubiertas', rendimiento:12,
+      resources:[
+        {id:50021,type:'M',code:'M-33',name:'Teja de arcilla colonial',unit:'und',cant:16,price:0.85},
+        {id:50022,type:'M',code:'M-34',name:'Listones de madera 1"x3"',unit:'ml',cant:3.5,price:1.5},
+        {id:50023,type:'M',code:'M-31',name:'Correa madera 2"x4"',unit:'ml',cant:1.5,price:2.8},
+        {id:50024,type:'M',code:'M-02',name:'Mortero de asiento',unit:'saco',cant:0.05,price:9},
+        {id:50025,type:'H',code:'H-10',name:'Techador oficial',unit:'día',cant:0.167,price:40},
+        {id:50026,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.083,price:30}
+      ]},
+    { id:5003, code:'CU-003', name:'Impermeabilización de losa con membrana asfáltica', unit:'m²', category:'Cubiertas', rendimiento:30,
+      resources:[
+        {id:50031,type:'M',code:'M-35',name:'Membrana asfáltica 4mm autoadhesiva',unit:'m²',cant:1.10,price:12},
+        {id:50032,type:'M',code:'M-36',name:'Imprimante asfáltico (lt)',unit:'lt',cant:0.30,price:4},
+        {id:50033,type:'E',code:'E-10',name:'Soplete de gas propano',unit:'hr',cant:0.067,price:3},
+        {id:50034,type:'H',code:'H-11',name:'Impermeabilizador oficial',unit:'día',cant:0.067,price:40},
+        {id:50035,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.033,price:30}
+      ]},
+    { id:5004, code:'CU-004', name:'Canalón PVC Ø6" incl. bajante y accesorios', unit:'ml', category:'Cubiertas', rendimiento:20,
+      resources:[
+        {id:50041,type:'M',code:'M-37',name:'Canalón PVC 6" x 3m',unit:'ml',cant:1.05,price:7},
+        {id:50042,type:'M',code:'M-38',name:'Bajante PVC 4" x 3m',unit:'ml',cant:0.5,price:5},
+        {id:50043,type:'M',code:'M-39',name:'Accesorios y pegamento PVC',unit:'global',cant:1,price:2},
+        {id:50044,type:'H',code:'H-05',name:'Plomero oficial',unit:'día',cant:0.1,price:45},
+        {id:50045,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.05,price:30}
+      ]},
+
+    // ══════════════════════════════════════════
+    // 06. PISOS Y ACABADOS
+    // ══════════════════════════════════════════
+    { id:6001, code:'AC-001', name:'Piso cerámica 40x40 cm (sum. y colocación)', unit:'m²', category:'Acabados', rendimiento:10,
+      resources:[
+        {id:60011,type:'M',code:'M-13',name:'Cerámica 40x40 cm (incl. 5% rotura)',unit:'m²',cant:1.05,price:14},
+        {id:60012,type:'M',code:'M-14',name:'Pega cerámica (saco 25kg)',unit:'saco',cant:0.35,price:12},
+        {id:60013,type:'M',code:'M-15',name:'Fragüe color (kg)',unit:'kg',cant:0.35,price:3},
+        {id:60014,type:'E',code:'E-06',name:'Amoladora c/disco diamante (hr)',unit:'hr',cant:0.10,price:5},
+        {id:60015,type:'H',code:'H-12',name:'Pegador oficial',unit:'día',cant:0.10,price:42},
+        {id:60016,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.10,price:30}
+      ]},
+    { id:6002, code:'AC-002', name:'Piso porcelanato 60x60 cm rectificado (sum. y colocación)', unit:'m²', category:'Acabados', rendimiento:8,
+      resources:[
+        {id:60021,type:'M',code:'M-13b',name:'Porcelanato 60x60 cm (incl. 5% rotura)',unit:'m²',cant:1.05,price:28},
+        {id:60022,type:'M',code:'M-14',name:'Pega cerámica blanca premium',unit:'saco',cant:0.40,price:14},
+        {id:60023,type:'M',code:'M-15b',name:'Fragüe epóxico (kg)',unit:'kg',cant:0.20,price:8},
+        {id:60024,type:'E',code:'E-06',name:'Amoladora c/disco diamante',unit:'hr',cant:0.125,price:5},
+        {id:60025,type:'H',code:'H-12',name:'Pegador oficial',unit:'día',cant:0.125,price:42},
+        {id:60026,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.125,price:30}
+      ]},
+    { id:6003, code:'AC-003', name:'Piso granito nacional (lavado y cristalizado)', unit:'m²', category:'Acabados', rendimiento:6,
+      resources:[
+        {id:60031,type:'M',code:'M-41',name:'Piedra granito nacional (incl. rotura)',unit:'m²',cant:1.05,price:22},
+        {id:60032,type:'M',code:'M-14',name:'Pega cerámica',unit:'saco',cant:0.35,price:12},
+        {id:60033,type:'E',code:'E-11',name:'Pulidora de pisos c/disco (hr)',unit:'hr',cant:0.5,price:8},
+        {id:60034,type:'H',code:'H-12',name:'Oficial pegador/pulidor',unit:'día',cant:0.333,price:42},
+        {id:60035,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.167,price:30}
+      ]},
+    { id:6004, code:'AC-004', name:'Revestimiento cerámica en pared baño (sum. y colocación)', unit:'m²', category:'Acabados', rendimiento:10,
+      resources:[
+        {id:60041,type:'M',code:'M-42',name:'Cerámica de pared 30x60 cm',unit:'m²',cant:1.05,price:16},
+        {id:60042,type:'M',code:'M-14',name:'Pega cerámica blanca',unit:'saco',cant:0.40,price:12},
+        {id:60043,type:'M',code:'M-15',name:'Fragüe color (kg)',unit:'kg',cant:0.30,price:3},
+        {id:60044,type:'E',code:'E-06',name:'Amoladora c/disco',unit:'hr',cant:0.10,price:5},
+        {id:60045,type:'H',code:'H-12',name:'Pegador oficial',unit:'día',cant:0.10,price:42},
+        {id:60046,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.10,price:30}
+      ]},
+    { id:6005, code:'AC-005', name:'Pintura vinílica lavable (2 manos + base selladora)', unit:'m²', category:'Acabados', rendimiento:40,
+      resources:[
+        {id:60051,type:'M',code:'M-16',name:'Pintura vinílica lavable (lt)',unit:'lt',cant:0.35,price:5},
+        {id:60052,type:'M',code:'M-17',name:'Base selladora (lt)',unit:'lt',cant:0.15,price:4},
+        {id:60053,type:'M',code:'M-18',name:'Lija #100 y rodillo c/bandeja',unit:'global',cant:1,price:1.5},
+        {id:60054,type:'H',code:'H-13',name:'Pintor oficial',unit:'día',cant:0.05,price:40},
+        {id:60055,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.025,price:30}
+      ]},
+    { id:6006, code:'AC-006', name:'Pintura caucho exterior (2 manos) + anticorrosivo', unit:'m²', category:'Acabados', rendimiento:35,
+      resources:[
+        {id:60061,type:'M',code:'M-43',name:'Caucho acrílico exterior (lt)',unit:'lt',cant:0.40,price:6},
+        {id:60062,type:'M',code:'M-44',name:'Anticorrosivo gris (lt)',unit:'lt',cant:0.10,price:4.5},
+        {id:60063,type:'M',code:'M-18',name:'Rodillo y accesorios',unit:'global',cant:1,price:1.5},
+        {id:60064,type:'H',code:'H-13',name:'Pintor oficial',unit:'día',cant:0.057,price:40},
+        {id:60065,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.029,price:30}
+      ]},
+    { id:6007, code:'AC-007', name:'Cielo raso de drywall (incl. estructura de acero)', unit:'m²', category:'Acabados', rendimiento:20,
+      resources:[
+        {id:60071,type:'M',code:'M-45',name:'Lámina drywall 1/2" 1.22x2.44m',unit:'m²',cant:1.05,price:8},
+        {id:60072,type:'M',code:'M-46',name:'Perfil canal 3.6m (estructura)',unit:'ml',cant:1.2,price:2.5},
+        {id:60073,type:'M',code:'M-47',name:'Tornillos drywall y masilla',unit:'global',cant:1,price:1.5},
+        {id:60074,type:'H',code:'H-14',name:'Drywall oficial',unit:'día',cant:0.10,price:42},
+        {id:60075,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.10,price:30}
+      ]},
+    { id:6008, code:'AC-008', name:'Cielo raso PVC tipo plafón (incl. estructura)', unit:'m²', category:'Acabados', rendimiento:25,
+      resources:[
+        {id:60081,type:'M',code:'M-48',name:'Lámina PVC decorativa (m²)',unit:'m²',cant:1.05,price:7},
+        {id:60082,type:'M',code:'M-49',name:'Perfil T de aluminio',unit:'ml',cant:1.2,price:1.8},
+        {id:60083,type:'M',code:'M-50',name:'Tirantes y tornillería',unit:'global',cant:1,price:0.80},
+        {id:60084,type:'H',code:'H-14',name:'Oficial instalador',unit:'día',cant:0.08,price:40},
+        {id:60085,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.08,price:30}
+      ]},
+
+    // ══════════════════════════════════════════
+    // 07. INSTALACIONES SANITARIAS
+    // ══════════════════════════════════════════
+    { id:7001, code:'IS-001', name:'Tubería PVC Ø4" sanitaria (sum. y colocación)', unit:'ml', category:'Instalaciones sanitarias', rendimiento:20,
+      resources:[
+        {id:70011,type:'M',code:'M-19',name:'Tubo PVC sanitario Ø4" x 3m',unit:'ml',cant:1.05,price:8},
+        {id:70012,type:'M',code:'M-20',name:'Pegamento PVC (1/4 lt)',unit:'und',cant:0.05,price:6},
+        {id:70013,type:'H',code:'H-05',name:'Plomero oficial',unit:'día',cant:0.10,price:45},
+        {id:70014,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.05,price:30}
+      ]},
+    { id:7002, code:'IS-002', name:'Tubería PVC Ø2" aguas blancas (sum. y colocación)', unit:'ml', category:'Instalaciones sanitarias', rendimiento:25,
+      resources:[
+        {id:70021,type:'M',code:'M-19b',name:'Tubo PVC presión Ø2" x 3m',unit:'ml',cant:1.05,price:5},
+        {id:70022,type:'M',code:'M-20',name:'Pegamento PVC y accesorios',unit:'global',cant:0.04,price:6},
+        {id:70023,type:'H',code:'H-05',name:'Plomero oficial',unit:'día',cant:0.08,price:45},
+        {id:70024,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.04,price:30}
+      ]},
+    { id:7003, code:'IS-003', name:'Tubería CPVC Ø1/2" agua caliente (sum. y colocación)', unit:'ml', category:'Instalaciones sanitarias', rendimiento:20,
+      resources:[
+        {id:70031,type:'M',code:'M-51',name:'Tubo CPVC Ø1/2" x 3m',unit:'ml',cant:1.05,price:4.5},
+        {id:70032,type:'M',code:'M-52',name:'Pegamento CPVC y codos',unit:'global',cant:0.05,price:5},
+        {id:70033,type:'H',code:'H-05',name:'Plomero oficial',unit:'día',cant:0.10,price:45},
+        {id:70034,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.05,price:30}
+      ]},
+    { id:7004, code:'IS-004', name:'Punto sanitario (inodoro + lavamanos) completo', unit:'und', category:'Instalaciones sanitarias', rendimiento:2,
+      resources:[
+        {id:70041,type:'M',code:'M-53',name:'Inodoro flux national (incl. accesorios)',unit:'und',cant:1,price:85},
+        {id:70042,type:'M',code:'M-54',name:'Lavamanos pedestal nacional (incl. grifería)',unit:'und',cant:1,price:75},
+        {id:70043,type:'M',code:'M-19b',name:'Tubería PVC (conexiones)',unit:'ml',cant:4,price:5},
+        {id:70044,type:'H',code:'H-05',name:'Plomero oficial',unit:'día',cant:1,price:45},
+        {id:70045,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.5,price:30}
+      ]},
+    { id:7005, code:'IS-005', name:'Tanque de agua superficial 1000 lt (incl. instalación)', unit:'und', category:'Instalaciones sanitarias', rendimiento:1,
+      resources:[
+        {id:70051,type:'M',code:'M-55',name:'Tanque polietileno 1000 lt',unit:'und',cant:1,price:120},
+        {id:70052,type:'M',code:'M-56',name:'Válvula de boya + accesorios',unit:'global',cant:1,price:18},
+        {id:70053,type:'M',code:'M-19b',name:'Tubería PVC conexión',unit:'ml',cant:3,price:5},
+        {id:70054,type:'H',code:'H-05',name:'Plomero oficial',unit:'día',cant:0.5,price:45},
+        {id:70055,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.25,price:30}
+      ]},
+    { id:7006, code:'IS-006', name:'Pozo séptico 1200 lt (excav. + anillos + tapa)', unit:'und', category:'Instalaciones sanitarias', rendimiento:1,
+      resources:[
+        {id:70061,type:'M',code:'M-57',name:'Anillos de concreto prefabricado Ø1.2m',unit:'und',cant:4,price:55},
+        {id:70062,type:'M',code:'M-58',name:'Tapa de concreto c/ventilación',unit:'und',cant:1,price:45},
+        {id:70063,type:'M',code:'M-02',name:'Cemento Portland (junteo)',unit:'saco',cant:1,price:9},
+        {id:70064,type:'E',code:'E-02',name:'Excavación c/retroexcavadora',unit:'hr',cant:2,price:110},
+        {id:70065,type:'H',code:'H-05',name:'Plomero oficial',unit:'día',cant:1,price:45},
+        {id:70066,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:1,price:30}
+      ]},
+
+    // ══════════════════════════════════════════
+    // 08. INSTALACIONES ELÉCTRICAS
+    // ══════════════════════════════════════════
+    { id:8001, code:'IE-001', name:'Punto eléctrico tomacorriente doble (incl. tubo+cable)', unit:'und', category:'Instalaciones eléctricas', rendimiento:6,
+      resources:[
+        {id:80011,type:'M',code:'M-21',name:'Tubo conduit metálico Ø3/4" + accesorios',unit:'ml',cant:3.5,price:1.80},
+        {id:80012,type:'M',code:'M-22',name:'Cable #12 AWG THHN (ml)',unit:'ml',cant:7,price:0.90},
+        {id:80013,type:'M',code:'M-23',name:'Tomacorriente doble + placa',unit:'und',cant:1,price:5},
+        {id:80014,type:'H',code:'H-06',name:'Electricista oficial',unit:'día',cant:0.167,price:50},
+        {id:80015,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.083,price:30}
+      ]},
+    { id:8002, code:'IE-002', name:'Punto eléctrico interruptor sencillo (incl. tubo+cable)', unit:'und', category:'Instalaciones eléctricas', rendimiento:8,
+      resources:[
+        {id:80021,type:'M',code:'M-21',name:'Tubo conduit Ø3/4" + accesorios',unit:'ml',cant:3,price:1.80},
+        {id:80022,type:'M',code:'M-59',name:'Cable #14 AWG THHN (ml)',unit:'ml',cant:6,price:0.70},
+        {id:80023,type:'M',code:'M-60',name:'Interruptor sencillo + placa',unit:'und',cant:1,price:3.5},
+        {id:80024,type:'H',code:'H-06',name:'Electricista oficial',unit:'día',cant:0.125,price:50},
+        {id:80025,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.063,price:30}
+      ]},
+    { id:8003, code:'IE-003', name:'Punto luminaria (lámpara techo, incl. cable y tubo)', unit:'und', category:'Instalaciones eléctricas', rendimiento:6,
+      resources:[
+        {id:80031,type:'M',code:'M-21',name:'Tubo conduit Ø1/2" flexible',unit:'ml',cant:3,price:1.20},
+        {id:80032,type:'M',code:'M-59',name:'Cable #14 AWG THHN',unit:'ml',cant:6,price:0.70},
+        {id:80033,type:'M',code:'M-61',name:'Caja octagonal + tapa',unit:'und',cant:1,price:1.50},
+        {id:80034,type:'H',code:'H-06',name:'Electricista oficial',unit:'día',cant:0.167,price:50},
+        {id:80035,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.083,price:30}
+      ]},
+    { id:8004, code:'IE-004', name:'Tablero de distribución 12 circuitos (sum. e instalación)', unit:'und', category:'Instalaciones eléctricas', rendimiento:1,
+      resources:[
+        {id:80041,type:'M',code:'M-62',name:'Tablero distribución 12 circuitos c/breakers',unit:'und',cant:1,price:95},
+        {id:80042,type:'M',code:'M-22',name:'Cable #10 AWG acometida (ml)',unit:'ml',cant:6,price:1.20},
+        {id:80043,type:'M',code:'M-63',name:'Barra de tierra + electrodo copperweld',unit:'global',cant:1,price:22},
+        {id:80044,type:'H',code:'H-06',name:'Electricista oficial',unit:'día',cant:2,price:50},
+        {id:80045,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:1,price:30}
+      ]},
+    { id:8005, code:'IE-005', name:'Acometida eléctrica 3x10mm² desde medidor', unit:'ml', category:'Instalaciones eléctricas', rendimiento:15,
+      resources:[
+        {id:80051,type:'M',code:'M-64',name:'Cable concéntrico 3x10mm² (ml)',unit:'ml',cant:1.05,price:3.80},
+        {id:80052,type:'M',code:'M-21',name:'Tubo conduit 1" + abrazaderas',unit:'ml',cant:1,price:2.20},
+        {id:80053,type:'H',code:'H-06',name:'Electricista oficial',unit:'día',cant:0.133,price:50},
+        {id:80054,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.067,price:30}
+      ]},
+    { id:8006, code:'IE-006', name:'Poste de luminaria vial 9m (sum. e instalación)', unit:'und', category:'Instalaciones eléctricas', rendimiento:1,
+      resources:[
+        {id:80061,type:'M',code:'M-65',name:'Poste metálico galvanizado 9m',unit:'und',cant:1,price:320},
+        {id:80062,type:'M',code:'M-66',name:'Luminaria LED 100W',unit:'und',cant:1,price:85},
+        {id:80063,type:'M',code:'M-02',name:'Concreto base (saco)',unit:'saco',cant:3,price:9},
+        {id:80064,type:'E',code:'E-02',name:'Excavación + montaje (grúa hr)',unit:'hr',cant:2,price:90},
+        {id:80065,type:'H',code:'H-06',name:'Electricista oficial',unit:'día',cant:0.5,price:50},
+        {id:80066,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:1,price:30}
+      ]},
+
+    // ══════════════════════════════════════════
+    // 09. CARPINTERÍA Y HERRERÍA
+    // ══════════════════════════════════════════
+    { id:9001, code:'CA-001', name:'Puerta madera sólida 0.90x2.10m (sum. e instalación)', unit:'und', category:'Carpintería y herrería', rendimiento:2,
+      resources:[
+        {id:90011,type:'M',code:'M-70',name:'Puerta madera sólida 0.90x2.10m',unit:'und',cant:1,price:180},
+        {id:90012,type:'M',code:'M-71',name:'Marco madera 3"x4" (juego)',unit:'und',cant:1,price:55},
+        {id:90013,type:'M',code:'M-72',name:'Bisagras 3.5" cromadas (par)',unit:'par',cant:3,price:3},
+        {id:90014,type:'M',code:'M-73',name:'Cerradura pomo+llaves',unit:'und',cant:1,price:25},
+        {id:90015,type:'H',code:'H-09',name:'Carpintero oficial',unit:'día',cant:1,price:42},
+        {id:90016,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.5,price:30}
+      ]},
+    { id:9002, code:'CA-002', name:'Ventana aluminio corrediza 1.00x1.20m (sum. e instalación)', unit:'und', category:'Carpintería y herrería', rendimiento:4,
+      resources:[
+        {id:90021,type:'M',code:'M-74',name:'Ventana aluminio natural corrediza 1.0x1.2m',unit:'und',cant:1,price:95},
+        {id:90022,type:'M',code:'M-75',name:'Vidrio claro 4mm (m²)',unit:'m²',cant:1.20,price:18},
+        {id:90023,type:'M',code:'M-02',name:'Mortero de fijación',unit:'kg',cant:2,price:0.25},
+        {id:90024,type:'H',code:'H-15',name:'Aluminiero/vidriero oficial',unit:'día',cant:0.5,price:42},
+        {id:90025,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.25,price:30}
+      ]},
+    { id:9003, code:'CA-003', name:'Portón metálico tubo cuadrado 2"x2" (sum. e instalación)', unit:'m²', category:'Carpintería y herrería', rendimiento:4,
+      resources:[
+        {id:90031,type:'M',code:'M-76',name:'Tubo cuadrado 2"x2" e=2mm',unit:'ml',cant:3.5,price:6.50},
+        {id:90032,type:'M',code:'M-77',name:'Platinas y soldadura',unit:'kg',cant:0.5,price:4},
+        {id:90033,type:'M',code:'M-44',name:'Anticorrosivo + esmalte (lt)',unit:'lt',cant:0.3,price:5},
+        {id:90034,type:'M',code:'M-78',name:'Bisagras pesadas + pasador',unit:'global',cant:1,price:18},
+        {id:90035,type:'E',code:'E-12',name:'Soldadora eléctrica (hr)',unit:'hr',cant:1,price:5},
+        {id:90036,type:'H',code:'H-16',name:'Herrero/soldador oficial',unit:'día',cant:0.5,price:45},
+        {id:90037,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.25,price:30}
+      ]},
+    { id:9004, code:'CA-004', name:'Reja de protección tubo 1"x1" (m²)', unit:'m²', category:'Carpintería y herrería', rendimiento:5,
+      resources:[
+        {id:90041,type:'M',code:'M-79',name:'Tubo cuadrado 1"x1" galvanizado',unit:'ml',cant:5,price:3.80},
+        {id:90042,type:'M',code:'M-77',name:'Soldadura E-6011',unit:'kg',cant:0.3,price:4},
+        {id:90043,type:'M',code:'M-44',name:'Anticorrosivo + esmalte',unit:'lt',cant:0.25,price:5},
+        {id:90044,type:'E',code:'E-12',name:'Soldadora eléctrica (hr)',unit:'hr',cant:0.4,price:5},
+        {id:90045,type:'H',code:'H-16',name:'Herrero oficial',unit:'día',cant:0.4,price:45},
+        {id:90046,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.2,price:30}
+      ]},
+
+    // ══════════════════════════════════════════
+    // 10. OBRAS EXTERIORES Y URBANISMO
+    // ══════════════════════════════════════════
+    { id:10001, code:'OE-001', name:'Acera de concreto simple f\'c=175 e=10cm', unit:'m²', category:'Obras exteriores', rendimiento:25,
+      resources:[
+        {id:100011,type:'M',code:'M-02',name:'Cemento Portland tipo I',unit:'saco',cant:0.26,price:9},
+        {id:100012,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.018,price:20},
+        {id:100013,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.027,price:26},
+        {id:100014,type:'M',code:'M-09',name:'Formaleta de madera (ml)',unit:'ml',cant:0.33,price:2},
+        {id:100015,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:0.08,price:40},
+        {id:100016,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.08,price:30}
+      ]},
+    { id:10002, code:'OE-002', name:'Cuneta de concreto triangular 0.30x0.30m', unit:'ml', category:'Obras exteriores', rendimiento:15,
+      resources:[
+        {id:100021,type:'M',code:'M-02',name:'Cemento Portland',unit:'saco',cant:0.22,price:9},
+        {id:100022,type:'M',code:'M-03',name:'Arena lavada',unit:'m³',cant:0.015,price:20},
+        {id:100023,type:'M',code:'M-04',name:'Gravilla 3/4"',unit:'m³',cant:0.022,price:26},
+        {id:100024,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:0.133,price:40},
+        {id:100025,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.067,price:30}
+      ]},
+    { id:10003, code:'OE-003', name:'Cerco perimetral malla ciclón 2" cal.12 h=2m', unit:'ml', category:'Obras exteriores', rendimiento:20,
+      resources:[
+        {id:100031,type:'M',code:'M-80',name:'Malla ciclón 2" cal.12 (rollo)',unit:'ml',cant:1,price:7.5},
+        {id:100032,type:'M',code:'M-81',name:'Tubo galvanizado 2" (parante c/2m)',unit:'und',cant:0.5,price:18},
+        {id:100033,type:'M',code:'M-02',name:'Concreto base paral',unit:'saco',cant:0.15,price:9},
+        {id:100034,type:'M',code:'M-82',name:'Alambre tensor y grapas',unit:'global',cant:1,price:1.5},
+        {id:100035,type:'H',code:'H-16',name:'Herrero oficial',unit:'día',cant:0.10,price:45},
+        {id:100036,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.10,price:30}
+      ]},
+
+    // ══════════════════════════════════════════
+    // 11. DEMOLICIÓN Y REMODELACIÓN
+    // ══════════════════════════════════════════
+    { id:11001, code:'DM-001', name:'Demolición pared de bloque (sin recuperación)', unit:'m²', category:'Demolición y remodelación', rendimiento:20,
+      resources:[
+        {id:110011,type:'E',code:'E-13',name:'Martillo demoledor eléctrico (hr)',unit:'hr',cant:0.10,price:12},
+        {id:110012,type:'H',code:'H-01',name:'Obrero',unit:'día',cant:0.10,price:30},
+        {id:110013,type:'T',code:'T-01',name:'Retiro escombros (m³ acarreo)',unit:'m³',cant:0.20,price:8}
+      ]},
+    { id:11002, code:'DM-002', name:'Picado de friso existente para reparación', unit:'m²', category:'Demolición y remodelación', rendimiento:30,
+      resources:[
+        {id:110021,type:'E',code:'E-01',name:'Herramienta menor (cincel+martillo)',unit:'global',cant:1,price:0.30},
+        {id:110022,type:'H',code:'H-01',name:'Obrero',unit:'día',cant:0.067,price:30},
+        {id:110023,type:'T',code:'T-01',name:'Retiro material picado',unit:'m³',cant:0.05,price:8}
+      ]},
+    { id:11003, code:'DM-003', name:'Resane y nivelación de pared existente (hasta 3cm)', unit:'m²', category:'Demolición y remodelación', rendimiento:15,
+      resources:[
+        {id:110031,type:'M',code:'M-02',name:'Cemento Portland',unit:'saco',cant:0.15,price:9},
+        {id:110032,type:'M',code:'M-03',name:'Arena fina lavada',unit:'m³',cant:0.012,price:20},
+        {id:110033,type:'M',code:'M-83',name:'Mezcla preparada resane (saco)',unit:'saco',cant:0.20,price:8},
+        {id:110034,type:'H',code:'H-02',name:'Oficial albañil',unit:'día',cant:0.133,price:40},
+        {id:110035,type:'H',code:'H-01',name:'Ayudante',unit:'día',cant:0.067,price:30}
       ]}
+
   ];
-  // Asegurarse que los IDs sean únicos
+    // Asegurarse que los IDs sean únicos
   apuData.forEach((a,i) => { a.id = Date.now() + i; a.resources.forEach((r,j) => r.id = Date.now() + i*100 + j); });
   apuSelected = null;
   apuRenderList();
   apuRenderDetail();
-  showToast(`✓ ${apuData.length} APUs base cargadas`);
+  showToast(`✓ ${apuData.length} APUs cargadas — actualiza los precios con tus valores reales`);
 }
 
 // ==========================================
