@@ -364,15 +364,25 @@ function recalc() {
   let montoIva = baseImponible * (projectData.iva / 100);
   let totalGeneral = baseImponible + montoIva;
 
+  // Conversión BCV si moneda es Bs
+  const tasa = (projectData.currency === 'Bs' && window.bcvTasa) ? window.bcvTasa : 1;
+  const sym  = projectData.currency;
+  const fmt  = (v) => {
+    const converted = v * tasa;
+    return `${sym} ${converted.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
   // Actualizar UI de totales
-  if(document.getElementById('subs')) document.getElementById('subs').textContent = `${projectData.currency} ${subtotalObra.toFixed(2)}`;
+  if(document.getElementById('subs')) document.getElementById('subs').textContent = fmt(subtotalObra);
   if(document.getElementById('disLbl')) document.getElementById('disLbl').textContent = `Diseño (${projectData.design.m2} m²)`;
-  if(document.getElementById('sDis')) document.getElementById('sDis').textContent = `${projectData.currency} ${subtotalDiseno.toFixed(2)}`;
+  if(document.getElementById('sDis')) document.getElementById('sDis').textContent = fmt(subtotalDiseno);
   if(document.getElementById('ulbl')) document.getElementById('ulbl').textContent = `Utilidad (${projectData.utility}%)`;
-  if(document.getElementById('sutil')) document.getElementById('sutil').textContent = `${projectData.currency} ${montoUtilidad.toFixed(2)}`;
+  if(document.getElementById('sutil')) document.getElementById('sutil').textContent = fmt(montoUtilidad);
   if(document.getElementById('ilbl')) document.getElementById('ilbl').textContent = `IVA (${projectData.iva}%)`;
-  if(document.getElementById('siva')) document.getElementById('siva').textContent = `${projectData.currency} ${montoIva.toFixed(2)}`;
-  if(document.getElementById('stot')) document.getElementById('stot').textContent = `${projectData.currency} ${totalGeneral.toFixed(2)}`;
+  if(document.getElementById('siva')) document.getElementById('siva').textContent = fmt(montoIva);
+  if(document.getElementById('stot')) document.getElementById('stot').textContent = fmt(totalGeneral);
+  // Actualizar info BCV si aplica
+  if (typeof bcvUpdateBudget === 'function') bcvUpdateBudget();
 
   // Sincronizar totales de filas de la tabla de forma rápida
   const tbody = document.getElementById('tbody');
@@ -1851,7 +1861,96 @@ function dbImport(e) {
 // Inicializador automático diferido
 window.addEventListener('DOMContentLoaded', () => {
   if (typeof initApp === 'function') initApp();
+  bcvInit();
 });
+
+// ==========================================
+// TASA BCV — Fetch automático
+// Fuente primaria: pydolarve.org (sin API key)
+// Fallback:        ve.dolarapi.com
+// Cache:           localStorage 30min
+// ==========================================
+const BCV_CACHE_KEY = 'linaro_bcv_cache';
+const BCV_CACHE_TTL = 30 * 60 * 1000; // 30 minutos
+
+window.bcvTasa = null; // tasa global accesible desde presupuesto
+
+async function bcvFetch() {
+  // Intento 1: pydolarve
+  try {
+    const r = await fetch('https://pydolarve.org/api/v1/dollar?monitor=bcv', { signal: AbortSignal.timeout(6000) });
+    if (r.ok) {
+      const d = await r.json();
+      const price = d?.price || d?.data?.price;
+      if (price && !isNaN(price)) return parseFloat(price);
+    }
+  } catch(_) {}
+  // Intento 2: ve.dolarapi.com
+  try {
+    const r = await fetch('https://ve.dolarapi.com/v1/dolares/oficial', { signal: AbortSignal.timeout(6000) });
+    if (r.ok) {
+      const d = await r.json();
+      const price = d?.promedio || d?.price;
+      if (price && !isNaN(price)) return parseFloat(price);
+    }
+  } catch(_) {}
+  return null;
+}
+
+async function bcvRefresh() {
+  const spin = document.getElementById('bcvSpin');
+  const rateEl = document.getElementById('bcvRate');
+  const timeEl = document.getElementById('bcvTime');
+  if (spin) spin.style.display = 'inline';
+  const tasa = await bcvFetch();
+  if (spin) spin.style.display = 'none';
+  if (tasa) {
+    window.bcvTasa = tasa;
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+    if (rateEl) rateEl.textContent = tasa.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (timeEl) timeEl.textContent = timeStr;
+    // Guardar en cache
+    localStorage.setItem(BCV_CACHE_KEY, JSON.stringify({ tasa, ts: Date.now(), time: timeStr }));
+    bcvUpdateBudget();
+  } else {
+    if (rateEl) { rateEl.textContent = 'N/D'; rateEl.style.color = '#e74c3c'; }
+    if (timeEl) timeEl.textContent = 'sin conexión';
+  }
+}
+
+function bcvInit() {
+  // Cargar desde cache primero (respuesta inmediata)
+  try {
+    const cached = JSON.parse(localStorage.getItem(BCV_CACHE_KEY) || 'null');
+    if (cached && cached.tasa && (Date.now() - cached.ts) < BCV_CACHE_TTL) {
+      window.bcvTasa = cached.tasa;
+      const rateEl = document.getElementById('bcvRate');
+      const timeEl = document.getElementById('bcvTime');
+      if (rateEl) rateEl.textContent = cached.tasa.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (timeEl) timeEl.textContent = cached.time || '';
+      bcvUpdateBudget();
+      return; // Cache válido, no hace fetch
+    }
+  } catch(_) {}
+  // Cache vencido o vacío — fetch
+  bcvRefresh();
+}
+
+function bcvUpdateBudget() {
+  // Si el presupuesto está en Bs, actualiza el label informativo
+  const curEl = document.getElementById('cur');
+  if (!curEl || curEl.value !== 'Bs' || !window.bcvTasa) return;
+  let infoEl = document.getElementById('bcvBudgetInfo');
+  if (!infoEl) {
+    infoEl = document.createElement('div');
+    infoEl.id = 'bcvBudgetInfo';
+    infoEl.style.cssText = 'font-size:11px;color:var(--text2);margin-top:4px;padding:6px 10px;background:rgba(186,117,23,.08);border-radius:6px;border:.5px solid rgba(186,117,23,.2)';
+    const curField = curEl.closest('.field');
+    if (curField) curField.appendChild(infoEl);
+  }
+  infoEl.innerHTML = `💱 Tasa BCV: <b style="color:var(--gold)">${window.bcvTasa.toLocaleString('es-VE', {minimumFractionDigits:2})}</b> Bs/$ — los montos se muestran en bolívares`;
+}
 </script>
 <style>
 :root{--gold:#BA7517;--gold-l:#FAEEDA;--gold-m:#FAC775;--green:#27500A;--green-l:#EAF3DE;--green-m:#C0DD97;--green-b:#3B6D11;--blue:#0C447C;--blue-l:#E6F1FB;--blue-b:#185FA5;--teal-l:#E1F5EE;--teal-b:#5DCAA5;--teal-d:#0F6E56;--purple-l:#EEEDFE;--purple:#534AB7;--purple-d:#3C3489;--red-l:#FCEBEB;--red:#A32D2D;--bg:#F8F7F4;--bg2:#FFFFFF;--bg3:#F1EFE8;--text:#1a1a1a;--text2:#666;--text3:#999;--border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);--r:8px;--rl:12px}
@@ -2201,7 +2300,15 @@ if (typeof currentInvTab === 'undefined') {
     <button class="nt"    onclick="goTab('database',this)">📁 Proyectos</button>
     <button class="nt"    onclick="goTab('apu',this)">🏗️ APU Civil</button>
   </div>
-  <span id="obraSaveIndicator" style="margin-left:auto;font-size:11px;color:#BA7517;opacity:0;transition:opacity .4s;flex-shrink:0;white-space:nowrap">✓ Guardado en nube</span>
+  <!-- BCV Rate Widget -->
+  <div id="bcvWidget" style="margin-left:auto;display:flex;align-items:center;gap:6px;background:rgba(186,117,23,.1);border:.5px solid rgba(186,117,23,.3);border-radius:20px;padding:4px 10px;cursor:pointer;flex-shrink:0" onclick="bcvRefresh()" title="Tasa BCV oficial — clic para actualizar">
+    <span style="font-size:10px;color:var(--text2);font-weight:600;letter-spacing:.04em">BCV</span>
+    <span id="bcvRate" style="font-size:12px;font-weight:700;color:var(--gold);font-family:monospace">—</span>
+    <span style="font-size:10px;color:var(--text2)">Bs/$</span>
+    <span id="bcvTime" style="font-size:9px;color:var(--text3)"></span>
+    <span id="bcvSpin" style="font-size:11px;display:none">↻</span>
+  </div>
+  <span id="obraSaveIndicator" style="font-size:11px;color:#BA7517;opacity:0;transition:opacity .4s;flex-shrink:0;white-space:nowrap">✓ Guardado en nube</span>
 </nav>
 
 <div class="page">
